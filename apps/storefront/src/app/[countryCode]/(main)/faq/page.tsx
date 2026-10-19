@@ -26,7 +26,7 @@ export default async function FAQPage(props: Props) {
     { name: "FAQ", url: `/${countryCode}/faq` },
   ])
 
-  const allFaqItems = DEFAULT_FAQ_DATA.flatMap((cat) => cat.questions)
+  const allFaqItems = (DEFAULT_FAQ_DATA || []).flatMap((cat) => cat.questions || [])
   const faqSchema = getFAQPageSchema(allFaqItems)
 
   return (

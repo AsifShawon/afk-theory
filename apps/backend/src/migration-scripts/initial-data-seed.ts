@@ -310,11 +310,24 @@ export default async function initial_data_seed({
   }
 
   // 8. Shipping Profile & Fulfillment Set
+  let shippingProfile: { id: string }
   const { data: shippingProfileResult } = await query.graph({
     entity: "shipping_profile",
-    fields: ["id"],
+    fields: ["id", "type"],
   })
-  const shippingProfile = shippingProfileResult[0]
+
+  if (shippingProfileResult.length > 0) {
+    shippingProfile = shippingProfileResult[0]
+  } else {
+    logger.info("Creating default shipping profile...")
+    const [profile] = await fulfillmentModuleService.createShippingProfiles([
+      {
+        name: "Default Shipping Profile",
+        type: "default",
+      },
+    ])
+    shippingProfile = profile
+  }
 
   const { data: existingFulfillmentSets } = await query.graph({
     entity: "fulfillment_set",
@@ -920,6 +933,6 @@ export default async function initial_data_seed({
   logger.info("AFK THEORY store seed completed successfully!")
   logger.info(`Store Name: AFK THEORY`)
   logger.info(`Sales Channel: ${defaultSalesChannel.name} (${defaultSalesChannel.id})`)
-  logger.info(`Publishable Key: ${publishableApiKey.id}`)
+  logger.info(`Publishable Key: ${publishableApiKey.token || publishableApiKey.id}`)
   logger.info("==================================================")
 }

@@ -32,8 +32,19 @@ const s3Bucket = process.env.S3_BUCKET
 const s3Region = process.env.S3_REGION || "auto"
 const s3Endpoint = process.env.S3_ENDPOINT
 
+const isRealS3Config = Boolean(
+  s3Url &&
+    s3AccessKeyId &&
+    !s3AccessKeyId.includes("placeholder") &&
+    s3SecretAccessKey &&
+    !s3SecretAccessKey.includes("placeholder") &&
+    s3Bucket &&
+    s3Endpoint &&
+    !s3Endpoint.includes("<account_id>")
+)
+
 const fileProviders = [
-  s3Url && s3AccessKeyId && s3SecretAccessKey && s3Bucket
+  isRealS3Config
     ? {
         resolve: "@medusajs/medusa/file-s3",
         id: "s3",
