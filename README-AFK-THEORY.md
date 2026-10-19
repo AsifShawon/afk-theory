@@ -147,6 +147,10 @@ pnpm --filter @dtc/storefront dev   # Storefront on http://localhost:8000
 ### Step 5: Medusa Admin Access
 Open `http://localhost:9000/app` in your browser to manage products, categories, inventory, and COD order reconciliations.
 
+- **Admin URL**: [http://localhost:9000/app](http://localhost:9000/app)
+- **Admin Email**: `admin@afktheory.com`
+- **Admin Password**: `supersecret`
+
 ---
 
 ## 7. Architecture & Quality Verification
