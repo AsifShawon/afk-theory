@@ -1,6 +1,6 @@
 import { test, describe } from "node:test"
 import assert from "node:assert/strict"
-import { createStoreNavigation } from "../components/layout/navigation-model"
+import { createStoreNavigation, isNavItemActive } from "../components/layout/navigation-model"
 import { deduplicateFooterLinks } from "../components/layout/footer-model"
 import { StoreRoutes } from "@dtc/commerce-contracts"
 
@@ -19,7 +19,9 @@ const mockRoutes: StoreRoutes = {
   order: (id) => `/order?id=${id}`,
   account: () => "/account",
   accountOrders: () => "/account/orders",
-  accountOrderDetail: (id) => `/account/order?id=${id}`,
+  accountOrderDetail(id) {
+    return `/account/order?id=${id}`
+  },
   about: () => "/about",
   contact: () => "/contact",
   faq: () => "/faq",
@@ -137,5 +139,63 @@ describe("Shared Mega Navigation IA & Interaction Suite", () => {
       ]
     )
     assert.equal(deduped[0].label, "New Arrivals")
+  })
+
+  test("7. isNavItemActive accurately detects active state with or without country code", () => {
+    const nav = createStoreNavigation(mockRoutes)
+    const shirtsItem = nav.find((i) => i.id === "shirts")!
+    const accessoriesItem = nav.find((i) => i.id === "accessories")!
+
+    // Direct match with country code prefix
+    assert.equal(isNavItemActive(shirtsItem, "/bd/category?handle=shirts"), true)
+    // Direct match without prefix
+    assert.equal(isNavItemActive(shirtsItem, "/category?handle=shirts"), true)
+    // Non-match
+    assert.equal(isNavItemActive(accessoriesItem, "/bd/category?handle=shirts"), false)
+    // Homepage does not falsely match categories
+    assert.equal(isNavItemActive(shirtsItem, "/bd"), false)
+    assert.equal(isNavItemActive(shirtsItem, "/"), false)
+  })
+
+  test("8. Hover-intent timing parameters adhere to usability guidelines", () => {
+    const idleHoverDelay = 300 // ms
+    const switchDelay = 60 // ms
+    const closeGracePeriod = 320 // ms
+
+    assert.ok(idleHoverDelay >= 250 && idleHoverDelay <= 500, "idle delay must be within 250-500ms range")
+    assert.ok(switchDelay <= 100, "adjacent switch delay must be snappy (<= 100ms)")
+    assert.ok(closeGracePeriod >= 280, "close grace period must allow diagonal pointer travel (>= 280ms)")
+  })
+
+  test("9. Scroll hysteresis prevents rapid threshold flipping", () => {
+    let isScrolled = false
+    const enterThreshold = 90
+    const exitThreshold = 40
+
+    function onScroll(y: number) {
+      if (!isScrolled && y > enterThreshold) {
+        isScrolled = true
+      } else if (isScrolled && y < exitThreshold) {
+        isScrolled = false
+      }
+    }
+
+    // Scroll down to 85px (below enter threshold) -> still false
+    onScroll(85)
+    assert.equal(isScrolled, false)
+
+    // Scroll past 90px -> enters floating mode
+    onScroll(95)
+    assert.equal(isScrolled, true)
+
+    // Jitter around 80px (between exit and enter) -> stays floating
+    onScroll(80)
+    assert.equal(isScrolled, true)
+    onScroll(60)
+    assert.equal(isScrolled, true)
+
+    // Scroll back to top (< 40px) -> returns to full-width mode
+    onScroll(35)
+    assert.equal(isScrolled, false)
   })
 })

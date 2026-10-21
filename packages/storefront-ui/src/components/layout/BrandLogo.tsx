@@ -6,6 +6,7 @@ export type BrandLogoVariant =
   | "horizontal-dark"
   | "horizontal-light"
   | "compact"
+  | "compact-light"
   | "icon"
 
 export interface BrandLogoProps {
@@ -14,7 +15,8 @@ export interface BrandLogoProps {
    * - "responsive": Desktop (>=1024px) renders horizontal wordmark, Mobile (<1024px) renders compact AFK mark
    * - "horizontal-dark": Matte graphite wordmark on light surfaces
    * - "horizontal-light": Light/chartreuse wordmark on dark/graphite surfaces
-   * - "compact": Compact angular AFK + pause mark
+   * - "compact": Compact angular AFK + pause mark (graphite + chartreuse for light surfaces)
+   * - "compact-light": Compact angular AFK + pause mark for dark surfaces
    * - "icon": Pure square pause symbol mark
    */
   variant?: BrandLogoVariant
@@ -45,7 +47,7 @@ export function BrandLogo({
 
         {/* Mobile Compact Mark (< 1024px) */}
         <img
-          src="/brand/afk-logo-compact.png"
+          src="/brand/afk-logo-compact-dark.png"
           alt={alt}
           width={1065}
           height={304}
@@ -86,6 +88,20 @@ export function BrandLogo({
   }
 
   if (variant === "compact") {
+    return (
+      <img
+        src="/brand/afk-logo-compact-dark.png"
+        alt={alt}
+        width={1065}
+        height={304}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        className={clsx("h-7 sm:h-8 w-auto object-contain select-none", className)}
+      />
+    )
+  }
+
+  if (variant === "compact-light") {
     return (
       <img
         src="/brand/afk-logo-compact.png"

@@ -41,12 +41,13 @@ export const getCacheOptions = async (
   }
 
   const cacheTag = await getCacheTag(tag)
+  const tags = [tag, cacheTag].filter(Boolean)
 
-  if (!cacheTag) {
+  if (tags.length === 0) {
     return {}
   }
 
-  return { tags: [`${cacheTag}`] }
+  return { tags }
 }
 
 // `sameSite: "lax"` rather than `"strict"`: the customer returns from a

@@ -187,8 +187,8 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
     {
       id: "linen",
       label: "Outerwear & Linen",
-      href: routes.collection("drop-01-offline-by-choice"),
-      shopAllHref: routes.collection("drop-01-offline-by-choice"),
+      href: routes.collection("archive"),
+      shopAllHref: routes.collection("archive"),
       shopAllLabel: "Shop Linen & Outerwear",
       featuredLinks: [
         { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01-offline-by-choice"), badge: "Featured" },
@@ -250,8 +250,8 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
     {
       id: "collections",
       label: "Collections",
-      href: routes.collection("drop-01-offline-by-choice"),
-      shopAllHref: routes.collection("drop-01-offline-by-choice"),
+      href: routes.collection("essentials"),
+      shopAllHref: routes.collection("essentials"),
       shopAllLabel: "Shop All Collections",
       featuredLinks: [
         { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01-offline-by-choice"), badge: "Drop 01" },
@@ -280,4 +280,30 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
       ],
     },
   ]
+}
+
+
+export function isNavItemActive(item: MegaNavItem, currentPath?: string): boolean {
+  if (!currentPath) return Boolean(item.isActive)
+
+  const normCurrent = currentPath.replace(/\/+$/, "") || "/"
+  const normHref = item.href.replace(/\/+$/, "") || "/"
+  const normShopAll = item.shopAllHref ? item.shopAllHref.replace(/\/+$/, "") : ""
+
+  const stripCountry = (p: string) => p.replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/"
+  const cleanCurrent = stripCountry(normCurrent)
+  const cleanHref = stripCountry(normHref)
+  const cleanShopAll = stripCountry(normShopAll)
+
+  // 1. Direct match on main department href or shopAllHref
+  if (cleanCurrent !== "/" && (cleanCurrent === cleanHref || (cleanShopAll && cleanCurrent === cleanShopAll))) {
+    return true
+  }
+
+  // 2. Child path under this department's unique href
+  if (cleanHref !== "/" && cleanCurrent.startsWith(cleanHref + "/")) {
+    return true
+  }
+
+  return false
 }

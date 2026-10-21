@@ -1,12 +1,14 @@
 "use client"
 
 import React, { useState } from "react"
-import { CartTotalsView, StoreCapabilities } from "@dtc/commerce-contracts"
+import Image from "next/image"
+import { CartItemView, CartTotalsView, StoreCapabilities } from "@dtc/commerce-contracts"
 import { BadgeCheckIcon, ShieldCheckIcon, TagIcon, TrashIcon, TruckIcon, CheckIcon } from "../icons"
 import { Button } from "../ui/button"
 
 export interface OrderSummaryProps {
   totals: CartTotalsView
+  items?: CartItemView[]
   promotions?: Array<{
     code: string
     description?: string
@@ -23,6 +25,7 @@ export interface OrderSummaryProps {
 
 export function OrderSummary({
   totals,
+  items,
   promotions = [],
   onApplyPromoCode,
   onRemovePromoCode,
@@ -69,6 +72,61 @@ export function OrderSummary({
       <h3 className="font-heading font-bold text-sm text-brand-primary uppercase tracking-wider pb-3 border-b border-brand-border">
         Order Summary
       </h3>
+
+      {/* Items Preview */}
+      {items && items.length > 0 && (
+        <div className="space-y-3 pb-3 border-b border-brand-border">
+          <div className="flex items-center justify-between text-xs font-heading font-semibold text-brand-primary">
+            <span className="uppercase tracking-wider">Garments ({items.reduce((s, i) => s + i.quantity, 0)})</span>
+          </div>
+          <div className="space-y-2.5 max-h-56 overflow-y-auto no-scrollbar pr-1">
+            {items.map((item) => {
+              let imgUrl = item.thumbnail?.url
+              if (imgUrl) {
+                if (imgUrl.startsWith("http://localhost:9000/") && !imgUrl.startsWith("http://localhost:9000/static/")) {
+                  imgUrl = imgUrl.replace("http://localhost:9000/", "http://localhost:9000/static/")
+                } else if (imgUrl.startsWith("http://127.0.0.1:9000/") && !imgUrl.startsWith("http://127.0.0.1:9000/static/")) {
+                  imgUrl = imgUrl.replace("http://127.0.0.1:9000/", "http://127.0.0.1:9000/static/")
+                }
+              }
+              const itemTitle = item.title || item.productTitle || "Garment"
+
+              return (
+                <div key={item.id} className="flex items-center gap-3 text-xs">
+                  <div className="relative aspect-[3/4] w-12 bg-brand-secondary border border-brand-border flex-shrink-0 overflow-hidden">
+                    {imgUrl ? (
+                      <Image
+                        src={imgUrl}
+                        alt={item.thumbnail?.altText || itemTitle}
+                        fill
+                        sizes="48px"
+                        className="object-cover object-center"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-brand-muted text-[8px] font-mono select-none bg-brand-surface">
+                        <span>AFK</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-heading font-semibold text-brand-primary truncate text-xs">
+                      {itemTitle}
+                    </p>
+                    <p className="text-[11px] text-brand-muted truncate">
+                      {item.variantTitle ? `${item.variantTitle} • ` : ""}Qty: {item.quantity}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-heading font-bold text-xs text-brand-primary">
+                      {item.totalPrice.formatted}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Free Shipping Progress Meter */}
       <div className="p-3.5 bg-brand-secondary/70 border border-brand-border/80 rounded-xl space-y-2">

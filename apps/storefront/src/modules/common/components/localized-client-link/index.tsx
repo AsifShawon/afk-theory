@@ -21,9 +21,23 @@ const LocalizedClientLink = ({
   [x: string]: unknown
 }) => {
   const { countryCode } = useParams()
+  const code = (countryCode as string) || "bd"
+
+  let finalHref = href
+  if (
+    !href.startsWith(`/${code}`) &&
+    !href.startsWith("http://") &&
+    !href.startsWith("https://") &&
+    !href.startsWith("#") &&
+    !href.startsWith("mailto:") &&
+    !href.startsWith("tel:")
+  ) {
+    const cleanHref = href.startsWith("/") ? href : `/${href}`
+    finalHref = `/${code}${cleanHref === "/" ? "" : cleanHref}`
+  }
 
   return (
-    <Link href={`/${countryCode}${href}`} {...props}>
+    <Link href={finalHref} {...props}>
       {children}
     </Link>
   )

@@ -15,11 +15,21 @@ import {
   ShippingOptionView,
 } from "@dtc/commerce-contracts"
 import { HttpTypes } from "@medusajs/types"
+import { normalizeImageUrl } from "@lib/util/image-url"
 
 export function toCartItemView(
   item: HttpTypes.StoreCartLineItem,
   currencyCode = "bdt"
 ): CartItemView {
+  const rawThumbnail =
+    item.thumbnail ||
+    item.variant?.product?.thumbnail ||
+    item.variant?.product?.images?.[0]?.url ||
+    item.product?.thumbnail ||
+    item.product?.images?.[0]?.url
+
+  const resolvedThumbnailUrl = normalizeImageUrl(rawThumbnail)
+
   return {
     id: item.id,
     productId: item.product_id || item.product?.id || "",
@@ -30,11 +40,11 @@ export function toCartItemView(
     variantId: item.variant_id || item.variant?.id || "",
     variantTitle: item.variant_title || "",
     sku: item.variant_sku || item.variant?.sku || item.id,
-    thumbnail: item.thumbnail
+    thumbnail: resolvedThumbnailUrl
       ? {
           id: `${item.id}-thumb`,
-          url: item.thumbnail,
-          altText: item.title || "Garment",
+          url: resolvedThumbnailUrl,
+          altText: item.title || item.product_title || "Garment",
         }
       : undefined,
     unitPrice: createMoneyView(item.unit_price ?? 0, currencyCode),
@@ -137,25 +147,35 @@ export function toAddressFormView(address?: HttpTypes.StoreCartAddress | null): 
 
 export function toOrderView(order: HttpTypes.StoreOrder): OrderView {
   const currencyCode = order.currency_code || "bdt"
-  const items: OrderLineView[] = (order.items || []).map((item: HttpTypes.StoreOrderLineItem) => ({
-    id: item.id,
-    productId: item.product_id || "",
-    productTitle: item.product_title || item.title || "Garment",
-    productHandle: item.product_handle || "",
-    variantTitle: item.variant_title || "",
-    sku: item.variant_sku || item.id,
-    thumbnail: item.thumbnail
-      ? {
-          id: `${item.id}-thumb`,
-          url: item.thumbnail,
+  const items: OrderLineView[] = (order.items || []).map((item: HttpTypes.StoreOrderLineItem) => {
+    const rawThumbnail =
+      item.thumbnail ||
+      item.variant?.product?.thumbnail ||
+      item.variant?.product?.images?.[0]?.url ||
+      item.product?.thumbnail ||
+      item.product?.images?.[0]?.url
 
-          altText: item.title || "Garment",
-        }
-      : undefined,
-    unitPrice: createMoneyView(item.unit_price ?? 0, currencyCode),
-    totalPrice: createMoneyView(item.total ?? 0, currencyCode),
-    quantity: item.quantity,
-  }))
+    const resolvedThumbnailUrl = normalizeImageUrl(rawThumbnail)
+
+    return {
+      id: item.id,
+      productId: item.product_id || "",
+      productTitle: item.product_title || item.title || "Garment",
+      productHandle: item.product_handle || "",
+      variantTitle: item.variant_title || "",
+      sku: item.variant_sku || item.id,
+      thumbnail: resolvedThumbnailUrl
+        ? {
+            id: `${item.id}-thumb`,
+            url: resolvedThumbnailUrl,
+            altText: item.title || item.product_title || "Garment",
+          }
+        : undefined,
+      unitPrice: createMoneyView(item.unit_price ?? 0, currencyCode),
+      totalPrice: createMoneyView(item.total ?? 0, currencyCode),
+      quantity: item.quantity,
+    }
+  })
 
   const totals = toCartTotalsView(order, currencyCode)
 

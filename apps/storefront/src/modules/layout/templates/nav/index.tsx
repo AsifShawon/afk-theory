@@ -18,7 +18,7 @@ export default async function Nav() {
   ])
 
   return (
-    <div className="relative z-40">
+    <>
       <AnnouncementBar announcement={announcement} />
       <NavHeader
         regions={regions}
@@ -48,6 +48,6 @@ export default async function Nav() {
           </Suspense>
         }
       />
-    </div>
+    </>
   )
 }

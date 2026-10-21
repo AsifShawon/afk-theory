@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { Header as SharedHeader, createStoreNavigation } from "@dtc/storefront-ui"
 import { createMedusaRoutes } from "@adapters/medusa/routes"
@@ -25,6 +26,7 @@ export default function NavHeader({
 }: NavHeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const countryToggleState = useToggleState()
+  const pathname = usePathname()
 
   const routes = useMemo(() => createMedusaRoutes("bd"), [])
   const navItems = useMemo(() => createStoreNavigation(routes), [routes])
@@ -38,6 +40,7 @@ export default function NavHeader({
         accountHref="/account"
         cartCountNode={cartCountNode}
         announcementText=""
+        activePath={pathname}
         onOpenSearch={() => setIsSearchOpen(true)}
         linkComponent={LocalizedClientLink}
         mobileNavBottomSlot={

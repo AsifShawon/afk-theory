@@ -80,16 +80,22 @@ const fileProviders = [
         },
       }
     : {
-        resolve: "@medusajs/medusa/file-local",
+        resolve: "./src/modules/file-provider",
         id: "local",
         options: {
           upload_dir: "static",
-          backend_url: process.env.MEDUSA_BACKEND_URL || "http://localhost:9000",
+          backend_url: `${process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"}/static`,
         },
       },
 ]
 
 module.exports = defineConfig({
+  admin: {
+    disable: process.env.ADMIN_DISABLED === "true",
+    path: "/app",
+    backendUrl: process.env.MEDUSA_BACKEND_URL || "http://localhost:9000",
+    maxUploadFileSize: 25 * 1024 * 1024, // 25MB upload limit (permits high-resolution garment media)
+  },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
