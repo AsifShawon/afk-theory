@@ -78,7 +78,7 @@ export function ProductCard({
     product.totalStock > 0 &&
     product.totalStock <= 5
 
-  const fabricInfo = product.material || product.subtitle || "British Smart-Casual"
+  const fabricInfo = product.material || product.subtitle || "240–280 GSM Heavyweight Cotton"
 
   // Unique sizes count
   const uniqueSizesCount = useMemo(() => {
@@ -146,7 +146,7 @@ export function ProductCard({
     <>
       <article
         data-testid="product-wrapper"
-        className="product-card group relative flex flex-col bg-white border border-brand-border/80 hover:border-brand-primary rounded-xl overflow-hidden transition-all duration-300 shadow-subtle hover:shadow-editorial"
+        className="product-card group relative flex flex-col bg-white border border-brand-border hover:border-brand-primary overflow-hidden transition-all duration-300 shadow-xs"
       >
         {/* 1. Image Canvas & Badges */}
         <div className="relative aspect-[3/4] w-full bg-brand-secondary overflow-hidden">
@@ -163,8 +163,8 @@ export function ProductCard({
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className={`object-cover object-center transition-all duration-500 ${
                   secondaryImage
-                    ? "group-hover:opacity-0 group-hover:scale-105"
-                    : "group-hover:scale-105"
+                    ? "group-hover:opacity-0 group-hover:scale-103"
+                    : "group-hover:scale-103"
                 }`}
               />
             ) : (
@@ -179,31 +179,31 @@ export function ProductCard({
                 alt={secondaryImage.altText || `${product.title} alternate angle`}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-103 transition-all duration-500"
               />
             )}
           </LinkComp>
 
           {/* Status Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 pointer-events-none">
             {product.isNewArrival && (
-              <span className="bg-brand-accent text-white text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-xs">
-                New In
+              <span className="bg-brand-accent text-brand-primary text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+                DROP 01
               </span>
             )}
             {product.isBestSeller && !product.isNewArrival && (
-              <span className="bg-brand-secondary text-brand-accent border border-brand-accent/30 text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-xs">
-                Bestseller
-              </span>
-            )}
-            {isSoldOut && (
-              <span className="bg-rose-900 text-white text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-xs">
-                Sold Out
+              <span className="bg-brand-primary text-brand-accent text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+                BESTSELLER
               </span>
             )}
             {isLowStock && (
-              <span className="bg-amber-800 text-white text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-xs">
-                Only {product.totalStock} Left
+              <span className="bg-brand-primary text-amber-300 border border-amber-400/40 text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+                LOW STOCK ({product.totalStock})
+              </span>
+            )}
+            {isSoldOut && (
+              <span className="bg-rose-950 text-rose-200 border border-rose-800 text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+                SOLD OUT
               </span>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { defineMiddlewares } from "@medusajs/medusa"
+import { defineMiddlewares, authenticate } from "@medusajs/medusa"
 import {
   MedusaRequest,
   MedusaResponse,
@@ -72,7 +72,7 @@ async function validateShippingMethodSelection(
       return
     }
 
-    const check = validateDeliveryOptionForAddress(option, cart.shipping_address)
+    const check = validateDeliveryOptionForAddress(option as any, cart.shipping_address)
     if (!check.isValid) {
       res.status(400).json({
         message: check.message,
@@ -146,28 +146,30 @@ async function validateCartBeforeCompletion(
       return
     }
 
-    const selectedMethod = cart.shipping_methods[0]
-    const option = selectedMethod.shipping_option || {
-      id: selectedMethod.shipping_option_id,
-      name: selectedMethod.name,
-      data: selectedMethod.data,
-      type: null,
-    }
+    const selectedMethod = cart.shipping_methods?.[0]
+    if (selectedMethod) {
+      const option = (selectedMethod as any).shipping_option || {
+        id: selectedMethod.shipping_option_id,
+        name: selectedMethod.name,
+        data: selectedMethod.data,
+        type: null,
+      }
 
-    const check = validateDeliveryOptionForAddress(option, cart.shipping_address)
-    if (!check.isValid) {
-      res.status(400).json({
-        message: `Cannot complete order: ${check.message}`,
-        type: "invalid_data",
-      })
-      return
+      const check = validateDeliveryOptionForAddress(option as any, cart.shipping_address)
+      if (!check.isValid) {
+        res.status(400).json({
+          message: `Cannot complete order: ${check.message}`,
+          type: "invalid_data",
+        })
+        return
+      }
     }
   }
 
   // Payment session verification
   const sessions = cart.payment_collection?.payment_sessions || []
   const hasValidSession = sessions.some(
-    (s: { status: string }) => s.status === "pending" || s.status === "authorized"
+    (s: any) => s && (s.status === "pending" || s.status === "authorized")
   )
   if (!hasValidSession) {
     res.status(400).json({
@@ -210,23 +212,25 @@ async function handleCartAddressChange(
     const countryCode = (newAddress.country_code || "bd").toLowerCase()
     if (countryCode === "bd") {
       const selectedMethod = cart.shipping_methods[0]
-      const option = selectedMethod.shipping_option || {
-        id: selectedMethod.shipping_option_id,
-        name: selectedMethod.name,
-        data: selectedMethod.data,
-        type: null,
-      }
-      const check = validateDeliveryOptionForAddress(option, newAddress)
-      if (!check.isValid) {
-        // Incompatible shipping method detected after address change.
-        // Delete the invalid shipping method so customer must re-select a valid zone rate.
-        try {
-          const cartModule = req.scope.resolve(Modules.CART)
-          await (cartModule as any).deleteShippingMethods(
-            cart.shipping_methods.map((m: { id: string }) => m.id)
-          )
-        } catch {
-          // If deletion fails, completion check will still enforce revalidation
+      if (selectedMethod) {
+        const option = (selectedMethod as any).shipping_option || {
+          id: selectedMethod.shipping_option_id,
+          name: selectedMethod.name,
+          data: selectedMethod.data,
+          type: null,
+        }
+        const check = validateDeliveryOptionForAddress(option, newAddress)
+        if (!check.isValid) {
+          // Incompatible shipping method detected after address change.
+          // Delete the invalid shipping method so customer must re-select a valid zone rate.
+          try {
+            const cartModule = req.scope.resolve(Modules.CART)
+            await (cartModule as any).deleteShippingMethods(
+              cart.shipping_methods.filter(Boolean).map((m: any) => m.id)
+            )
+          } catch {
+            // If deletion fails, completion check will still enforce revalidation
+          }
         }
       }
     }
@@ -237,6 +241,14 @@ async function handleCartAddressChange(
 
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: "/admin/campaign-slides*",
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
+    },
+    {
+      matcher: "/admin/announcement-bar*",
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
+    },
     {
       matcher: "/store/carts/:id/shipping-methods",
       method: "POST",

@@ -1,5 +1,6 @@
 export * from "./AboutView"
 export * from "./ContactView"
 export * from "./FaqView"
+export * from "./faq-data"
 export * from "./PolicyView"
 export * from "./SizeGuideView"

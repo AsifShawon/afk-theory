@@ -41,15 +41,15 @@ export function VariantSelector({
               </span>
               <div className="flex items-center gap-3">
                 {selectedVal && (
-                  <span className="font-medium text-brand-accent">{selectedVal}</span>
+                  <span className="font-heading font-bold text-brand-primary uppercase">{selectedVal}</span>
                 )}
                 {isSize && onOpenSizeGuide && (
                   <button
                     type="button"
                     onClick={onOpenSizeGuide}
-                    className="text-xs font-heading font-semibold text-brand-accent hover:underline uppercase tracking-wider"
+                    className="text-xs font-heading font-bold text-brand-primary underline hover:text-black uppercase tracking-wider cursor-pointer"
                   >
-                    Size Guide
+                    Size Guide (Inches/CM)
                   </button>
                 )}
               </div>

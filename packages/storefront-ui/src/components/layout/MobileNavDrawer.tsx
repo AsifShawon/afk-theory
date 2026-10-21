@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Drawer } from "../ui/drawer"
 import { MagnifyingGlassIcon, ShoppingBagIcon, UserIcon, ChevronDownIcon } from "../icons"
 import { MegaNavItem } from "./navigation-model"
+import { BrandLogo } from "./BrandLogo"
 import { LinkComponent } from "../../types"
 
 export interface MobileNavDrawerProps {
@@ -47,7 +48,14 @@ export function MobileNavDrawer({
       isOpen={isOpen}
       onClose={onClose}
       position="left"
-      title="AFK THEORY Navigation"
+      title={
+        <div className="flex flex-col gap-0.5">
+          <BrandLogo variant="horizontal-dark" className="h-6 w-auto" alt="AFK THEORY" />
+          <span className="text-[9px] font-heading font-extrabold uppercase tracking-widest text-brand-muted">
+            PAUSE THE GAME. KEEP YOUR STYLE.
+          </span>
+        </div>
+      }
       maxWidth="sm"
     >
       <div className="flex flex-col justify-between h-full">
@@ -83,7 +91,7 @@ export function MobileNavDrawer({
                           onClick={() => toggleGroup(item.id)}
                           aria-expanded={isExpanded}
                           aria-controls={`mobile-group-${item.id}`}
-                          className="w-full flex items-center justify-between py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-brand-accent transition-colors min-h-[44px]"
+                          className="w-full flex items-center justify-between py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-black transition-colors min-h-[44px]"
                         >
                           <span>{item.label}</span>
                           <ChevronDownIcon
@@ -101,9 +109,10 @@ export function MobileNavDrawer({
                             <LinkComp
                               href={item.shopAllHref}
                               onClick={onClose}
-                              className="block py-2 text-xs font-heading font-bold text-brand-accent uppercase tracking-wider min-h-[44px] flex items-center"
+                              className="inline-flex items-center gap-1.5 py-2 px-2.5 text-xs font-heading font-bold text-brand-primary bg-brand-sand/60 hover:bg-brand-sand transition-colors uppercase tracking-wider min-h-[44px] rounded-sm"
                             >
-                              {item.shopAllLabel || `Shop All ${item.label} →`}
+                              <span>{item.shopAllLabel || `Shop All ${item.label}`}</span>
+                              <span aria-hidden="true">→</span>
                             </LinkComp>
 
                             {/* Subcategory links */}
@@ -162,7 +171,7 @@ export function MobileNavDrawer({
                       <LinkComp
                         href={item.href}
                         onClick={onClose}
-                        className="block py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-brand-accent transition-colors min-h-[44px] flex items-center"
+                        className="block py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-black transition-colors min-h-[44px] flex items-center"
                       >
                         {item.label}
                       </LinkComp>
@@ -178,7 +187,7 @@ export function MobileNavDrawer({
                   key={link.href}
                   href={link.href}
                   onClick={onClose}
-                  className="block py-3.5 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-brand-accent transition-colors min-h-[44px] flex items-center"
+                  className="block py-3.5 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-black transition-colors min-h-[44px] flex items-center"
                 >
                   {link.label}
                 </LinkComp>
@@ -230,16 +239,16 @@ export function MobileNavDrawer({
             <LinkComp
               href={accountHref}
               onClick={onClose}
-              className="flex items-center justify-center gap-2 p-3 bg-brand-surface border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-brand-secondary transition-colors min-h-[44px]"
+              className="flex items-center justify-center gap-2 p-3 bg-brand-surface border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-brand-secondary transition-colors min-h-[44px] rounded-sm"
             >
-              <UserIcon className="w-4 h-4 text-brand-accent" />
+              <UserIcon className="w-4 h-4 text-brand-primary" />
               <span>Account</span>
             </LinkComp>
 
             <LinkComp
               href={cartHref}
               onClick={onClose}
-              className="flex items-center justify-center gap-2 p-3 bg-brand-surface border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-brand-secondary transition-colors min-h-[44px]"
+              className="flex items-center justify-center gap-2 p-3 bg-brand-primary text-white border border-brand-primary text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors min-h-[44px] rounded-sm"
             >
               <ShoppingBagIcon className="w-4 h-4 text-brand-accent" />
               <span>Bag ({cartCount})</span>

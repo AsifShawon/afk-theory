@@ -1,4 +1,5 @@
 export * from "./AnnouncementBar"
+export * from "./BrandLogo"
 export * from "./DesktopNav"
 export * from "./MobileNavDrawer"
 export * from "./MegaMenu"

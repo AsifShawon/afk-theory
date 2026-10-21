@@ -1,5 +1,7 @@
 import React from "react"
 import {
+  AnnouncementBarView,
+  CampaignSlideView,
   CategoryView,
   ProductView,
   QuickAddRequest,
@@ -24,6 +26,8 @@ export interface HomeViewProps {
   categories: CategoryView[]
   routes: StoreRoutes
   capabilities?: StoreCapabilities
+  campaignSlides?: CampaignSlideView[]
+  announcement?: AnnouncementBarView
   onQuickAdd?: (req: QuickAddRequest) => Promise<QuickAddResult>
   secondaryCtaSlot?: React.ReactNode
   newsletterSlot?: React.ReactNode
@@ -36,6 +40,8 @@ export function HomeView({
   categories,
   routes,
   capabilities,
+  campaignSlides,
+  announcement,
   onQuickAdd,
   secondaryCtaSlot,
   newsletterSlot,
@@ -49,8 +55,12 @@ export function HomeView({
     <div className="flex flex-col w-full">
       {/* 1. Editorial Hero */}
       <HeroSection
-        routes={routes}
+        catalogHref={routes?.catalog ? routes.catalog() : "/store"}
+        aboutHref={routes?.about ? routes.about() : "/about"}
         featuredProduct={heroProduct || featuredProducts[0]}
+        slides={campaignSlides}
+        autoplay={announcement?.desktopAutoplay}
+        autoplayIntervalMs={announcement?.autoplayIntervalMs}
         secondaryCtaSlot={secondaryCtaSlot}
         linkComponent={linkComponent}
       />
@@ -59,7 +69,7 @@ export function HomeView({
       <ProductRails
         title="DROP 01 // OVERSIZED DROP SHOULDER"
         subtitle="Calibrated shoulder seams, wide boxy circumference, and dense pre-shrunk cotton."
-        viewAllHref={routes.collection("drop-01")}
+        viewAllHref={routes.collection("drop-01-offline-by-choice")}
         viewAllLabel="Shop Drop 01"
         products={displayRailProducts}
         routes={routes}

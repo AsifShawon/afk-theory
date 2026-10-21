@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
 import { listRegions } from "@lib/data/regions"
+import { getAnnouncementBar } from "@lib/data/campaign"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
@@ -9,15 +10,16 @@ import AnnouncementBar from "@modules/layout/components/announcement-bar"
 import NavHeader from "@modules/layout/components/nav-header"
 
 export default async function Nav() {
-  const [regions, locales, currentLocale] = await Promise.all([
+  const [regions, locales, currentLocale, announcement] = await Promise.all([
     listRegions().then((regions: StoreRegion[]) => regions),
     listLocales(),
     getLocale(),
+    getAnnouncementBar(),
   ])
 
   return (
     <div className="relative z-40">
-      <AnnouncementBar />
+      <AnnouncementBar announcement={announcement} />
       <NavHeader
         regions={regions}
         locales={locales}

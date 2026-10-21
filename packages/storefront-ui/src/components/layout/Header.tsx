@@ -2,9 +2,12 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
 import Link from "next/link"
+import clsx from "clsx"
 import { BarsThreeIcon, MagnifyingGlassIcon, ShoppingBagIcon, UserIcon } from "../icons"
 import { DesktopNav, NavLinkItem } from "./DesktopNav"
 import { MegaNavItem } from "./navigation-model"
+import { BrandLogo } from "./BrandLogo"
+import { MobileNavDrawer } from "./MobileNavDrawer"
 import { LinkComponent } from "../../types"
 
 export interface HeaderProps {
@@ -17,8 +20,11 @@ export interface HeaderProps {
   onCartClick?: () => void
   accountHref?: string
   onOpenSearch?: () => void
+  isMobileMenuOpen?: boolean
   onOpenMobileMenu?: () => void
+  onCloseMobileMenu?: () => void
   mobileMenuSlot?: React.ReactNode
+  mobileNavBottomSlot?: React.ReactNode
   headerActionsSlot?: React.ReactNode
   announcementText?: string
   secondaryLinks?: Array<{ label: string; href: string }>
@@ -35,8 +41,11 @@ export function Header({
   onCartClick,
   accountHref = "/account",
   onOpenSearch,
+  isMobileMenuOpen: isMobileMenuOpenProp,
   onOpenMobileMenu,
+  onCloseMobileMenu,
   mobileMenuSlot,
+  mobileNavBottomSlot,
   headerActionsSlot,
   announcementText = "PAUSE THE GAME. KEEP YOUR STYLE. • CASH ON DELIVERY AVAILABLE ACROSS BANGLADESH",
   secondaryLinks = [
@@ -47,34 +56,48 @@ export function Header({
 }: HeaderProps) {
   const headerRef = useRef<HTMLElement>(null)
   const [headerBottom, setHeaderBottom] = useState<number>(120)
+  const [isScrolled, setIsScrolled] = useState<boolean>(false)
+  const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState<boolean>(false)
+  const isMenuOpen = isMobileMenuOpenProp !== undefined ? isMobileMenuOpenProp : internalMobileMenuOpen
 
-  const updateHeaderBottom = useCallback(() => {
+  const handleOpenMobileMenu = useCallback(() => {
+    setInternalMobileMenuOpen(true)
+    onOpenMobileMenu?.()
+  }, [onOpenMobileMenu])
+
+  const handleCloseMobileMenu = useCallback(() => {
+    setInternalMobileMenuOpen(false)
+    onCloseMobileMenu?.()
+  }, [onCloseMobileMenu])
+
+  const updateHeaderMetrics = useCallback(() => {
     if (headerRef.current) {
       setHeaderBottom(headerRef.current.getBoundingClientRect().bottom)
     }
+    setIsScrolled(window.scrollY > 30)
   }, [])
 
   useEffect(() => {
-    updateHeaderBottom()
+    updateHeaderMetrics()
     if (!headerRef.current) return
 
-    const ro = new ResizeObserver(updateHeaderBottom)
+    const ro = new ResizeObserver(updateHeaderMetrics)
     ro.observe(headerRef.current)
-    window.addEventListener("scroll", updateHeaderBottom, { passive: true })
-    window.addEventListener("resize", updateHeaderBottom)
+    window.addEventListener("scroll", updateHeaderMetrics, { passive: true })
+    window.addEventListener("resize", updateHeaderMetrics)
 
     return () => {
       ro.disconnect()
-      window.removeEventListener("scroll", updateHeaderBottom)
-      window.removeEventListener("resize", updateHeaderBottom)
+      window.removeEventListener("scroll", updateHeaderMetrics)
+      window.removeEventListener("resize", updateHeaderMetrics)
     }
-  }, [updateHeaderBottom])
+  }, [updateHeaderMetrics])
 
   return (
     <>
-      {/* 1. Optional Slim Announcement Bar in normal page flow */}
+      {/* 1. Slim Editorial Announcement Bar in normal page flow */}
       {announcementText && (
-        <div className="bg-brand-primary text-brand-secondary text-[11px] font-heading font-medium tracking-wide py-1.5 px-4 text-center border-b border-white/10">
+        <div className="bg-brand-primary text-brand-secondary text-[11px] font-heading font-medium tracking-wide py-1.5 px-4 text-center border-b border-brand-primary/20">
           <div className="content-container flex items-center justify-center gap-2">
             <span>{announcementText}</span>
           </div>
@@ -84,34 +107,45 @@ export function Header({
       {/* 2. Floating Elevated Sticky Header Shell */}
       <header
         ref={headerRef}
-        className="sticky top-2 sm:top-3.5 z-40 w-full px-2.5 sm:px-4 lg:px-6 transition-[top] duration-200 pointer-events-none"
+        className={clsx(
+          "sticky z-40 w-full transition-all duration-300 pointer-events-none",
+          isScrolled ? "top-1 sm:top-2 px-2 sm:px-3 lg:px-4" : "top-2 sm:top-3 px-2.5 sm:px-4 lg:px-6"
+        )}
         style={{
-          top: "calc(var(--demo-banner-offset, 0px) + 8px)",
+          top: "calc(var(--demo-banner-offset, 0px) + " + (isScrolled ? "4px" : "8px") + ")",
         }}
       >
         <div className="content-container max-w-[1440px] mx-auto pointer-events-auto">
           {/* Floating Island Surface Card */}
           <div
-            className="relative border border-brand-border/80 bg-brand-surface/95 backdrop-blur-md shadow-subtle hover:shadow-editorial transition-all duration-300"
+            className={clsx(
+              "relative border border-brand-border/80 bg-brand-secondary/95 backdrop-blur-md shadow-subtle hover:shadow-editorial transition-all duration-300",
+              isScrolled && "shadow-editorial bg-white/95"
+            )}
           >
             {/* Primary Row: Mobile toggle, Secondary desktop links, Brand wordmark, Actions */}
-            <div className="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-5 lg:px-6">
+            <div
+              className={clsx(
+                "flex items-center justify-between px-3 sm:px-5 lg:px-6 transition-all duration-300",
+                isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-16"
+              )}
+            >
               {/* Left Column: Mobile Menu Trigger & Secondary Desktop Links */}
               <div className="flex items-center gap-x-5 flex-1 basis-0">
                 {mobileMenuSlot ? (
                   <div className="lg:hidden">{mobileMenuSlot}</div>
-                ) : onOpenMobileMenu ? (
+                ) : (
                   <div className="lg:hidden">
                     <button
                       type="button"
-                      onClick={onOpenMobileMenu}
-                      className="p-2 -ml-2 text-brand-primary hover:text-brand-accent transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+                      onClick={handleOpenMobileMenu}
+                      className="p-2 -ml-2 text-brand-primary hover:text-brand-accent transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent cursor-pointer"
                       aria-label="Open navigation menu"
                     >
                       <BarsThreeIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                   </div>
-                ) : null}
+                )}
 
                 {/* Secondary Desktop Utility Links */}
                 <nav className="hidden lg:flex items-center gap-4 text-xs font-heading font-medium text-brand-primary/70">
@@ -127,27 +161,15 @@ export function Header({
                 </nav>
               </div>
 
-              {/* Center Column: Brand Logotype with Official AFK Pause Mark */}
+              {/* Center Column: Official Responsive AFK THEORY Brand Logo */}
               <div className="flex flex-col items-center justify-center px-2">
                 <LinkComp
                   href={homeHref}
-                  className="flex items-center gap-2.5 group py-1"
+                  className="flex items-center group py-1"
                   data-testid="nav-store-link"
+                  aria-label="AFK THEORY Home"
                 >
-                  <img
-                    src="/brand/pause-symbol.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain flex-shrink-0"
-                  />
-                  <div className="flex flex-col items-start sm:items-center">
-                    <span className="font-heading font-black text-lg sm:text-xl lg:text-2xl tracking-[0.14em] text-brand-primary uppercase whitespace-nowrap leading-none group-hover:text-brand-primary/80 transition-colors">
-                      AFK THEORY
-                    </span>
-                    <span className="text-[8px] sm:text-[9px] uppercase font-heading tracking-[0.22em] text-brand-muted font-bold mt-0.5">
-                      PAUSE THE GAME. KEEP YOUR STYLE.
-                    </span>
-                  </div>
+                  <BrandLogo variant="responsive" priority alt="AFK THEORY" />
                 </LinkComp>
               </div>
 
@@ -234,6 +256,22 @@ export function Header({
           </div>
         </div>
       </header>
+
+      {/* Reusable Mobile Navigation Drawer (Portalled to document.body) */}
+      {!mobileMenuSlot && (
+        <MobileNavDrawer
+          isOpen={isMenuOpen}
+          onClose={handleCloseMobileMenu}
+          items={navItems}
+          links={navLinks}
+          onOpenSearch={onOpenSearch}
+          cartCount={cartCount}
+          cartHref={cartHref}
+          accountHref={accountHref}
+          bottomSlot={mobileNavBottomSlot}
+          linkComponent={LinkComp}
+        />
+      )}
     </>
   )
 }

@@ -1,7 +1,7 @@
 import { Metadata } from "next"
-import { constructMetadata, getBreadcrumbSchema, getFAQPageSchema } from "@lib/util/seo"
+import { constructMetadata, getBreadcrumbSchema } from "@lib/util/seo"
 import JsonLd from "@modules/common/components/json-ld"
-import { DEFAULT_FAQ_DATA, FaqView } from "@dtc/storefront-ui"
+import { FaqView } from "@dtc/storefront-ui"
 
 type Props = {
   params: Promise<{ countryCode: string }>
@@ -26,12 +26,9 @@ export default async function FAQPage(props: Props) {
     { name: "FAQ", url: `/${countryCode}/faq` },
   ])
 
-  const allFaqItems = (DEFAULT_FAQ_DATA || []).flatMap((cat) => cat.questions || [])
-  const faqSchema = getFAQPageSchema(allFaqItems)
-
   return (
     <>
-      <JsonLd data={[breadcrumbs, faqSchema]} />
+      <JsonLd data={breadcrumbs} />
       <FaqView contactHref={`/${countryCode}/contact`} />
     </>
   )

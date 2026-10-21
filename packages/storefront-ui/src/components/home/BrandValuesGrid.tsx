@@ -49,17 +49,17 @@ export function BrandValuesGrid() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {pillars.map((pillar) => (
             <div
               key={pillar.number}
-              className="bg-white rounded-2xl p-6 sm:p-7 border border-brand-border/70 shadow-subtle space-y-3 flex flex-col justify-between"
+              className="bg-white p-6 sm:p-7 border border-brand-border/80 shadow-xs space-y-3 flex flex-col justify-between hover:border-brand-primary/40 transition-colors"
             >
-              <span className="font-display text-2xl text-brand-sand font-normal block">
+              <span className="font-heading font-black text-2xl text-brand-primary/20 block">
                 {pillar.number}
               </span>
               <div className="space-y-2">
-                <h3 className="font-heading font-bold text-sm sm:text-base text-brand-primary tracking-tight">
+                <h3 className="font-heading font-bold text-sm sm:text-base text-brand-primary uppercase tracking-tight">
                   {pillar.title}
                 </h3>
                 <p className="text-xs text-brand-muted leading-relaxed font-sans">

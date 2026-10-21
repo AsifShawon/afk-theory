@@ -7,7 +7,8 @@ import { createMedusaRoutes } from "@adapters/medusa/routes"
 import SearchModal from "../search-modal"
 import { HttpTypes } from "@medusajs/types"
 import { Locale } from "@lib/data/locales"
-import SideMenu from "../side-menu"
+import CountrySelect from "../country-select"
+import useToggleState from "@lib/hooks/use-toggle-state"
 
 type NavHeaderProps = {
   regions: HttpTypes.StoreRegion[] | null
@@ -18,11 +19,12 @@ type NavHeaderProps = {
 
 export default function NavHeader({
   regions,
-  locales,
-  currentLocale,
+  locales: _locales,
+  currentLocale: _currentLocale,
   cartCountNode,
 }: NavHeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const countryToggleState = useToggleState()
 
   const routes = useMemo(() => createMedusaRoutes("bd"), [])
   const navItems = useMemo(() => createStoreNavigation(routes), [routes])
@@ -38,7 +40,14 @@ export default function NavHeader({
         announcementText=""
         onOpenSearch={() => setIsSearchOpen(true)}
         linkComponent={LocalizedClientLink}
-        mobileMenuSlot={<SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />}
+        mobileNavBottomSlot={
+          regions && regions.length > 0 ? (
+            <div className="flex items-center justify-between text-xs text-brand-muted pt-2 border-t border-brand-border/60">
+              <span className="font-heading font-bold uppercase tracking-wider">Region:</span>
+              <CountrySelect toggleState={countryToggleState} regions={regions} />
+            </div>
+          ) : null
+        }
         headerActionsSlot={
           <div className="hidden sm:flex items-center text-[11px] font-heading font-semibold uppercase tracking-wider text-brand-primary/80 bg-brand-secondary/80 border border-brand-border px-3 py-1 rounded-full">
             <span>🇧🇩 BDT (৳)</span>

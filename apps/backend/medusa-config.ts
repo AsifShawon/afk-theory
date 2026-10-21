@@ -108,6 +108,9 @@ module.exports = defineConfig({
         providers: fileProviders,
       },
     },
+    {
+      resolve: "./src/modules/campaign",
+    },
     ...(paymentProviders.length > 0
       ? [
           {

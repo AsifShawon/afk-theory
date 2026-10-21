@@ -13,7 +13,6 @@ import {
 } from "./faq-data"
 
 export type { FaqItem, FaqCategory }
-export { DEFAULT_FAQ_DATA }
 
 export interface FaqViewProps {
   faqData?: FaqCategory[]

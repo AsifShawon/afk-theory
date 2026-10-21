@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { constructMetadata } from "@lib/util/seo"
 import { listProducts } from "@lib/data/products"
 import { listCategories } from "@lib/data/categories"
+import { getCampaignSlides, getAnnouncementBar } from "@lib/data/campaign"
 import { getRegion } from "@lib/data/regions"
 import { HomeView } from "@dtc/storefront-ui"
 import { createMedusaRoutes } from "@adapters/medusa/routes"
@@ -35,13 +36,20 @@ export default async function Home(props: {
   }
 
   const routes = createMedusaRoutes(countryCode)
-  const productCategories = await listCategories()
-  const { response } = await listProducts({
-    countryCode,
-    queryParams: { limit: 12 },
-  })
 
-  const featuredProducts = (response.products || []).map((p) => toProductView(p, region.currency_code))
+  const [productCategories, productsResult, campaignSlides, announcement] = await Promise.all([
+    listCategories(),
+    listProducts({
+      countryCode,
+      queryParams: { limit: 12 },
+    }),
+    getCampaignSlides(),
+    getAnnouncementBar(),
+  ])
+
+  const featuredProducts = (productsResult.response.products || []).map((p) =>
+    toProductView(p, region.currency_code)
+  )
   const categories = (productCategories || []).map(toCategoryView)
 
   return (
@@ -50,6 +58,8 @@ export default async function Home(props: {
       categories={categories}
       routes={routes}
       capabilities={DEFAULT_MEDUSA_CAPABILITIES}
+      campaignSlides={campaignSlides}
+      announcement={announcement}
     />
   )
 }

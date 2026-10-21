@@ -65,7 +65,7 @@ export function OrderSummary({
   const activeError = promoError || localError
 
   return (
-    <div className={`bg-brand-surface border border-brand-border/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-subtle ${className}`}>
+    <div className={`bg-brand-surface border border-brand-border p-6 sm:p-7 space-y-6 shadow-xs ${className}`}>
       <h3 className="font-heading font-bold text-sm text-brand-primary uppercase tracking-wider pb-3 border-b border-brand-border">
         Order Summary
       </h3>
@@ -220,31 +220,30 @@ export function OrderSummary({
       {/* Checkout Button */}
       <div className="pt-2">
         {checkoutButtonSlot || (
-          <Button
+          <button
             type="button"
             onClick={onProceedToCheckout}
-            isLoading={isSubmitting}
-            variant="primary"
-            className="w-full h-12 rounded-full text-xs font-heading font-bold uppercase tracking-wider shadow-subtle hover:shadow-editorial"
+            disabled={isSubmitting}
+            className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer disabled:opacity-50"
           >
-            Proceed to Checkout →
-          </Button>
+            {isSubmitting ? "Processing..." : "Proceed to Checkout →"}
+          </button>
         )}
       </div>
 
       {/* Trust Badges */}
       <div className="pt-4 border-t border-brand-border/60 space-y-2.5 text-brand-muted text-[11px] font-sans">
         <div className="flex items-center gap-2">
-          <TruckIcon className="w-4 h-4 text-brand-accent flex-shrink-0" />
-          <span>Direct dispatch from Dhaka Central Fulfillment</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ShieldCheckIcon className="w-4 h-4 text-brand-accent flex-shrink-0" />
-          <span>Doorstep size exchange guarantee</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <BadgeCheckIcon className="w-4 h-4 text-brand-accent flex-shrink-0" />
+          <BadgeCheckIcon className="w-4 h-4 text-brand-primary flex-shrink-0" />
           <span>100% Cash on Delivery across all 64 districts</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <TruckIcon className="w-4 h-4 text-brand-primary flex-shrink-0" />
+          <span>Dhaka Express (24–48h) • Nationwide (3–5 days)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ShieldCheckIcon className="w-4 h-4 text-brand-primary flex-shrink-0" />
+          <span>7-Day doorstep size exchange guarantee</span>
         </div>
       </div>
     </div>

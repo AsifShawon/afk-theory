@@ -37,11 +37,11 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
     {
       id: "new-arrivals",
       label: "New & Trending",
-      href: routes.collection("new-arrivals"),
-      shopAllHref: routes.collection("new-arrivals"),
-      shopAllLabel: "Shop All New Arrivals",
+      href: routes.collection("drop-01-offline-by-choice"),
+      shopAllHref: routes.collection("drop-01-offline-by-choice"),
+      shopAllLabel: "Shop Drop 01 Launch",
       featuredLinks: [
-        { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01"), badge: "Drop 01" },
+        { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01-offline-by-choice"), badge: "Drop 01" },
         { label: "Drop Shoulder T-Shirts", href: routes.category("drop-shoulder-t-shirts") },
         { label: "Essentials", href: routes.collection("essentials") },
         { label: "Archive", href: routes.collection("archive") },
@@ -52,8 +52,8 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
           links: [
             { label: "Drop Shoulder T-Shirts", href: routes.category("drop-shoulder-t-shirts") },
             { label: "Regular T-Shirts", href: routes.category("regular-t-shirts") },
-            { label: "Shirts", href: routes.category("shirts") },
-            { label: "Trousers & Pants", href: routes.category("trousers-pants") },
+            { label: "Streetwear Shirts", href: routes.category("shirts") },
+            { label: "Trousers & Pants", href: routes.category("trousers-&-pants") },
           ],
         },
       ],
@@ -64,20 +64,20 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
           image: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?auto=format&fit=crop&w=800&q=80",
           imageAlt: "AFK THEORY Drop 01 Streetwear",
           ctaText: "Shop Drop 01",
-          href: routes.collection("drop-01"),
+          href: routes.collection("drop-01-offline-by-choice"),
         },
       ],
     },
     {
       id: "shirts",
       label: "Shirts",
-      href: routes.catalog({ category: "shirts" }),
-      shopAllHref: routes.catalog({ category: "shirts" }),
+      href: routes.category("shirts"),
+      shopAllHref: routes.category("shirts"),
       shopAllLabel: "Shop All Shirts",
       featuredLinks: [
         { label: "Relaxed Street Shirts", href: routes.category("shirts"), badge: "Signature" },
         { label: "Utility Overshirts", href: routes.category("shirts") },
-        { label: "Boxy Layering", href: routes.catalog({ category: "shirts" }) },
+        { label: "Boxy Layering", href: routes.category("shirts") },
       ],
       categoryGroups: [
         {
@@ -85,7 +85,7 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
           links: [
             { label: "Boxy Casual Shirts", href: routes.category("shirts") },
             { label: "Camp Collar Shirts", href: routes.category("shirts") },
-            { label: "Overshirts", href: routes.catalog({ category: "shirts" }) },
+            { label: "Overshirts", href: routes.category("shirts") },
           ],
         },
         {
@@ -110,9 +110,9 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
     {
       id: "polos-tees",
       label: "Polos & Tees",
-      href: routes.catalog({ category: "polos" }),
-      shopAllHref: routes.catalog(),
-      shopAllLabel: "Shop All Polos & Tees",
+      href: routes.category("drop-shoulder-t-shirts"),
+      shopAllHref: routes.category("drop-shoulder-t-shirts"),
+      shopAllLabel: "Shop All T-Shirts",
       featuredLinks: [
         { label: "Drop Shoulder T-Shirts", href: routes.category("drop-shoulder-t-shirts"), badge: "Signature" },
         { label: "Regular T-Shirts", href: routes.category("regular-t-shirts") },
@@ -149,27 +149,27 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
     {
       id: "trousers",
       label: "Trousers",
-      href: routes.catalog({ category: "chinos" }),
-      shopAllHref: routes.catalog({ category: "chinos" }),
+      href: routes.category("trousers-&-pants"),
+      shopAllHref: routes.category("trousers-&-pants"),
       shopAllLabel: "Shop All Trousers",
       featuredLinks: [
-        { label: "Trousers & Pants", href: routes.category("trousers-pants"), badge: "Essential" },
-        { label: "Relaxed Street Twill", href: routes.category("trousers-pants") },
+        { label: "Trousers & Pants", href: routes.category("trousers-&-pants"), badge: "Essential" },
+        { label: "Relaxed Street Twill", href: routes.category("trousers-&-pants") },
         { label: "Essentials", href: routes.collection("essentials") },
       ],
       categoryGroups: [
         {
           title: "Styles & Cuts",
           links: [
-            { label: "Wide-Leg & Relaxed Pants", href: routes.category("trousers-pants") },
-            { label: "Tapered Street Trousers", href: routes.category("trousers-pants") },
+            { label: "Wide-Leg & Relaxed Pants", href: routes.category("trousers-&-pants") },
+            { label: "Tapered Street Trousers", href: routes.category("trousers-&-pants") },
           ],
         },
         {
           title: "Color Palette",
           links: [
-            { label: "Washed Black & Charcoal", href: routes.category("trousers-pants") },
-            { label: "Earth Tones & Olive", href: routes.category("trousers-pants") },
+            { label: "Washed Black & Charcoal", href: routes.category("trousers-&-pants") },
+            { label: "Earth Tones & Olive", href: routes.category("trousers-&-pants") },
           ],
         },
       ],
@@ -180,18 +180,18 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
           image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80",
           imageAlt: "AFK THEORY Trousers & Pants",
           ctaText: "Shop Trousers",
-          href: routes.category("trousers-pants"),
+          href: routes.category("trousers-&-pants"),
         },
       ],
     },
     {
       id: "linen",
       label: "Outerwear & Linen",
-      href: routes.category("women"),
-      shopAllHref: routes.category("women"),
+      href: routes.collection("drop-01-offline-by-choice"),
+      shopAllHref: routes.collection("drop-01-offline-by-choice"),
       shopAllLabel: "Shop Linen & Outerwear",
       featuredLinks: [
-        { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01"), badge: "Featured" },
+        { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01-offline-by-choice"), badge: "Featured" },
         { label: "Lightweight Outerwear", href: routes.category("shirts") },
         { label: "Archive", href: routes.collection("archive") },
       ],
@@ -250,11 +250,11 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
     {
       id: "collections",
       label: "Collections",
-      href: routes.catalog(),
-      shopAllHref: routes.catalog(),
+      href: routes.collection("drop-01-offline-by-choice"),
+      shopAllHref: routes.collection("drop-01-offline-by-choice"),
       shopAllLabel: "Shop All Collections",
       featuredLinks: [
-        { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01"), badge: "Drop 01" },
+        { label: "Drop 01: Offline by Choice", href: routes.collection("drop-01-offline-by-choice"), badge: "Drop 01" },
         { label: "Essentials", href: routes.collection("essentials") },
         { label: "Archive", href: routes.collection("archive") },
       ],
@@ -262,7 +262,7 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
         {
           title: "Curated Lines",
           links: [
-            { label: "Drop 01 Capsule", href: routes.collection("drop-01") },
+            { label: "Drop 01 Capsule", href: routes.collection("drop-01-offline-by-choice") },
             { label: "Core Essentials", href: routes.collection("essentials") },
             { label: "Design Archive", href: routes.collection("archive") },
           ],
@@ -275,7 +275,7 @@ export function createStoreNavigation(routes: StoreRoutes): MegaNavItem[] {
           image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=80",
           imageAlt: "AFK THEORY Drop 01 Collection",
           ctaText: "Explore Drop 01",
-          href: routes.collection("drop-01"),
+          href: routes.collection("drop-01-offline-by-choice"),
         },
       ],
     },
