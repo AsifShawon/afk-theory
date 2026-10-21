@@ -10,6 +10,14 @@ jobs:
   static-quality:
     name: Static Quality & Storefront Parity Validation
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: "pk_afk_theory_static_ci_fixture"
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: "http://localhost:9000"
+      NEXT_PUBLIC_BASE_URL: "http://localhost:8000"
+      NEXT_PUBLIC_DEFAULT_REGION: "bd"
+      NODE_ENV: "test"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,37 +47,23 @@ jobs:
       - name: Install dependencies (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
-      - name: Verify Architecture & Shared UI Consumption
+      - name: Verify Architecture & Monorepo Boundaries
         run: pnpm run check:architecture
 
-      - name: Type Check Workspace
+      - name: Type Check Monorepo
         run: pnpm run type-check
 
       - name: Lint Workspace
         run: pnpm run lint
 
-      - name: Shared Storefront UI Transition Tests
+      - name: Bangladesh Delivery & Contract Unit Tests
+        run: pnpm --filter @dtc/commerce-contracts test
+
+      - name: Shared Storefront UI Transition & Interaction Tests
         run: pnpm --filter @dtc/storefront-ui test
 
-      - name: Portfolio Demo Unit & Storage Tests
-        run: pnpm run demo:test
-
-      - name: Build Portfolio Demo (Static Export)
-        run: pnpm run demo:build
-
-      - name: Install Playwright Chromium Browser
-        run: pnpm --filter @dtc/portfolio-demo exec playwright install chromium --with-deps
-
-      - name: Run Playwright E2E & Smoke Tests
-        run: pnpm --filter @dtc/portfolio-demo run test:e2e --project=chromium
-
-      - name: Upload Playwright Report on Failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: apps/portfolio-demo/playwright-report/
-          retention-days: 7
+      - name: Production Storefront Build Check
+        run: pnpm --filter @dtc/storefront build
 
       - name: Verify Clean Repository & No Whitespace Errors
         run: git diff --check

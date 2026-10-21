@@ -1,10 +1,29 @@
-import { loadEnv, defineConfig } from "@medusajs/framework/utils"
+import { loadEnv, defineConfig, MedusaError } from "@medusajs/framework/utils"
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
-// Stripe Payment Provider Configuration
-const stripeApiKey = process.env.STRIPE_API_KEY
-const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+if (process.env.NODE_ENV === "production") {
+  const jwtSecret = process.env.JWT_SECRET
+  const cookieSecret = process.env.COOKIE_SECRET
+  if (!jwtSecret || jwtSecret.length < 32 || jwtSecret.includes("supersecret")) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "CRITICAL SECURITY CONFIGURATION: In production, JWT_SECRET must be explicitly set and contain at least 32 characters. Do not use default or placeholder secrets."
+    )
+  }
+  if (!cookieSecret || cookieSecret.length < 32 || cookieSecret.includes("supersecret")) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "CRITICAL SECURITY CONFIGURATION: In production, COOKIE_SECRET must be explicitly set and contain at least 32 characters. Do not use default or placeholder secrets."
+    )
+  }
+}
+
+// Stripe Payment Provider Configuration (Disabled by default; AFK THEORY launches with pure Cash on Delivery)
+const stripeApiKey =
+  process.env.ENABLE_STRIPE === "true" ? process.env.STRIPE_API_KEY : undefined
+const stripeWebhookSecret =
+  process.env.ENABLE_STRIPE === "true" ? process.env.STRIPE_WEBHOOK_SECRET : undefined
 
 const paymentProviders: {
   resolve: string

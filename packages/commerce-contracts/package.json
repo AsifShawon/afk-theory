@@ -7,6 +7,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
+    "test": "node -e \"const { createJiti } = require('jiti'); const jiti = createJiti(process.cwd()); jiti('./src/__tests__/bangladesh-delivery.test.ts');\"",
     "lint": "eslint src/"
   },
   "devDependencies": {

@@ -16,6 +16,8 @@ import {
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { getErrorMessage } from "@lib/util/get-error-message"
 import {
+  findBangladeshDistrict,
+  determineBangladeshShippingZone,
   isValidBangladeshPhone,
   normalizeBangladeshPhone,
   validateShippingOptionForAddress,
@@ -138,15 +140,25 @@ export default function MedusaCheckoutClient({
       // Must map country to valid 2-letter ISO code supported by cart region
       const isoCountryCode = (countryCode || "bd").toLowerCase()
       const cleanPhone = normalizeBangladeshPhone(addr.phone?.trim() || "")
-      const districtName = addr.district?.trim() || ""
+      const matchedDistrict = findBangladeshDistrict(addr.district || addr.city)
+      const districtName = matchedDistrict?.name || addr.district?.trim() || ""
+      const districtId = matchedDistrict?.id || ""
+      const divisionName =
+        matchedDistrict?.division || addr.division || addr.province || districtName || ""
       const cityName = addr.city?.trim() || districtName
-      const provinceName = addr.division || addr.province || districtName || ""
       const address2Full = [
         addr.address2?.trim(),
         addr.notes?.trim() ? `Delivery Note: ${addr.notes.trim()}` : "",
       ]
         .filter(Boolean)
         .join(" | ")
+
+      const deliveryZone = determineBangladeshShippingZone(
+        districtName,
+        cityName,
+        addr.address1,
+        divisionName
+      )
 
       const addressPayload = {
         first_name: addr.firstName.trim(),
@@ -156,8 +168,14 @@ export default function MedusaCheckoutClient({
         city: cityName,
         country_code: isoCountryCode,
         postal_code: addr.postalCode?.trim() || "",
-        province: provinceName,
+        province: divisionName,
         phone: cleanPhone,
+        metadata: {
+          district_id: districtId,
+          district: districtName,
+          division: divisionName,
+          delivery_zone: deliveryZone,
+        },
       }
 
       const updated = await updateCart({
@@ -166,7 +184,29 @@ export default function MedusaCheckoutClient({
         billing_address: addressPayload,
       })
 
-      setShippingAddress(addr)
+      setShippingAddress({
+        ...addr,
+        district: districtName,
+        division: divisionName,
+      })
+
+      // When shipping address changes, revalidate previously selected shipping method
+      if (selectedShippingMethodId) {
+        const chosenOpt = shippingOptions.find((opt) => opt.id === selectedShippingMethodId)
+        if (chosenOpt) {
+          const zoneCheck = validateShippingOptionForAddress(
+            chosenOpt.name,
+            districtName,
+            cityName,
+            addr.address1,
+            divisionName
+          )
+          if (!zoneCheck.isValid) {
+            // Stale shipping method incompatible with new destination; reset selection
+            setSelectedShippingMethodId(undefined)
+          }
+        }
+      }
 
       if (updated) {
         setCurrentCart(updated)
@@ -200,9 +240,10 @@ export default function MedusaCheckoutClient({
     if (selectedOption) {
       const zoneCheck = validateShippingOptionForAddress(
         selectedOption.name,
-        shippingAddress.district || shippingAddress.province || shippingAddress.city,
+        shippingAddress.district || shippingAddress.city,
         shippingAddress.city,
-        shippingAddress.address1
+        shippingAddress.address1,
+        shippingAddress.division || shippingAddress.province
       )
       if (!zoneCheck.isValid && zoneCheck.message) {
         setCheckoutError(zoneCheck.message)

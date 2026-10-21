@@ -33,12 +33,12 @@ describe("Shared Predictive Search Contract & Combobox Suite", () => {
 
   test("2. Suggestions filtering matches catalog terms and creates category-scoped suggestions", () => {
     const catalogSuggestions = [
+      "Drop Shoulder",
+      "Oversized Tee",
+      "Graphic Tee",
+      "Essentials",
       "Heavyweight T-Shirt",
-      "Oxford Shirt",
-      "Regent Polo",
-      "Mayfair Chinos",
-      "French Linen Shirt",
-      "Cotton Cap",
+      "Twill Cap",
     ]
 
     function filterSuggestions(query: string) {
@@ -47,15 +47,14 @@ describe("Shared Predictive Search Contract & Combobox Suite", () => {
       return catalogSuggestions.filter((s) => s.toLowerCase().includes(q))
     }
 
-    const matches = filterSuggestions("shirt")
-    assert.equal(matches.length, 3)
-    assert.ok(matches.includes("Heavyweight T-Shirt"))
-    assert.ok(matches.includes("Oxford Shirt"))
-    assert.ok(matches.includes("French Linen Shirt"))
+    const matches = filterSuggestions("tee")
+    assert.equal(matches.length, 2)
+    assert.ok(matches.includes("Oversized Tee"))
+    assert.ok(matches.includes("Graphic Tee"))
   })
 
   test("3. Combobox ArrowUp/ArrowDown cycling updates active index and loops smoothly", () => {
-    const suggestions = ["Heavyweight T-Shirt", "Oxford Shirt", "Regent Polo"]
+    const suggestions = ["Drop Shoulder", "Oversized Tee", "Graphic Tee"]
     let highlightedIndex = -1
 
     function handleArrowKey(key: "ArrowDown" | "ArrowUp") {
@@ -69,23 +68,23 @@ describe("Shared Predictive Search Contract & Combobox Suite", () => {
     }
 
     // First ArrowDown -> index 0
-    assert.equal(handleArrowKey("ArrowDown"), "Heavyweight T-Shirt")
+    assert.equal(handleArrowKey("ArrowDown"), "Drop Shoulder")
     assert.equal(highlightedIndex, 0)
 
     // Second ArrowDown -> index 1
-    assert.equal(handleArrowKey("ArrowDown"), "Oxford Shirt")
+    assert.equal(handleArrowKey("ArrowDown"), "Oversized Tee")
     assert.equal(highlightedIndex, 1)
 
     // Third ArrowDown -> index 2
-    assert.equal(handleArrowKey("ArrowDown"), "Regent Polo")
+    assert.equal(handleArrowKey("ArrowDown"), "Graphic Tee")
     assert.equal(highlightedIndex, 2)
 
     // Fourth ArrowDown -> loops back to index 0
-    assert.equal(handleArrowKey("ArrowDown"), "Heavyweight T-Shirt")
+    assert.equal(handleArrowKey("ArrowDown"), "Drop Shoulder")
     assert.equal(highlightedIndex, 0)
 
     // ArrowUp -> loops backwards to index 2
-    assert.equal(handleArrowKey("ArrowUp"), "Regent Polo")
+    assert.equal(handleArrowKey("ArrowUp"), "Graphic Tee")
     assert.equal(highlightedIndex, 2)
   })
 

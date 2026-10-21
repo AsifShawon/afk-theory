@@ -4,7 +4,7 @@
 > *Offline by choice. Away from keyboard. Same energy. Different reality.*
 
 <p align="center">
-  <img src="apps/storefront/public/brand/wordmark-pause.png" alt="AFK THEORY Wordmark" width="400">
+  <img src="apps/storefront/public/brand/logo-wordmark.png" alt="AFK THEORY Wordmark" width="400">
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@
 - **Electric Chartreuse (`#D8F452`)**: High-energy accent token for primary call-to-actions, badges, focus rings, and drop notifications.
 
 ### Brand Assets
-- **Wordmark**: `apps/storefront/public/brand/wordmark-pause.png`
+- **Wordmark**: `apps/storefront/public/brand/logo-wordmark.png`
 - **Icon / Favicon**: `apps/storefront/public/brand/pause-symbol.png`
 - **Angular Emblem**: `apps/storefront/public/brand/logo-angular.png`
 - **Chartreuse Badge**: `apps/storefront/public/brand/logo-chartreuse.png`
@@ -144,12 +144,17 @@ pnpm --filter @dtc/backend dev      # Backend on http://localhost:9000
 pnpm --filter @dtc/storefront dev   # Storefront on http://localhost:8000
 ```
 
-### Step 5: Medusa Admin Access
-Open `http://localhost:9000/app` in your browser to manage products, categories, inventory, and COD order reconciliations.
+### Step 5: Create Administrator & Medusa Admin Access
+Create your secure administrator account using the Medusa CLI:
+```bash
+cd apps/backend
+pnpm medusa user -e <your-admin-email> -p <strong-password>
+```
+*Never use default or shared passwords. Generate a unique, high-entropy password for administrator access.*
+
+Open `http://localhost:9000/app` in your browser to log into the Medusa Admin dashboard to manage products, categories, inventory, and COD order reconciliations.
 
 - **Admin URL**: [http://localhost:9000/app](http://localhost:9000/app)
-- **Admin Email**: `admin@afktheory.com`
-- **Admin Password**: `supersecret`
 
 ---
 

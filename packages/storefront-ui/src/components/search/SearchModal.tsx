@@ -22,8 +22,8 @@ export function SearchModal({
   query,
   onQueryChange,
   onSubmit,
-  placeholder = "Search garments, fabrics (e.g. T-Shirt, Oxford, Linen, Chino)...",
-  suggestions = ["Heavyweight T-Shirt", "Oxford Shirt", "Regent Polo", "Mayfair Chinos", "Linen Shirt", "Cotton Cap"],
+  placeholder = "Search garments, fabrics (e.g. Drop Shoulder, Oversized, Cotton)...",
+  suggestions = ["Drop Shoulder", "Oversized Tee", "Graphic Tee", "Essentials", "Heavyweight T-Shirt", "Twill Cap"],
   onSelectSuggestion,
   resultsSlot,
 }: SearchModalProps) {

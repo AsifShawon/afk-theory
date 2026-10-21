@@ -99,20 +99,35 @@ export function getOrganizationSchema() {
     url: base,
     logo: `${base}/brand/logo-chartreuse.png`,
     description: DEFAULT_STORE_DESCRIPTION,
-    email: "support@afktheory.com",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Banani / Tejgaon",
-      addressLocality: "Dhaka",
-      addressRegion: "Dhaka Division",
-      postalCode: "1213",
-      addressCountry: "BD",
-    },
+    email: process.env.NEXT_PUBLIC_STORE_SUPPORT_EMAIL || "support@afktheory.com",
+    ...(process.env.NEXT_PUBLIC_STORE_STREET_ADDRESS
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: process.env.NEXT_PUBLIC_STORE_STREET_ADDRESS,
+            addressLocality: process.env.NEXT_PUBLIC_STORE_CITY || "Dhaka",
+            addressRegion: process.env.NEXT_PUBLIC_STORE_DIVISION || "Dhaka Division",
+            ...(process.env.NEXT_PUBLIC_STORE_POSTAL_CODE
+              ? { postalCode: process.env.NEXT_PUBLIC_STORE_POSTAL_CODE }
+              : {}),
+            addressCountry: "BD",
+          },
+        }
+      : {
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Dhaka",
+            addressCountry: "BD",
+          },
+        }),
     contactPoint: [
       {
         "@type": "ContactPoint",
         contactType: "Customer Support",
-        email: "support@afktheory.com",
+        email: process.env.NEXT_PUBLIC_STORE_SUPPORT_EMAIL || "support@afktheory.com",
+        ...(process.env.NEXT_PUBLIC_STORE_PHONE
+          ? { telephone: process.env.NEXT_PUBLIC_STORE_PHONE }
+          : {}),
         areaServed: "BD",
         availableLanguage: ["English", "Bengali"],
       },
@@ -141,15 +156,15 @@ export function getProductSchema({
     images.unshift(product.thumbnail)
   }
 
-  // Calculate cheapest price or price from variants
-  let minPrice = 0
+  // Calculate cheapest price or price from variants (only consider positive numbers)
+  let minPrice: number | null = null
   let inStock = false
   const currency = region.currency_code.toUpperCase()
 
   if (product.variants && product.variants.length > 0) {
     const prices = product.variants
       .map((v) => v.calculated_price?.calculated_amount)
-      .filter((p): p is number => typeof p === "number")
+      .filter((p): p is number => typeof p === "number" && !isNaN(p) && p > 0)
     if (prices.length > 0) {
       minPrice = Math.min(...prices)
     }
@@ -163,18 +178,26 @@ export function getProductSchema({
 
   const defaultSku = product.variants?.[0]?.sku || `AFK-${product.id.slice(-6).toUpperCase()}`
 
-  return {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.title,
-    description: product.description || product.subtitle || product.title,
+    name: (product.metadata?.seo_title as string) || product.title,
+    description:
+      (product.metadata?.seo_description as string) ||
+      product.description ||
+      product.subtitle ||
+      product.title,
     image: images.length > 0 ? images : [`${base}/opengraph-image.jpg`],
     sku: defaultSku,
     brand: {
       "@type": "Brand",
       name: DEFAULT_STORE_NAME,
     },
-    offers: {
+  }
+
+  // Only include offer if a genuine price exists (never output price: "0")
+  if (minPrice !== null) {
+    schema.offers = {
       "@type": "Offer",
       url: canonicalUrl,
       priceCurrency: currency,
@@ -187,8 +210,10 @@ export function getProductSchema({
         "@type": "Organization",
         name: DEFAULT_STORE_NAME,
       },
-    },
+    }
   }
+
+  return schema
 }
 
 /**

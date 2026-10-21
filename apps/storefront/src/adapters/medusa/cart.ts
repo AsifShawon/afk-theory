@@ -111,6 +111,15 @@ export function toShippingMethodView(
 }
 
 export function toAddressFormView(address?: HttpTypes.StoreCartAddress | null): AddressFormView {
+  const meta = (address?.metadata || {}) as Record<string, unknown>
+  const district =
+    (meta.district as string) ||
+    (meta.district_name as string) ||
+    address?.city ||
+    address?.province ||
+    ""
+  const division = (meta.division as string) || address?.province || ""
+
   return {
     firstName: address?.first_name || "",
     lastName: address?.last_name || "",
@@ -118,11 +127,11 @@ export function toAddressFormView(address?: HttpTypes.StoreCartAddress | null): 
     address2: address?.address_2 || "",
     city: address?.city || "Dhaka",
     postalCode: address?.postal_code || "",
-    province: address?.province || "",
+    province: division,
     country: address?.country_code?.toLowerCase() || "bd",
     phone: address?.phone || "",
-    district: address?.province || address?.city || "",
-    division: address?.province || "",
+    district,
+    division,
   }
 }
 

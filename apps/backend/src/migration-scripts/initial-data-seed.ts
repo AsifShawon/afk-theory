@@ -13,7 +13,6 @@ import {
   createProductTagsWorkflow,
   createProductsWorkflow,
   createRegionsWorkflow,
-  deleteRegionsWorkflow,
   createSalesChannelsWorkflow,
   createShippingOptionsWorkflow,
   createStockLocationsWorkflow,
@@ -23,7 +22,6 @@ import {
   createTaxRegionsWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
   linkSalesChannelsToStockLocationWorkflow,
-  deleteProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 
 export default async function initial_data_seed({
@@ -39,14 +37,20 @@ export default async function initial_data_seed({
   )
 
   // 1. Production Safety Guard
-  if (process.env.NODE_ENV === "production" && !process.env.ALLOW_PROD_SEED) {
-    logger.warn("Skipping development seed script in production environment.")
+  // Routine seed execution must never be triggered in production without explicit opt-in.
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "true") {
+    logger.warn(
+      "Skipping seed script in production environment. To allow safe, non-destructive production seeding, set ALLOW_PROD_SEED=true."
+    )
     return
   }
 
-  logger.info("Starting AFK THEORY store seed (Bangladesh / BDT)...")
+  // Development fixtures (sample draft products & inventory) should only run if explicitly enabled or in development.
+  const seedDevFixtures = process.env.SEED_DEV_FIXTURES !== "false"
 
-  // 2. Sales Channel
+  logger.info("Starting safe, idempotent AFK THEORY store initialization (Bangladesh / BDT)...")
+
+  // 2. Sales Channel (Idempotent)
   let defaultSalesChannel: { id: string; name: string }
   const { data: existingSalesChannels } = await query.graph({
     entity: "sales_channel",
@@ -80,7 +84,7 @@ export default async function initial_data_seed({
     defaultSalesChannel = channel
   }
 
-  // 3. Publishable API Key
+  // 3. Publishable API Key (Idempotent)
   let publishableApiKey: { id: string; token?: string; title: string }
   const { data: existingApiKeys } = await query.graph({
     entity: "api_key",
@@ -122,14 +126,14 @@ export default async function initial_data_seed({
     logger.debug(`Sales channel link to API key already exists or skipped: ${err}`)
   }
 
-  // 4. Store Details
+  // 4. Store Details (Idempotent update without overwriting unrelated settings)
   const { data: existingStores } = await query.graph({
     entity: "store",
     fields: ["id", "name"],
   })
 
   if (existingStores.length > 0) {
-    logger.info("Updating existing store settings for AFK THEORY...")
+    logger.info("Ensuring AFK THEORY store settings...")
     await updateStoresWorkflow(container).run({
       input: {
         selector: { id: existingStores[0].id },
@@ -173,34 +177,24 @@ export default async function initial_data_seed({
     })
   }
 
-  // 5. Region (Bangladesh - BDT)
+  // 5. Region (Bangladesh - BDT) - STRICTLY NON-DESTRUCTIVE
+  // We NEVER delete non-BDT regions or customer orders in other regions.
   let region: { id: string; name: string }
   const { data: existingRegions } = await query.graph({
     entity: "region",
     fields: ["id", "name", "currency_code"],
   })
 
-  const nonBdRegions = existingRegions.filter(
-    (r: { currency_code: string }) => r.currency_code !== "bdt"
-  )
-  if (nonBdRegions.length > 0) {
-    logger.info(`Cleaning up ${nonBdRegions.length} old non-BD region(s)...`)
-    try {
-      await deleteRegionsWorkflow(container).run({
-        input: { ids: nonBdRegions.map((r: { id: string }) => r.id) },
-      })
-    } catch (e) {
-      logger.debug(`Note on removing old regions: ${e}`)
-    }
-  }
+  // COD is the sole authorized launch payment provider.
+  // Stripe is only included if explicitly enabled via ENABLE_STRIPE="true".
+  const desiredPaymentProviders =
+    process.env.ENABLE_STRIPE === "true" && process.env.STRIPE_API_KEY
+      ? ["pp_system_default", "pp_stripe_stripe"]
+      : ["pp_system_default"]
 
   const bdRegion = existingRegions.find(
     (r: { currency_code: string }) => r.currency_code === "bdt"
   )
-
-  const desiredPaymentProviders = process.env.STRIPE_API_KEY
-    ? ["pp_stripe_stripe", "pp_system_default"]
-    : ["pp_system_default"]
 
   if (bdRegion) {
     region = bdRegion
@@ -234,7 +228,7 @@ export default async function initial_data_seed({
     region = regionResult[0]
   }
 
-  // 6. Tax Region
+  // 6. Tax Region (Idempotent)
   const { data: existingTaxRegions } = await query.graph({
     entity: "tax_region",
     fields: ["id", "country_code"],
@@ -251,7 +245,7 @@ export default async function initial_data_seed({
     })
   }
 
-  // 7. Stock Location
+  // 7. Stock Location (Idempotent)
   let stockLocation: { id: string; name: string }
   const { data: existingStockLocations } = await query.graph({
     entity: "stock_location",
@@ -309,7 +303,7 @@ export default async function initial_data_seed({
     }
   }
 
-  // 8. Shipping Profile & Fulfillment Set
+  // 8. Shipping Profile & Fulfillment Set & Shipping Options (Fully Idempotent)
   let shippingProfile: { id: string }
   const { data: shippingProfileResult } = await query.graph({
     entity: "shipping_profile",
@@ -341,9 +335,9 @@ export default async function initial_data_seed({
 
   if (existingBdFulfillment && existingBdFulfillment.service_zones?.length > 0) {
     serviceZoneId = existingBdFulfillment.service_zones[0].id
-    logger.info("Using existing Bangladesh fulfillment service zone.")
+    logger.info(`Using existing Bangladesh fulfillment service zone: ${serviceZoneId}`)
   } else {
-    logger.info("Creating Bangladesh Fulfillment Set and Service Zones...")
+    logger.info("Creating Bangladesh Fulfillment Set and Service Zone...")
     const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
       name: "Bangladesh Delivery Network",
       type: "shipping",
@@ -373,130 +367,157 @@ export default async function initial_data_seed({
     } catch (e) {
       logger.debug(`Stock location fulfillment set link already exists: ${e}`)
     }
-
-    logger.info("Creating standard shipping options for Bangladesh in BDT...")
-    await createShippingOptionsWorkflow(container).run({
-      input: [
-        {
-          name: "Standard Delivery (Inside Dhaka)",
-          price_type: "flat",
-          provider_id: "manual_manual",
-          service_zone_id: serviceZoneId,
-          shipping_profile_id: shippingProfile.id,
-          type: {
-            label: "Inside Dhaka",
-            description: "Delivered within 24-48 hours in Dhaka Metro.",
-            code: "inside_dhaka",
-          },
-          prices: [
-            {
-              currency_code: "bdt",
-              amount: 60,
-            },
-            {
-              currency_code: "usd",
-              amount: 1,
-            },
-            {
-              region_id: region.id,
-              amount: 60,
-            },
-          ],
-          rules: [
-            {
-              attribute: "enabled_in_store",
-              value: "true",
-              operator: "eq",
-            },
-            {
-              attribute: "is_return",
-              value: "false",
-              operator: "eq",
-            },
-          ],
-        },
-        {
-          name: "Dhaka Suburban Delivery",
-          price_type: "flat",
-          provider_id: "manual_manual",
-          service_zone_id: serviceZoneId,
-          shipping_profile_id: shippingProfile.id,
-          type: {
-            label: "Dhaka Suburban",
-            description: "Delivered in 2-3 business days (Gazipur, Savar, Narayanganj, Keraniganj).",
-            code: "dhaka_suburban",
-          },
-          prices: [
-            {
-              currency_code: "bdt",
-              amount: 100,
-            },
-            {
-              currency_code: "usd",
-              amount: 1.5,
-            },
-            {
-              region_id: region.id,
-              amount: 100,
-            },
-          ],
-          rules: [
-            {
-              attribute: "enabled_in_store",
-              value: "true",
-              operator: "eq",
-            },
-            {
-              attribute: "is_return",
-              value: "false",
-              operator: "eq",
-            },
-          ],
-        },
-        {
-          name: "Standard Delivery (Outside Dhaka)",
-          price_type: "flat",
-          provider_id: "manual_manual",
-          service_zone_id: serviceZoneId,
-          shipping_profile_id: shippingProfile.id,
-          type: {
-            label: "Outside Dhaka",
-            description: "Nationwide courier delivery across all 60 Bangladesh districts in 3-5 business days.",
-            code: "outside_dhaka",
-          },
-          prices: [
-            {
-              currency_code: "bdt",
-              amount: 130,
-            },
-            {
-              currency_code: "usd",
-              amount: 2,
-            },
-            {
-              region_id: region.id,
-              amount: 130,
-            },
-          ],
-          rules: [
-            {
-              attribute: "enabled_in_store",
-              value: "true",
-              operator: "eq",
-            },
-            {
-              attribute: "is_return",
-              value: "false",
-              operator: "eq",
-            },
-          ],
-        },
-      ],
-    })
   }
 
-  // 9. Categories: Drop Shoulder T-Shirts, Regular T-Shirts, Shirts, Trousers & Pants, Accessories
-  logger.info("Setting up AFK THEORY product categories...")
+  // Authoritative Shipping Options Check
+  // Guarantee all 3 Bangladesh delivery zones exist in Medusa
+  const { data: existingShippingOptions } = await query.graph({
+    entity: "shipping_option",
+    fields: ["id", "name", "service_zone_id"],
+  })
+
+  const existingOptionNames = new Set(
+    existingShippingOptions.map((o: { name: string }) => o.name)
+  )
+
+  const shippingOptionsToCreate = [
+    {
+      name: "Standard Delivery (Inside Dhaka)",
+      price_type: "flat" as const,
+      provider_id: "manual_manual",
+      service_zone_id: serviceZoneId,
+      shipping_profile_id: shippingProfile.id,
+      data: {
+        zone: "inside_dhaka",
+      },
+      type: {
+        label: "Inside Dhaka",
+        description: "Delivered within 24-48 hours in Dhaka Metro.",
+        code: "inside_dhaka",
+      },
+      prices: [
+        {
+          currency_code: "bdt",
+          amount: 60.0,
+        },
+        {
+          currency_code: "usd",
+          amount: 1.0,
+        },
+        {
+          region_id: region.id,
+          amount: 60.0,
+        },
+      ],
+      rules: [
+        {
+          attribute: "enabled_in_store",
+          value: "true",
+          operator: "eq" as const,
+        },
+        {
+          attribute: "is_return",
+          value: "false",
+          operator: "eq" as const,
+        },
+      ],
+    },
+    {
+      name: "Dhaka Suburban Delivery",
+      price_type: "flat" as const,
+      provider_id: "manual_manual",
+      service_zone_id: serviceZoneId,
+      shipping_profile_id: shippingProfile.id,
+      data: {
+        zone: "dhaka_suburban",
+      },
+      type: {
+        label: "Dhaka Suburban",
+        description: "Delivered in 2-3 business days (Gazipur, Savar, Narayanganj, Keraniganj).",
+        code: "dhaka_suburban",
+      },
+      prices: [
+        {
+          currency_code: "bdt",
+          amount: 100.0,
+        },
+        {
+          currency_code: "usd",
+          amount: 1.5,
+        },
+        {
+          region_id: region.id,
+          amount: 100.0,
+        },
+      ],
+      rules: [
+        {
+          attribute: "enabled_in_store",
+          value: "true",
+          operator: "eq" as const,
+        },
+        {
+          attribute: "is_return",
+          value: "false",
+          operator: "eq" as const,
+        },
+      ],
+    },
+    {
+      name: "Standard Delivery (Outside Dhaka)",
+      price_type: "flat" as const,
+      provider_id: "manual_manual",
+      service_zone_id: serviceZoneId,
+      shipping_profile_id: shippingProfile.id,
+      data: {
+        zone: "outside_dhaka",
+      },
+      type: {
+        label: "Outside Dhaka",
+        description: "Nationwide courier delivery across all 60 Bangladesh districts in 3-5 business days.",
+        code: "outside_dhaka",
+      },
+      prices: [
+        {
+          currency_code: "bdt",
+          amount: 130.0,
+        },
+        {
+          currency_code: "usd",
+          amount: 2.0,
+        },
+        {
+          region_id: region.id,
+          amount: 130.0,
+        },
+      ],
+      rules: [
+        {
+          attribute: "enabled_in_store",
+          value: "true",
+          operator: "eq" as const,
+        },
+        {
+          attribute: "is_return",
+          value: "false",
+          operator: "eq" as const,
+        },
+      ],
+    },
+  ].filter((opt) => !existingOptionNames.has(opt.name))
+
+  if (shippingOptionsToCreate.length > 0) {
+    logger.info(`Creating ${shippingOptionsToCreate.length} missing Bangladesh shipping option(s)...`)
+    await createShippingOptionsWorkflow(container).run({
+      input: shippingOptionsToCreate,
+    })
+    logger.info("Bangladesh shipping options created successfully.")
+  } else {
+    logger.info("All Bangladesh delivery options already exist.")
+  }
+
+  // 9. Categories: Drop Shoulder T-Shirts, Regular T-Shirts, Shirts, Trousers & Pants, Accessories (Idempotent)
+  logger.info("Ensuring AFK THEORY product categories...")
   const categoryNames = [
     "Drop Shoulder T-Shirts",
     "Regular T-Shirts",
@@ -532,8 +553,8 @@ export default async function initial_data_seed({
     allCategories.map((c: { name: string; id: string }) => [c.name, c.id])
   )
 
-  // 10. Collections: Drop 01: Offline by Choice, Essentials, Archive
-  logger.info("Setting up AFK THEORY product collections...")
+  // 10. Collections: Drop 01: Offline by Choice, Essentials, Archive (Idempotent)
+  logger.info("Ensuring AFK THEORY product collections...")
   const collectionData = [
     { title: "Drop 01: Offline by Choice", handle: "drop-01-offline-by-choice" },
     { title: "Essentials", handle: "essentials" },
@@ -564,48 +585,8 @@ export default async function initial_data_seed({
     allCollections.map((c: { handle: string; id: string }) => [c.handle, c.id])
   )
 
-  // 11. Clean Up Old Legacy Products If Existing
-  const { data: existingProducts } = await query.graph({
-    entity: "product",
-    fields: ["id", "handle"],
-  })
-
-  const legacyHandlesToDelete = [
-    "heavyweight-t-shirt",
-    "oxford-button-down-shirt",
-    "regent-knit-polo",
-    "mayfair-tailored-chinos",
-    "chelsea-relaxed-linen-shirt",
-    "soho-cotton-twill-cap",
-    "t-shirt",
-    "sweatshirt",
-    "sweatpants",
-    "shorts",
-  ]
-  const legacyProductIds = existingProducts
-    .filter((p: { handle: string }) => legacyHandlesToDelete.includes(p.handle))
-    .map((p: { id: string }) => p.id)
-
-  if (legacyProductIds.length > 0) {
-    logger.info(`Purging legacy product catalog items: ${legacyProductIds.length} items...`)
-    try {
-      await deleteProductsWorkflow(container).run({
-        input: { ids: legacyProductIds },
-      })
-    } catch (e) {
-      logger.debug(`Note on deleting legacy products: ${e}`)
-    }
-  }
-
-  // 12. Check if AFK THEORY sample Drop Shoulder product already exists
-  const { data: currentProducts } = await query.graph({
-    entity: "product",
-    fields: ["id", "handle"],
-  })
-  const currentHandles = new Set(currentProducts.map((p: { handle: string }) => p.handle))
-
-  // 13. Product Tags Setup
-  logger.info("Setting up AFK THEORY product tags...")
+  // 11. Product Tags Setup (Idempotent)
+  logger.info("Ensuring AFK THEORY product tags...")
   const tagValues = [
     "drop-shoulder",
     "oversized",
@@ -641,8 +622,241 @@ export default async function initial_data_seed({
     allTags.map((t: { value: string; id: string }) => [t.value, t.id])
   )
 
-  // 14. Stock Allocation Map (SKU -> Units)
-  // Configured with genuine inventory per variant, with XXL/Chartreuse set to 0 to verify sold-out UI
+  // 12. Check existing products - STRICTLY PRESERVE EXISTING DATA, NO AUTOMATIC DELETION
+  const { data: currentProducts } = await query.graph({
+    entity: "product",
+    fields: ["id", "handle"],
+  })
+  const currentHandles = new Set(currentProducts.map((p: { handle: string }) => p.handle))
+
+  // 13. Create Single Configurable Sample Drop Shoulder Product (DRAFT STATUS ONLY)
+  // Dev sample inventory & draft fixture is restricted to explicit fixture opt-in.
+  if (seedDevFixtures && !currentHandles.has("drop-shoulder-t-shirt")) {
+    logger.info("Creating single configurable AFK THEORY Drop Shoulder sample fixture in DRAFT status...")
+
+    // Price in major units (1450.0 BDT / 13.0 USD)
+    const basePriceBdt = 1450.0
+    const basePriceUsd = 13.0
+
+    await createProductsWorkflow(container).run({
+      input: {
+        products: [
+          {
+            title: "AFK THEORY Drop 01 Oversized Drop Shoulder T-Shirt",
+            handle: "drop-shoulder-t-shirt",
+            subtitle: "Sample Streetwear Drop Shoulder Fixture (Draft Spec)",
+            description:
+              "The foundational AFK THEORY silhouette. Engineered with fallen shoulder seams, wide chest ease, robust rib-knit collar retention, and generous boxy streetwear drape. Created as a configurable development fixture awaiting final production specifications.",
+            material: "100% Combed Heavyweight Cotton (Development Fixture)",
+            status: ProductStatus.DRAFT, // MUST REMAIN DRAFT UNTIL USER SUPPLIES FINAL SPECS
+            shipping_profile_id: shippingProfile.id,
+            collection_id:
+              colMap["drop-01-offline-by-choice"] || colMap["essentials"],
+            category_ids: [
+              catMap["Drop Shoulder T-Shirts"],
+              catMap["Regular T-Shirts"],
+            ].filter(Boolean),
+            tag_ids: [
+              tagMap["drop-shoulder"],
+              tagMap["oversized"],
+              tagMap["streetwear"],
+              tagMap["heavyweight"],
+              tagMap["drop-01"],
+            ].filter(Boolean),
+            metadata: {
+              care_instructions:
+                "Machine wash cold inside out with like colors. Do not bleach. Dry flat in shade. Cool iron on reverse. Do not iron over graphic print.",
+              fit: "Intentional Oversized Streetwear Fit with Dropped Shoulder Seams",
+              origin: "Engineered and crafted in Bangladesh",
+              sample_spec: "true",
+              placeholder_asset: "true",
+            },
+            images: [
+              {
+                url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1000&q=80",
+              },
+              {
+                url: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=1000&q=80",
+              },
+              {
+                url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1000&q=80",
+              },
+            ],
+            options: [
+              { title: "Size", values: ["S", "M", "L", "XL", "XXL"] },
+              {
+                title: "Color",
+                values: ["Graphite Black", "Bone White", "Electric Chartreuse"],
+              },
+            ],
+            variants: [
+              // Graphite Black
+              {
+                title: "S / Graphite Black",
+                sku: "AFK-DS-BLK-S",
+                manage_inventory: true,
+                options: { Size: "S", Color: "Graphite Black" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "M / Graphite Black",
+                sku: "AFK-DS-BLK-M",
+                manage_inventory: true,
+                options: { Size: "M", Color: "Graphite Black" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "L / Graphite Black",
+                sku: "AFK-DS-BLK-L",
+                manage_inventory: true,
+                options: { Size: "L", Color: "Graphite Black" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "XL / Graphite Black",
+                sku: "AFK-DS-BLK-XL",
+                manage_inventory: true,
+                options: { Size: "XL", Color: "Graphite Black" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "XXL / Graphite Black",
+                sku: "AFK-DS-BLK-XXL",
+                manage_inventory: true,
+                options: { Size: "XXL", Color: "Graphite Black" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+
+              // Bone White
+              {
+                title: "S / Bone White",
+                sku: "AFK-DS-WHT-S",
+                manage_inventory: true,
+                options: { Size: "S", Color: "Bone White" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "M / Bone White",
+                sku: "AFK-DS-WHT-M",
+                manage_inventory: true,
+                options: { Size: "M", Color: "Bone White" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "L / Bone White",
+                sku: "AFK-DS-WHT-L",
+                manage_inventory: true,
+                options: { Size: "L", Color: "Bone White" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "XL / Bone White",
+                sku: "AFK-DS-WHT-XL",
+                manage_inventory: true,
+                options: { Size: "XL", Color: "Bone White" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "XXL / Bone White",
+                sku: "AFK-DS-WHT-XXL",
+                manage_inventory: true,
+                options: { Size: "XXL", Color: "Bone White" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+
+              // Electric Chartreuse
+              {
+                title: "S / Electric Chartreuse",
+                sku: "AFK-DS-CHA-S",
+                manage_inventory: true,
+                options: { Size: "S", Color: "Electric Chartreuse" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "M / Electric Chartreuse",
+                sku: "AFK-DS-CHA-M",
+                manage_inventory: true,
+                options: { Size: "M", Color: "Electric Chartreuse" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "L / Electric Chartreuse",
+                sku: "AFK-DS-CHA-L",
+                manage_inventory: true,
+                options: { Size: "L", Color: "Electric Chartreuse" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "XL / Electric Chartreuse",
+                sku: "AFK-DS-CHA-XL",
+                manage_inventory: true,
+                options: { Size: "XL", Color: "Electric Chartreuse" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+              {
+                title: "XXL / Electric Chartreuse (Out of Stock Test Variant)",
+                sku: "AFK-DS-CHA-XXL",
+                manage_inventory: true,
+                options: { Size: "XXL", Color: "Electric Chartreuse" },
+                prices: [
+                  { amount: basePriceBdt, currency_code: "bdt" },
+                  { amount: basePriceUsd, currency_code: "usd" },
+                ],
+              },
+            ],
+            sales_channels: [{ id: defaultSalesChannel.id }],
+          },
+        ],
+      },
+    })
+    logger.info("AFK THEORY draft product fixture created successfully.")
+  } else {
+    logger.info("AFK THEORY drop shoulder product already present or dev fixtures disabled.")
+  }
+
+  // 14. Inventory Allocation per Variant (Only for unassigned inventory levels)
   const skuStockMap: Record<string, number> = {
     // Graphite Black variants
     "AFK-DS-BLK-S": 25,
@@ -666,237 +880,6 @@ export default async function initial_data_seed({
     "AFK-DS-CHA-XXL": 0, // Zero inventory: verifies sold-out behavior in storefront
   }
 
-  // 15. Create Single Configurable Sample Drop Shoulder Product (DRAFT STATUS)
-  // As required: "Create one configurable sample Drop Shoulder product as a draft or development-only fixture.
-  // The final product must remain unpublished until I provide real details."
-  logger.info("Configuring AFK THEORY inaugural Drop Shoulder sample fixture (status: draft)...")
-
-  const productsToCreate: any[] = []
-
-  if (!currentHandles.has("drop-shoulder-t-shirt")) {
-    productsToCreate.push({
-      title: "AFK THEORY Drop 01 Oversized Drop Shoulder T-Shirt",
-      handle: "drop-shoulder-t-shirt",
-      subtitle: "Sample Streetwear Drop Shoulder Fixture (Draft Spec)",
-      description:
-        "The foundational AFK THEORY silhouette. Engineered with fallen shoulder seams, wide chest ease, robust rib-knit collar retention, and generous boxy streetwear drape. Created as a configurable development fixture awaiting final production specifications.",
-      material: "100% Combed Heavyweight Cotton (Development Fixture)",
-      status: ProductStatus.DRAFT, // MUST REMAIN DRAFT UNTIL USER DETAILS PROVIDED
-      shipping_profile_id: shippingProfile.id,
-      collection_id:
-        colMap["drop-01-offline-by-choice"] || colMap["essentials"],
-      category_ids: [
-        catMap["Drop Shoulder T-Shirts"],
-        catMap["Regular T-Shirts"],
-      ].filter(Boolean),
-      tag_ids: [
-        tagMap["drop-shoulder"],
-        tagMap["oversized"],
-        tagMap["streetwear"],
-        tagMap["heavyweight"],
-        tagMap["drop-01"],
-      ].filter(Boolean),
-      metadata: {
-        care_instructions:
-          "Machine wash cold inside out with like colors. Do not bleach. Dry flat in shade. Cool iron on reverse. Do not iron over graphic print.",
-        fit: "Intentional Oversized Streetwear Fit with Dropped Shoulder Seams",
-        origin: "Engineered and crafted in Bangladesh",
-        sample_spec: "true",
-        placeholder_asset: "true",
-      },
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1000&q=80",
-        },
-        {
-          url: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=1000&q=80",
-        },
-        {
-          url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1000&q=80",
-        },
-      ],
-      options: [
-        { title: "Size", values: ["S", "M", "L", "XL", "XXL"] },
-        {
-          title: "Color",
-          values: ["Graphite Black", "Bone White", "Electric Chartreuse"],
-        },
-      ],
-      variants: [
-        // Graphite Black
-        {
-          title: "S / Graphite Black",
-          sku: "AFK-DS-BLK-S",
-          manage_inventory: true,
-          options: { Size: "S", Color: "Graphite Black" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "M / Graphite Black",
-          sku: "AFK-DS-BLK-M",
-          manage_inventory: true,
-          options: { Size: "M", Color: "Graphite Black" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "L / Graphite Black",
-          sku: "AFK-DS-BLK-L",
-          manage_inventory: true,
-          options: { Size: "L", Color: "Graphite Black" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "XL / Graphite Black",
-          sku: "AFK-DS-BLK-XL",
-          manage_inventory: true,
-          options: { Size: "XL", Color: "Graphite Black" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "XXL / Graphite Black",
-          sku: "AFK-DS-BLK-XXL",
-          manage_inventory: true,
-          options: { Size: "XXL", Color: "Graphite Black" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-
-        // Bone White
-        {
-          title: "S / Bone White",
-          sku: "AFK-DS-WHT-S",
-          manage_inventory: true,
-          options: { Size: "S", Color: "Bone White" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "M / Bone White",
-          sku: "AFK-DS-WHT-M",
-          manage_inventory: true,
-          options: { Size: "M", Color: "Bone White" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "L / Bone White",
-          sku: "AFK-DS-WHT-L",
-          manage_inventory: true,
-          options: { Size: "L", Color: "Bone White" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "XL / Bone White",
-          sku: "AFK-DS-WHT-XL",
-          manage_inventory: true,
-          options: { Size: "XL", Color: "Bone White" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "XXL / Bone White",
-          sku: "AFK-DS-WHT-XXL",
-          manage_inventory: true,
-          options: { Size: "XXL", Color: "Bone White" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-
-        // Electric Chartreuse
-        {
-          title: "S / Electric Chartreuse",
-          sku: "AFK-DS-CHA-S",
-          manage_inventory: true,
-          options: { Size: "S", Color: "Electric Chartreuse" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "M / Electric Chartreuse",
-          sku: "AFK-DS-CHA-M",
-          manage_inventory: true,
-          options: { Size: "M", Color: "Electric Chartreuse" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "L / Electric Chartreuse",
-          sku: "AFK-DS-CHA-L",
-          manage_inventory: true,
-          options: { Size: "L", Color: "Electric Chartreuse" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "XL / Electric Chartreuse",
-          sku: "AFK-DS-CHA-XL",
-          manage_inventory: true,
-          options: { Size: "XL", Color: "Electric Chartreuse" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-        {
-          title: "XXL / Electric Chartreuse (Out of Stock Test Variant)",
-          sku: "AFK-DS-CHA-XXL",
-          manage_inventory: true,
-          options: { Size: "XXL", Color: "Electric Chartreuse" },
-          prices: [
-            { amount: 1450, currency_code: "bdt" },
-            { amount: 13, currency_code: "usd" },
-          ],
-        },
-      ],
-      sales_channels: [{ id: defaultSalesChannel.id }],
-    })
-  }
-
-  if (productsToCreate.length > 0) {
-    logger.info(`Creating ${productsToCreate.length} AFK THEORY sample draft product...`)
-    await createProductsWorkflow(container).run({
-      input: {
-        products: productsToCreate,
-      },
-    })
-    logger.info("AFK THEORY draft product fixture created successfully.")
-  } else {
-    logger.info("AFK THEORY drop shoulder product already present in catalog.")
-  }
-
-  // 16. Inventory Allocation per Variant
-  logger.info("Assigning variant inventory levels to Dhaka Central Warehouse...")
   const { data: inventoryItems } = await query.graph({
     entity: "inventory_item",
     fields: ["id", "sku", "location_levels.id", "location_levels.location_id"],
@@ -918,7 +901,7 @@ export default async function initial_data_seed({
   }
 
   if (inventoryLevelsToCreate.length > 0) {
-    logger.info(`Creating ${inventoryLevelsToCreate.length} inventory location levels...`)
+    logger.info(`Assigning ${inventoryLevelsToCreate.length} variant inventory levels to Dhaka Central Warehouse...`)
     await createInventoryLevelsWorkflow(container).run({
       input: {
         inventory_levels: inventoryLevelsToCreate,
@@ -930,7 +913,7 @@ export default async function initial_data_seed({
   }
 
   logger.info("==================================================")
-  logger.info("AFK THEORY store seed completed successfully!")
+  logger.info("AFK THEORY store seed completed safely and idempotently!")
   logger.info(`Store Name: AFK THEORY`)
   logger.info(`Sales Channel: ${defaultSalesChannel.name} (${defaultSalesChannel.id})`)
   logger.info(`Publishable Key: ${publishableApiKey.token || publishableApiKey.id}`)

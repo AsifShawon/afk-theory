@@ -202,7 +202,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
             Cash on Delivery
           </span>
           <span className="px-2 py-0.5 text-[10px] font-heading font-bold uppercase bg-brand-accent text-brand-primary">
-            Verified COD
+            Pay on Delivery
           </span>
         </div>
         <p className="text-[11px] text-brand-muted leading-relaxed">

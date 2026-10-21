@@ -66,6 +66,15 @@ const SHIPPING_SECTIONS = [
       </p>
     ),
   },
+  {
+    title: "5. Operational Verification Notice",
+    content: (
+      <div className="p-3 bg-brand-secondary/60 border border-brand-accent/40 text-xs text-brand-primary/80">
+        <span className="font-semibold text-brand-primary block mb-1">Notice</span>
+        <p>[REVIEW REQUIRED: Business-owner verification needed for warehouse dispatch location, carrier partner SLAs, and free shipping thresholds.]</p>
+      </div>
+    ),
+  },
 ]
 
 export default async function ShippingPolicyPage(props: Props) {

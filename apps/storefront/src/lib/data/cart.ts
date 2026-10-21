@@ -17,6 +17,8 @@ import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
 import { listCartShippingMethods } from "./fulfillment"
 import {
+  findBangladeshDistrict,
+  determineBangladeshShippingZone,
   isValidBangladeshPhone,
   normalizeBangladeshPhone,
   validateShippingOptionForAddress,
@@ -240,11 +242,21 @@ export async function setShippingMethod({
     const shippingOptions = await listCartShippingMethods(cartId).catch(() => [])
     const chosenOption = shippingOptions?.find((o) => o.id === shippingMethodId)
     if (chosenOption) {
+      const addr = currentCart.shipping_address
+      const meta = (addr.metadata || {}) as Record<string, unknown>
+      const district =
+        (meta.district as string) ||
+        (meta.district_name as string) ||
+        addr.city ||
+        addr.province
+      const division = (meta.division as string) || addr.province
+
       const check = validateShippingOptionForAddress(
         chosenOption.name,
-        currentCart.shipping_address.province || currentCart.shipping_address.city,
-        currentCart.shipping_address.city,
-        currentCart.shipping_address.address_1
+        district,
+        addr.city,
+        addr.address_1,
+        division
       )
       if (!check.isValid && check.message) {
         throw new Error(check.message)
@@ -376,17 +388,43 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     }
     const cleanPhone = rawPhone ? normalizeBangladeshPhone(rawPhone) : ""
 
+    const rawDistrict =
+      (formData.get("shipping_address.district") as string) ||
+      (formData.get("shipping_address.city") as string) ||
+      ""
+    const matchedDistrict = findBangladeshDistrict(rawDistrict)
+    const districtName = matchedDistrict?.name || rawDistrict
+    const districtId = matchedDistrict?.id || ""
+    const divisionName =
+      matchedDistrict?.division ||
+      (formData.get("shipping_address.province") as string) ||
+      districtName
+    const cityName = (formData.get("shipping_address.city") as string) || districtName
+    const addressLine = (formData.get("shipping_address.address_1") as string) || ""
+    const deliveryZone = determineBangladeshShippingZone(
+      districtName,
+      cityName,
+      addressLine,
+      divisionName
+    )
+
     const shippingAddress: Record<string, unknown> = {
       first_name: formData.get("shipping_address.first_name"),
       last_name: formData.get("shipping_address.last_name"),
-      address_1: formData.get("shipping_address.address_1"),
+      address_1: addressLine,
       address_2: "",
       company: formData.get("shipping_address.company"),
       postal_code: formData.get("shipping_address.postal_code"),
-      city: formData.get("shipping_address.city"),
-      country_code: formData.get("shipping_address.country_code"),
-      province: formData.get("shipping_address.province"),
+      city: cityName,
+      country_code: formData.get("shipping_address.country_code") || "bd",
+      province: divisionName,
       phone: cleanPhone,
+      metadata: {
+        district_id: districtId,
+        district: districtName,
+        division: divisionName,
+        delivery_zone: deliveryZone,
+      },
     }
 
     const data: Record<string, unknown> = {

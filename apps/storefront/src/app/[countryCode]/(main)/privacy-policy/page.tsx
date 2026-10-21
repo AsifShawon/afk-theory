@@ -52,6 +52,15 @@ const PRIVACY_SECTIONS = [
       </p>
     ),
   },
+  {
+    title: "5. Legal Verification Notice",
+    content: (
+      <div className="p-3 bg-brand-secondary/60 border border-brand-accent/40 text-xs text-brand-primary/80">
+        <span className="font-semibold text-brand-primary block mb-1">Notice</span>
+        <p>[REVIEW REQUIRED: Legal counsel review recommended for compliance with Bangladesh Cyber Security Act and data retention terms.]</p>
+      </div>
+    ),
+  },
 ]
 
 export default async function PrivacyPolicyPage(props: Props) {

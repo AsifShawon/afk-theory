@@ -57,7 +57,7 @@ export default function BrandStory() {
               <div className="relative aspect-[3/4] bg-white border border-brand-border overflow-hidden shadow-lg">
                 <Image
                   src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80"
-                  alt="Oxford Weave Details"
+                  alt="High-Density Combed Cotton Texture"
                   fill
                   sizes="(max-width: 768px) 50vw, 300px"
                   className="object-cover"
@@ -81,7 +81,7 @@ export default function BrandStory() {
               <div className="relative aspect-[3/4] bg-white border border-brand-border overflow-hidden shadow-lg">
                 <Image
                   src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=600&q=80"
-                  alt="Regent Knit Pique Polo"
+                  alt="Engineered Drop Shoulder Silhouette"
                   fill
                   sizes="(max-width: 768px) 50vw, 300px"
                   className="object-cover"

@@ -8,6 +8,14 @@ import { getBaseURL } from "@lib/util/env"
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseURL().replace(/\/$/, "")
 
+  // Do not output sitemap entries if indexing is disabled
+  if (
+    process.env.NEXT_PUBLIC_INDEXING_DISABLED === "true" ||
+    process.env.VERCEL_ENV === "preview"
+  ) {
+    return []
+  }
+
   try {
     const regions = await listRegions().catch(() => [])
     const countryCodes = (regions || [])
