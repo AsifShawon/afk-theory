@@ -2,7 +2,7 @@ import React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { StoreRoutes } from "@dtc/commerce-contracts"
-import { ArrowRightIcon } from "../icons"
+import { ArrowRightIcon, CheckIcon } from "../icons"
 import { LinkComponent } from "../../types"
 
 export interface CraftsmanshipSectionProps {
@@ -14,34 +14,57 @@ export function CraftsmanshipSection({
   routes,
   linkComponent: LinkComp = Link,
 }: CraftsmanshipSectionProps) {
+  const technicalSpecs = [
+    {
+      metric: "240–280 GSM",
+      label: "Heavyweight Dense Cotton",
+      desc: "Substantial compact-spun cotton maintaining structured silhouette without cling.",
+    },
+    {
+      metric: "Pre-Shrunk",
+      label: "Bio-Washed Integrity",
+      desc: "Pre-treated to retain dimensional stability and zero shrinkage after home wash.",
+    },
+    {
+      metric: "Boxy Drape",
+      label: "Dropped Shoulder Cut",
+      desc: "Fallen seam geometry engineered for broad chest drape and relaxed arm mobility.",
+    },
+    {
+      metric: "Silicone & HD",
+      label: "Tactile Brand Badges",
+      desc: "High-density screen prints and dimensional matte silicone pause marks.",
+    },
+  ]
+
   return (
     <section className="py-14 sm:py-20 lg:py-24 bg-brand-surface border-b border-brand-border/80">
       <div className="editorial-container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* Visual Column */}
           <div className="lg:col-span-6 relative">
-            <div className="relative aspect-[4/3] sm:aspect-[16/11] w-full bg-brand-secondary rounded-2xl overflow-hidden border border-brand-border/80 shadow-subtle group">
+            <div className="relative aspect-[4/3] sm:aspect-[16/11] w-full bg-brand-primary overflow-hidden border border-brand-border/80 shadow-sm group">
               <Image
-                src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1200&q=80"
-                alt="AFK THEORY Drop Shoulder Garment Architecture"
+                src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=85"
+                alt="AFK THEORY Drop Shoulder Textile & Fit Architecture"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover object-center group-hover:scale-102 transition-transform duration-700"
+                className="object-cover object-center group-hover:scale-102 transition-transform duration-700 opacity-90"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
 
               {/* Floating Metric Callout */}
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-[#292828]/95 backdrop-blur-md p-4 border border-[#3D3B3B] shadow-md flex items-center justify-between text-white">
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-brand-primary/95 backdrop-blur-md p-4 sm:p-5 border border-white/10 flex items-center justify-between text-white">
                 <div>
-                  <span className="block font-heading font-extrabold text-xs text-white uppercase tracking-wider">
-                    Oversized Drop Shoulder
+                  <span className="block font-heading font-extrabold text-xs text-brand-bone uppercase tracking-widest">
+                    DROP 01 ARCHITECTURE
                   </span>
-                  <span className="text-[11px] text-brand-sand">
-                    Fallen shoulder seams, structured boxy drape
+                  <span className="text-[11px] text-brand-muted">
+                    240–280 GSM • Bio-Washed • Dropped Shoulder Silhouette
                   </span>
                 </div>
-                <span className="text-xs font-heading font-extrabold text-brand-primary bg-brand-accent px-2.5 py-1">
-                  DROP 01
+                <span className="text-xs font-heading font-extrabold text-brand-primary bg-brand-accent px-3 py-1.5 uppercase tracking-wider">
+                  OFFLINE BY CHOICE
                 </span>
               </div>
             </div>
@@ -51,51 +74,54 @@ export function CraftsmanshipSection({
           <div className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2">
               <span className="px-3 py-1 bg-brand-primary text-brand-accent text-[10px] sm:text-[11px] font-heading font-extrabold uppercase tracking-widest">
-                FIT &amp; QUALITY ARCHITECTURE
+                GARMENT ENGINEERING
               </span>
             </div>
 
             <h2 className="font-heading font-black text-2xl sm:text-4xl text-brand-primary uppercase leading-tight tracking-tight">
               THE ANATOMY OF <br />
-              <span className="text-brand-primary/80">THE DROP SHOULDER.</span>
+              <span className="text-brand-muted">THE DROP SHOULDER.</span>
             </h2>
 
             <p className="text-xs sm:text-sm text-brand-muted leading-relaxed font-sans">
-              Streetwear silhouettes live or die by their proportion. AFK THEORY drop shoulder tees are engineered with dropped seam geometry that creates a clean, broadened chest profile without looking sloppy.
+              Streetwear silhouettes live or die by proportion. AFK THEORY drop shoulder tees are engineered with fallen seam geometry that creates a broadened chest profile with structured drape—never sloppy, never clingy.
             </p>
 
-            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed font-sans">
-              Cut from substantial compact cotton yarns, each garment maintains its structured shape whether stationary or in motion. Designed for relaxed movement, breathable comfort in Bangladesh climate, and enduring wash retention.
-            </p>
-
-            <div className="grid grid-cols-3 gap-4 pt-2 border-t border-brand-border/80">
-              <div>
-                <span className="font-heading font-bold text-sm text-brand-primary uppercase block">
-                  Fallen Seam
-                </span>
-                <span className="text-[11px] text-brand-muted font-sans">Relaxed Shoulders</span>
-              </div>
-              <div>
-                <span className="font-heading font-bold text-sm text-brand-primary uppercase block">
-                  Boxy Cut
-                </span>
-                <span className="text-[11px] text-brand-muted font-sans">Zero Body Cling</span>
-              </div>
-              <div>
-                <span className="font-heading font-bold text-sm text-brand-primary uppercase block">
-                  Dense Rib
-                </span>
-                <span className="text-[11px] text-brand-muted font-sans">Collar Retention</span>
-              </div>
+            {/* 4 Technical Pillars */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-brand-border/80">
+              {technicalSpecs.map((spec) => (
+                <div key={spec.metric} className="p-3.5 bg-brand-secondary/60 border border-brand-border/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-accent flex-shrink-0" />
+                    <span className="font-heading font-extrabold text-xs text-brand-primary uppercase tracking-wider">
+                      {spec.metric}
+                    </span>
+                  </div>
+                  <span className="block text-[11px] font-heading font-bold text-brand-primary/80 uppercase pt-1">
+                    {spec.label}
+                  </span>
+                  <p className="text-[11px] text-brand-muted leading-relaxed font-sans pt-0.5">
+                    {spec.desc}
+                  </p>
+                </div>
+              ))}
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center gap-4">
               <LinkComp
                 href={routes.about()}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-primary text-white hover:bg-black text-xs font-heading font-semibold uppercase tracking-wider transition-all duration-200 shadow-subtle group"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-brand-primary text-white hover:bg-brand-primary/90 text-xs font-heading font-bold uppercase tracking-wider transition-all duration-200 shadow-sm group"
               >
                 <span>Read Our Craft Archive</span>
                 <ArrowRightIcon className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </LinkComp>
+
+              <LinkComp
+                href={routes.collection("drop-01-offline-by-choice")}
+                className="inline-flex items-center gap-2 px-6 py-3.5 border border-brand-primary/30 text-brand-primary hover:border-brand-primary hover:bg-white text-xs font-heading font-bold uppercase tracking-wider transition-colors"
+              >
+                <span>Shop Drop 01</span>
+                <span aria-hidden="true">→</span>
               </LinkComp>
             </div>
           </div>

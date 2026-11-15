@@ -56,8 +56,10 @@ export const listProducts = async ({
     ...(await getAuthHeaders()),
   }
 
+  const isDev = process.env.NODE_ENV === "development"
   const next = {
     ...(await getCacheOptions("products")),
+    revalidate: isDev ? 0 : 30,
   }
 
   return sdk.client
@@ -75,7 +77,7 @@ export const listProducts = async ({
         },
         headers,
         next,
-        cache: "force-cache",
+        cache: isDev ? "no-store" : "force-cache",
       }
     )
     .then(({ products, count }) => {

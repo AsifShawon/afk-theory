@@ -134,6 +134,22 @@ export function ChevronDownIcon({ size = 16, className = "w-4 h-4", ...props }: 
   )
 }
 
+export function ChevronLeftIcon({ size = 16, className = "w-4 h-4", ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+      <path d="M15 19l-7-7 7-7" />
+    </svg>
+  )
+}
+
+export function ChevronRightIcon({ size = 16, className = "w-4 h-4", ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+      <path d="M9 5l7 7-7 7" />
+    </svg>
+  )
+}
+
 export function ArrowPathIcon({ size = 16, className = "w-4 h-4", ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>

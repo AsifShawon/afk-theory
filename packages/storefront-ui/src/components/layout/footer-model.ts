@@ -4,17 +4,18 @@ export interface FooterLinkItem {
 }
 
 export const DEFAULT_CATEGORIES: FooterLinkItem[] = [
-  { label: "Drop Shoulder T-Shirts", href: "/category?handle=drop-shoulder-tees" },
-  { label: "Oversized Tees", href: "/shop" },
-  { label: "Streetwear Essentials", href: "/collection?handle=essentials" },
-  { label: "Future Drops Archive", href: "/shop" },
+  { label: "Drop Shoulder T-Shirts", href: "/categories/drop-shoulder-t-shirts" },
+  { label: "Regular T-Shirts", href: "/categories/regular-t-shirts" },
+  { label: "Streetwear Shirts", href: "/categories/shirts" },
+  { label: "Trousers & Pants", href: "/categories/trousers-&-pants" },
+  { label: "Accessories", href: "/categories/accessories" },
 ]
 
 export const DEFAULT_COLLECTIONS: FooterLinkItem[] = [
-  { label: "Drop 01: Offline by Choice", href: "/collection?handle=drop-01" },
-  { label: "New Arrivals", href: "/collection?handle=new-arrivals" },
-  { label: "Essentials", href: "/collection?handle=essentials" },
-  { label: "All Streetwear", href: "/shop" },
+  { label: "Drop 01: Offline by Choice", href: "/collections/drop-01-offline-by-choice" },
+  { label: "Essentials", href: "/collections/essentials" },
+  { label: "Archive Releases", href: "/collections/archive" },
+  { label: "All Streetwear", href: "/store" },
 ]
 
 export const DEFAULT_CUSTOMER_CARE: FooterLinkItem[] = [

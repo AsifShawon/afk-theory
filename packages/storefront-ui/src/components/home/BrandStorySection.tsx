@@ -38,7 +38,7 @@ export function BrandStorySection({
 
             <h2 className="font-heading font-black text-3xl sm:text-4xl text-brand-primary uppercase tracking-tight leading-tight">
               PAUSE THE GAME. <br />
-              <span className="text-brand-accent">KEEP YOUR STYLE.</span>
+              <span className="text-brand-muted">KEEP YOUR STYLE.</span>
             </h2>
 
             <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">

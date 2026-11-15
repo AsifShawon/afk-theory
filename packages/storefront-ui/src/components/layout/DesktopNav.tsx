@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import clsx from "clsx"
-import { MegaNavItem } from "./navigation-model"
+import { MegaNavItem, isNavItemActive } from "./navigation-model"
 import { MegaMenu } from "./MegaMenu"
 import { LinkComponent } from "../../types"
 
@@ -20,6 +20,8 @@ export interface DesktopNavProps {
   activeMenuId?: string | null
   onMenuChange?: (id: string | null) => void
   backdropTop?: number
+  currentPath?: string
+  panelClassName?: string
 }
 
 export function DesktopNav({
@@ -29,6 +31,8 @@ export function DesktopNav({
   activeMenuId: controlledActiveId,
   onMenuChange,
   backdropTop,
+  currentPath,
+  panelClassName,
 }: DesktopNavProps) {
   const [internalActiveId, setInternalActiveId] = useState<string | null>(null)
   const isControlled = controlledActiveId !== undefined
@@ -46,7 +50,7 @@ export function DesktopNav({
 
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const triggerRefs = useRef<Record<string, HTMLAnchorElement | HTMLButtonElement | null>>({})
+  const triggerRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
 
   // Clear timers on unmount
   useEffect(() => {
@@ -57,6 +61,7 @@ export function DesktopNav({
   }, [])
 
   const handleTriggerMouseEnter = (id: string) => {
+    // Cancel any pending close
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current)
       closeTimerRef.current = null
@@ -64,22 +69,25 @@ export function DesktopNav({
 
     if (activeId === id) return
 
-    // If another menu is already open, switch immediately without delay
+    // If another menu is already open, switch quickly with short 60ms delay
     if (activeId !== null) {
       if (openTimerRef.current) {
         clearTimeout(openTimerRef.current)
         openTimerRef.current = null
       }
-      setActiveId(id)
+      openTimerRef.current = setTimeout(() => {
+        setActiveId(id)
+        openTimerRef.current = null
+      }, 60)
       return
     }
 
-    // Snappy 120ms hover-intent delay (prevents accidental trigger on swift mouse sweeps)
+    // Idle navigation: deliberate 300ms hover-intent delay
     if (openTimerRef.current) clearTimeout(openTimerRef.current)
     openTimerRef.current = setTimeout(() => {
       setActiveId(id)
       openTimerRef.current = null
-    }, 120)
+    }, 300)
   }
 
   const handleTriggerMouseLeave = () => {
@@ -88,12 +96,12 @@ export function DesktopNav({
       openTimerRef.current = null
     }
 
-    // 280ms close grace period for diagonal pointer movement into the panel
+    // 320ms close grace period for diagonal pointer movement into the panel
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
     closeTimerRef.current = setTimeout(() => {
       setActiveId(null)
       closeTimerRef.current = null
-    }, 280)
+    }, 320)
   }
 
   const handlePanelMouseEnter = () => {
@@ -108,43 +116,53 @@ export function DesktopNav({
     closeTimerRef.current = setTimeout(() => {
       setActiveId(null)
       closeTimerRef.current = null
-    }, 280)
+    }, 320)
   }
 
-  const handleTriggerClick = (e: React.MouseEvent, item: MegaNavItem) => {
-    // If it has mega content, toggle it on click
-    if (item.featuredLinks?.length || item.categoryGroups?.length) {
-      if (activeId === item.id) {
-        setActiveId(null)
-      } else {
-        setActiveId(item.id)
-      }
+  const handleTriggerKeyDown = (e: React.KeyboardEvent, item: MegaNavItem, idx: number, allItems: MegaNavItem[]) => {
+    if (e.key === "Enter") {
+      // Normal link navigation happens naturally
+      return
     }
-  }
 
-  const handleTriggerKeyDown = (e: React.KeyboardEvent, id: string) => {
-    if (e.key === "Enter" || e.key === " ") {
+    if (e.key === " " || e.key === "ArrowDown") {
       e.preventDefault()
-      if (activeId === id) {
-        setActiveId(null)
-      } else {
-        setActiveId(id)
-      }
-    } else if (e.key === "Escape") {
-      if (activeId === id) {
-        e.preventDefault()
-        setActiveId(null)
-      }
-    } else if (e.key === "ArrowDown") {
-      if (activeId === id) {
-        e.preventDefault()
-        // Focus first link in active panel
-        const panel = document.getElementById(`mega-menu-panel-${id}`)
+      if (activeId === item.id) {
+        // Move focus into the first link in active panel
+        const panel = document.getElementById(`mega-menu-panel-${item.id}`)
         const firstLink = panel?.querySelector<HTMLAnchorElement>("a")
         firstLink?.focus()
       } else {
+        setActiveId(item.id)
+        // Defer focus into panel
+        setTimeout(() => {
+          const panel = document.getElementById(`mega-menu-panel-${item.id}`)
+          const firstLink = panel?.querySelector<HTMLAnchorElement>("a")
+          firstLink?.focus()
+        }, 50)
+      }
+    } else if (e.key === "Escape") {
+      if (activeId === item.id) {
         e.preventDefault()
-        setActiveId(id)
+        setActiveId(null)
+      }
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault()
+      const nextItem = allItems[(idx + 1) % allItems.length]
+      if (nextItem) {
+        triggerRefs.current[nextItem.id]?.focus()
+        if (activeId !== null) {
+          setActiveId(nextItem.id)
+        }
+      }
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault()
+      const prevItem = allItems[(idx - 1 + allItems.length) % allItems.length]
+      if (prevItem) {
+        triggerRefs.current[prevItem.id]?.focus()
+        if (activeId !== null) {
+          setActiveId(prevItem.id)
+        }
       }
     }
   }
@@ -162,18 +180,19 @@ export function DesktopNav({
     const activeItem = items.find((i) => i.id === activeId)
 
     return (
-      <>
+      <div className="relative w-full flex items-center justify-center">
         <nav
           aria-label="Main category navigation"
-          className="hidden lg:flex items-center h-full gap-x-6 xl:gap-x-8 text-xs font-heading font-semibold uppercase tracking-wider"
+          className="flex items-center justify-center gap-x-1 sm:gap-x-2 text-xs font-heading uppercase tracking-wider"
         >
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const isMenuOpen = activeId === item.id
+            const isActive = isNavItemActive(item, currentPath)
 
             return (
               <div
                 key={item.id}
-                className="relative flex items-center h-full"
+                className="relative flex items-center"
                 onMouseEnter={() => handleTriggerMouseEnter(item.id)}
                 onMouseLeave={handleTriggerMouseLeave}
               >
@@ -182,21 +201,24 @@ export function DesktopNav({
                     triggerRefs.current[item.id] = el
                   }}
                   href={item.href}
-                  onClick={(e: React.MouseEvent) => handleTriggerClick(e, item)}
-                  onKeyDown={(e: React.KeyboardEvent) => handleTriggerKeyDown(e, item.id)}
+                  onKeyDown={(e: React.KeyboardEvent) => handleTriggerKeyDown(e, item, idx, items)}
                   aria-expanded={isMenuOpen}
                   aria-controls={`mega-menu-panel-${item.id}`}
                   aria-haspopup="true"
                   className={clsx(
-                    "h-full flex items-center px-1 border-b-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent",
+                    "flex items-center px-3.5 py-1.5 rounded-lg text-xs font-heading font-medium tracking-wider transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
                     isMenuOpen
-                      ? "text-brand-accent border-brand-accent"
-                      : item.isActive
-                        ? "text-brand-primary border-brand-primary"
-                        : "text-brand-primary/90 border-transparent hover:text-brand-accent hover:border-brand-accent/50"
+                      ? "bg-brand-primary text-brand-secondary shadow-sm"
+                      : "text-brand-primary bg-transparent hover:bg-brand-primary hover:text-brand-secondary"
                   )}
                 >
                   <span>{item.label}</span>
+                  {isActive && !isMenuOpen && (
+                    <span
+                      aria-label="Current category"
+                      className="w-1.5 h-1.5 rounded-full bg-brand-accent ml-1.5 inline-block flex-shrink-0"
+                    />
+                  )}
                 </LinkComp>
               </div>
             )
@@ -222,28 +244,29 @@ export function DesktopNav({
             onMouseEnter={handlePanelMouseEnter}
             onMouseLeave={handlePanelMouseLeave}
             linkComponent={LinkComp}
+            className={panelClassName}
           />
         )}
-      </>
+      </div>
     )
   }
 
   // Backward-compatible fallback if only flat `links` provided
   const navLinks = links || []
   return (
-    <nav className="hidden lg:flex items-center h-full gap-x-7 text-xs font-semibold uppercase tracking-wider text-brand-primary">
+    <nav className="flex items-center justify-center gap-x-2 text-xs font-heading uppercase tracking-wider text-brand-primary">
       {navLinks.map((link, idx) => (
         <LinkComp
           key={`${link.label}-${link.href}-${idx}`}
           href={link.href}
           className={clsx(
-            "h-full flex items-center px-1 transition-colors duration-150 border-b-2 hover:text-brand-accent hover:border-brand-accent",
+            "flex items-center px-3.5 py-1.5 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary",
             link.isActive
-              ? "text-brand-accent border-brand-accent font-bold"
-              : "text-brand-primary border-transparent"
+              ? "bg-brand-primary text-brand-secondary font-semibold"
+              : "text-brand-primary bg-transparent hover:bg-brand-primary hover:text-brand-secondary"
           )}
         >
-          {link.label}
+          <span>{link.label}</span>
         </LinkComp>
       ))}
     </nav>

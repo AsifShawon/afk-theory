@@ -146,8 +146,12 @@ const CartDropdown = ({
                           className="w-20 bg-brand-secondary overflow-hidden block"
                         >
                           <Thumbnail
-                            thumbnail={item.thumbnail}
-                            images={item.variant?.product?.images}
+                            thumbnail={
+                              item.thumbnail ||
+                              item.variant?.product?.thumbnail ||
+                              item.product?.thumbnail
+                            }
+                            images={item.variant?.product?.images || item.product?.images}
                             size="square"
                           />
                         </LocalizedClientLink>

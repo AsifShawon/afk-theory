@@ -2,6 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
+import { BrandLogo } from "./BrandLogo"
 
 import {
   FooterLinkItem,
@@ -78,21 +79,11 @@ export function Footer({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12">
           {/* Column 1: Brand & Craftsmanship */}
           <div className="lg:col-span-5 space-y-4">
-            <LinkComp href={homeHref} className="inline-flex items-center gap-3">
-              <img
-                src="/brand/pause-symbol.png"
-                alt=""
-                aria-hidden="true"
-                className="w-8 h-8 object-contain"
-              />
-              <div>
-                <span className="font-heading font-black text-2xl tracking-[0.16em] text-white uppercase block leading-none">
-                  AFK THEORY
-                </span>
-                <span className="text-[9px] uppercase font-heading tracking-[0.22em] text-brand-accent font-bold mt-1 block">
-                  PAUSE THE GAME. KEEP YOUR STYLE.
-                </span>
-              </div>
+            <LinkComp href={homeHref} className="inline-block group py-1" aria-label="AFK THEORY Home">
+              <BrandLogo variant="horizontal-light" alt="AFK THEORY" className="h-8 sm:h-9 w-auto" />
+              <span className="text-[9px] uppercase font-heading tracking-[0.22em] text-brand-accent font-bold mt-2 block">
+                PAUSE THE GAME. KEEP YOUR STYLE.
+              </span>
             </LinkComp>
             <p className="text-xs text-brand-sand/80 leading-relaxed max-w-sm font-sans">
               Modern, independent, premium-accessible streetwear engineered in Bangladesh. Offline by choice. Built for individuals who demand bold design, oversized silhouettes, and distinct identity.

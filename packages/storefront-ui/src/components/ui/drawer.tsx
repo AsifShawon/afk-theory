@@ -8,7 +8,7 @@ import { XMarkIcon } from "../icons"
 export interface DrawerProps {
   isOpen: boolean
   onClose: () => void
-  title?: string
+  title?: React.ReactNode
   children: React.ReactNode
   position?: "left" | "right"
   maxWidth?: "sm" | "md" | "lg"
@@ -151,7 +151,7 @@ export function Drawer({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={title || "Slide-over Drawer"}
+      aria-label={typeof title === "string" ? title : "Slide-over Drawer"}
       className="fixed inset-0 z-50 overflow-hidden"
     >
       {/* Backdrop */}
@@ -180,9 +180,9 @@ export function Drawer({
                 ? "animate-drawer-exit border-l"
                 : "animate-drawer-enter border-l"
               : isClosing
-                ? "animate-fade-out border-r"
-                : "animate-fade-in border-r",
-            maxWidth === "sm" && "max-w-sm",
+                ? "animate-drawer-left-exit border-r"
+                : "animate-drawer-left-enter border-r",
+            maxWidth === "sm" && "max-w-[85vw] sm:max-w-sm",
             maxWidth === "md" && "max-w-[420px] sm:max-w-[460px]",
             maxWidth === "lg" && "max-w-lg",
             className
@@ -190,9 +190,13 @@ export function Drawer({
         >
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-brand-border/80 flex items-center justify-between bg-white flex-shrink-0">
-            <h2 className="font-heading font-bold text-sm text-brand-primary uppercase tracking-wider">
-              {title || ""}
-            </h2>
+            {typeof title === "string" ? (
+              <h2 className="font-heading font-bold text-sm text-brand-primary uppercase tracking-wider">
+                {title}
+              </h2>
+            ) : (
+              <div className="flex-1 min-w-0 pr-2">{title}</div>
+            )}
             <button
               ref={closeButtonRef}
               type="button"

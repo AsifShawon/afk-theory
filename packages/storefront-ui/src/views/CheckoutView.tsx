@@ -253,6 +253,7 @@ export function CheckoutView({
           <div className="lg:col-span-5 lg:sticky lg:top-24">
             <OrderSummary
               totals={totals}
+              items={items}
               promotions={promotions}
               onApplyPromoCode={onApplyPromoCode}
               onRemovePromoCode={onRemovePromoCode}

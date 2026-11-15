@@ -8,11 +8,13 @@ import {
   ProductVariantView,
   ProductView,
 } from "@dtc/commerce-contracts"
+import { normalizeImageUrl } from "@lib/util/image-url"
 
 export function toImageView(image: { id?: string; url: string }): ImageView {
+  const url = normalizeImageUrl(image.url) || image.url
   return {
     id: image.id || image.url,
-    url: image.url,
+    url,
     altText: "AFK THEORY Streetwear Apparel",
   }
 }

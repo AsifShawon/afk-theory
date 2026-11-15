@@ -80,17 +80,17 @@ export function CartDrawer({
           {items.length === 0 ? (
             <div className="py-16 text-center space-y-4 my-auto">
               <ShoppingBagIcon className="w-10 h-10 text-brand-muted mx-auto" />
-              <p className="font-heading font-semibold text-sm text-brand-primary">
+              <p className="font-heading font-semibold text-sm text-brand-primary uppercase tracking-wider">
                 Your bag is empty
               </p>
               <p className="text-xs text-brand-muted max-w-xs mx-auto font-sans leading-relaxed">
-                Explore our British tailoring and heavyweight cotton essentials.
+                Explore our Drop 01 oversized drop shoulder tees and heavyweight street essentials.
               </p>
               <div className="pt-2">
                 <LinkComp
                   href={routes.catalog()}
                   onClick={onClose}
-                  className="inline-block px-6 py-3 rounded-full bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors shadow-xs"
+                  className="inline-block px-6 py-3 bg-brand-primary text-white text-xs font-heading font-bold uppercase tracking-widest hover:bg-black transition-colors shadow-xs"
                 >
                   Start Shopping
                 </LinkComp>
@@ -127,22 +127,21 @@ export function CartDrawer({
 
             <div className="space-y-2 pt-1">
               {onProceedToCheckout ? (
-                <Button
+                <button
                   type="button"
                   onClick={() => {
                     onClose()
                     onProceedToCheckout()
                   }}
-                  variant="primary"
-                  className="w-full h-12 rounded-full text-xs font-heading font-bold uppercase tracking-wider shadow-subtle hover:shadow-editorial"
+                  className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                 >
                   Proceed to Checkout →
-                </Button>
+                </button>
               ) : (
                 <LinkComp
                   href={routes.checkout()}
                   onClick={onClose}
-                  className="w-full h-12 rounded-full bg-brand-primary hover:bg-black text-white text-xs font-heading font-bold uppercase tracking-wider flex items-center justify-center transition-colors shadow-subtle hover:shadow-editorial"
+                  className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                 >
                   Proceed to Checkout →
                 </LinkComp>
@@ -151,10 +150,14 @@ export function CartDrawer({
               <LinkComp
                 href={routes.cart()}
                 onClick={onClose}
-                className="w-full h-11 rounded-full border border-brand-border hover:border-brand-primary bg-white text-brand-primary text-xs font-heading font-semibold uppercase tracking-wider flex items-center justify-center transition-colors"
+                className="w-full h-11 border border-brand-border hover:border-brand-primary bg-white text-brand-primary text-xs font-heading font-bold uppercase tracking-wider flex items-center justify-center transition-colors"
               >
                 View Full Bag
               </LinkComp>
+            </div>
+
+            <div className="pt-2 border-t border-brand-border/60 text-[10px] text-brand-muted text-center font-heading uppercase tracking-wider">
+              Cash on Delivery Available • Dhaka 24–48h Delivery
             </div>
           </div>
         )}

@@ -187,7 +187,7 @@ export function classifyAddress(address: Record<string, any>): {
 
 export function matchOptionZone(option: {
   name: string
-  data?: Record<string, any>
+  data?: Record<string, any> | null
   type?: { code?: string } | null
 }): BangladeshShippingZone | null {
   const dataZone = option.data?.zone
@@ -211,7 +211,7 @@ export function matchOptionZone(option: {
 export function validateDeliveryOptionForAddress(
   option: {
     name: string
-    data?: Record<string, any>
+    data?: Record<string, any> | null
     type?: { code?: string } | null
   },
   address: Record<string, any>

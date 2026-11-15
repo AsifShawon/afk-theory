@@ -26,37 +26,51 @@ export function CartItemRow({
   linkComponent: LinkComp = Link,
   productHref,
 }: CartItemRowProps) {
+  const [imageError, setImageError] = React.useState(false)
   const title = ("title" in item && item.title) ? item.title : (item.productTitle || "Garment")
   const href = productHref || (item.productHandle ? `/products/${item.productHandle}` : undefined)
 
+  let imageUrl = item.thumbnail?.url
+  if (imageUrl) {
+    if (imageUrl.startsWith("http://localhost:9000/") && !imageUrl.startsWith("http://localhost:9000/static/")) {
+      imageUrl = imageUrl.replace("http://localhost:9000/", "http://localhost:9000/static/")
+    } else if (imageUrl.startsWith("http://127.0.0.1:9000/") && !imageUrl.startsWith("http://127.0.0.1:9000/static/")) {
+      imageUrl = imageUrl.replace("http://127.0.0.1:9000/", "http://127.0.0.1:9000/static/")
+    }
+  }
+
+  const showImage = Boolean(imageUrl && !imageError)
 
   return (
     <div className="py-4 sm:py-6 border-b border-brand-border flex gap-4 sm:gap-6 items-start">
       {/* Thumbnail */}
       <div className="relative aspect-[3/4] w-20 sm:w-24 bg-brand-secondary border border-brand-border flex-shrink-0 overflow-hidden">
-        {item.thumbnail?.url ? (
+        {showImage && imageUrl ? (
           href ? (
             <LinkComp href={href}>
               <Image
-                src={item.thumbnail.url}
-                alt={item.thumbnail.altText || title}
+                src={imageUrl}
+                alt={item.thumbnail?.altText || title}
                 fill
                 sizes="96px"
                 className="object-cover object-center hover:scale-105 transition-transform"
+                onError={() => setImageError(true)}
               />
             </LinkComp>
           ) : (
             <Image
-              src={item.thumbnail.url}
-              alt={item.thumbnail.altText || title || "Garment"}
+              src={imageUrl}
+              alt={item.thumbnail?.altText || title || "Garment"}
               fill
               sizes="96px"
               className="object-cover object-center"
+              onError={() => setImageError(true)}
             />
           )
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-brand-muted text-xs">
-            No Image
+          <div className="w-full h-full flex flex-col items-center justify-center text-brand-muted text-[10px] font-mono tracking-wider select-none bg-brand-surface">
+            <span>AFK</span>
+            <span>THEORY</span>
           </div>
         )}
       </div>
