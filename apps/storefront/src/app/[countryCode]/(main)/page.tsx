@@ -5,6 +5,7 @@ import { listCategories } from "@lib/data/categories"
 import { getCampaignSlides, getAnnouncementBar } from "@lib/data/campaign"
 import { getRegion } from "@lib/data/regions"
 import { HomeView } from "@dtc/storefront-ui"
+import StorefrontProductCard from "@modules/products/components/product-card-client"
 import { createMedusaRoutes } from "@adapters/medusa/routes"
 import { toCategoryView, toProductView } from "@adapters/medusa/catalog"
 import { DEFAULT_MEDUSA_CAPABILITIES } from "@dtc/commerce-contracts"
@@ -60,6 +61,7 @@ export default async function Home(props: {
       capabilities={DEFAULT_MEDUSA_CAPABILITIES}
       campaignSlides={campaignSlides}
       announcement={announcement}
+      productCardComponent={StorefrontProductCard}
     />
   )
 }

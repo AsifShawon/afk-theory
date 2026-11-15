@@ -184,11 +184,6 @@ export function OrderSummary({
         <div className="pt-3 border-t border-brand-border flex items-baseline justify-between">
           <div>
             <span className="font-heading font-bold text-base text-brand-primary">Total</span>
-            {totals.total.approxUsd && (
-              <span className="block text-[11px] text-brand-muted font-mono mt-0.5">
-                ≈ ${totals.total.approxUsd} USD
-              </span>
-            )}
           </div>
           <span className="font-heading font-bold text-lg sm:text-xl text-brand-primary">
             {totals.total.formatted}

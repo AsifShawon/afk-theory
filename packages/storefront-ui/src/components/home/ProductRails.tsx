@@ -6,7 +6,7 @@ import {
   StoreCapabilities,
   StoreRoutes,
 } from "@dtc/commerce-contracts"
-import { ProductCard } from "../product/ProductCard"
+import { ProductCard, ProductCardProps } from "../product/ProductCard"
 import { ProductRailScroller } from "./ProductRailScroller"
 import { LinkComponent } from "../../types"
 
@@ -20,6 +20,9 @@ export interface ProductRailsProps {
   capabilities?: StoreCapabilities
   onQuickAdd?: (req: QuickAddRequest) => Promise<QuickAddResult>
   linkComponent?: LinkComponent
+  wishlistIds?: string[]
+  onToggleWishlist?: (productId: string) => void | Promise<void>
+  productCardComponent?: React.ComponentType<ProductCardProps>
 }
 
 export function ProductRails({
@@ -32,8 +35,13 @@ export function ProductRails({
   capabilities,
   onQuickAdd,
   linkComponent,
+  wishlistIds,
+  onToggleWishlist,
+  productCardComponent: Card = ProductCard,
 }: ProductRailsProps) {
   if (!products || products.length === 0) return null
+
+  const isSingle = products.length === 1
 
   return (
     <ProductRailScroller
@@ -41,18 +49,26 @@ export function ProductRails({
       subtitle={subtitle}
       viewAllHref={viewAllHref}
       viewAllLabel={viewAllLabel}
+      showControls={!isSingle}
       linkComponent={linkComponent}
     >
       {products.map((product) => (
         <div
           key={product.id}
-          className="w-[260px] sm:w-[280px] lg:w-[310px] flex-shrink-0 snap-start"
+          className={
+            isSingle
+              ? "w-[280px] sm:w-[320px] lg:w-[360px] flex-shrink-0 snap-start"
+              : "w-[260px] sm:w-[280px] lg:w-[310px] flex-shrink-0 snap-start"
+          }
         >
-          <ProductCard
+          <Card
             product={product}
             href={routes.product(product.handle)}
             capabilities={capabilities}
             onQuickAdd={onQuickAdd}
+            linkComponent={linkComponent}
+            isWishlisted={wishlistIds ? wishlistIds.includes(product.id) : false}
+            onToggleWishlist={onToggleWishlist}
           />
         </div>
       ))}

@@ -9,6 +9,7 @@ import {
   StoreCapabilities,
   StoreRoutes,
 } from "@dtc/commerce-contracts"
+import { ProductCardProps } from "../components/product/ProductCard"
 import { HeroSection } from "../components/home/HeroSection"
 import { FeaturedCategories } from "../components/home/FeaturedCategories"
 import { ProductRails } from "../components/home/ProductRails"
@@ -32,6 +33,9 @@ export interface HomeViewProps {
   secondaryCtaSlot?: React.ReactNode
   newsletterSlot?: React.ReactNode
   linkComponent?: LinkComponent
+  wishlistIds?: string[]
+  onToggleWishlist?: (productId: string) => void | Promise<void>
+  productCardComponent?: React.ComponentType<ProductCardProps>
 }
 
 export function HomeView({
@@ -46,6 +50,9 @@ export function HomeView({
   secondaryCtaSlot,
   newsletterSlot,
   linkComponent,
+  wishlistIds,
+  onToggleWishlist,
+  productCardComponent,
 }: HomeViewProps) {
   const newArrivals = featuredProducts.filter((p) => p.isNewArrival)
   const bestSellers = featuredProducts.filter((p) => p.isBestSeller)
@@ -76,6 +83,9 @@ export function HomeView({
         capabilities={capabilities}
         onQuickAdd={onQuickAdd}
         linkComponent={linkComponent}
+        wishlistIds={wishlistIds}
+        onToggleWishlist={onToggleWishlist}
+        productCardComponent={productCardComponent}
       />
 
       {/* 3. Category Mosaic / Department Grid */}
@@ -103,6 +113,9 @@ export function HomeView({
           capabilities={capabilities}
           onQuickAdd={onQuickAdd}
           linkComponent={linkComponent}
+          wishlistIds={wishlistIds}
+          onToggleWishlist={onToggleWishlist}
+          productCardComponent={productCardComponent}
         />
       )}
 

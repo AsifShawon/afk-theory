@@ -14,6 +14,7 @@ import {
 import { FilterSidebar } from "../components/catalog/FilterSidebar"
 import { SortDropdown } from "../components/catalog/SortDropdown"
 import { ProductGrid } from "../components/product/ProductGrid"
+import { ProductCardProps } from "../components/product/ProductCard"
 import { Drawer } from "../components/ui/drawer"
 import { AdjustmentsIcon, XMarkIcon } from "../components/icons"
 import { LinkComponent } from "../types"
@@ -33,6 +34,9 @@ export interface CatalogViewProps {
   isLoading?: boolean
   breadcrumbs?: Array<{ label: string; href: string }>
   linkComponent?: LinkComponent
+  wishlistIds?: string[]
+  onToggleWishlist?: (productId: string) => void | Promise<void>
+  productCardComponent?: React.ComponentType<ProductCardProps>
 }
 
 export function CatalogView({
@@ -53,6 +57,9 @@ export function CatalogView({
     { label: "Shop", href: routes.catalog() },
   ],
   linkComponent: LinkComp = Link,
+  wishlistIds,
+  onToggleWishlist,
+  productCardComponent,
 }: CatalogViewProps) {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
   const displayCount = totalCount !== undefined ? totalCount : products.length
@@ -238,6 +245,9 @@ export function CatalogView({
                 emptyStateTitle="No garments match your filters"
                 emptyStateMessage="Try adjusting size, color, or category choices, or clear all filters to view our full collection."
                 linkComponent={LinkComp}
+                wishlistIds={wishlistIds}
+                onToggleWishlist={onToggleWishlist}
+                productCardComponent={productCardComponent}
               />
             )}
           </div>

@@ -117,6 +117,9 @@ module.exports = defineConfig({
     {
       resolve: "./src/modules/campaign",
     },
+    {
+      resolve: "./src/modules/wishlist",
+    },
     ...(paymentProviders.length > 0
       ? [
           {

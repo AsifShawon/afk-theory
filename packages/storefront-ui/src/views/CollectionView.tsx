@@ -12,6 +12,7 @@ import {
   StoreRoutes,
 } from "@dtc/commerce-contracts"
 import { CatalogView } from "./CatalogView"
+import { ProductCardProps } from "../components/product/ProductCard"
 import { LinkComponent } from "../types"
 
 export interface CollectionViewProps {
@@ -26,6 +27,9 @@ export interface CollectionViewProps {
   onQuickAdd?: (req: QuickAddRequest) => Promise<QuickAddResult>
   isLoading?: boolean
   linkComponent?: LinkComponent
+  wishlistIds?: string[]
+  onToggleWishlist?: (productId: string) => void | Promise<void>
+  productCardComponent?: React.ComponentType<ProductCardProps>
 }
 
 export function CollectionView({
@@ -40,6 +44,9 @@ export function CollectionView({
   onQuickAdd,
   isLoading,
   linkComponent = Link,
+  wishlistIds,
+  onToggleWishlist,
+  productCardComponent,
 }: CollectionViewProps) {
   const breadcrumbs = [
     { label: "Home", href: routes.home() },
@@ -62,6 +69,9 @@ export function CollectionView({
       isLoading={isLoading}
       breadcrumbs={breadcrumbs}
       linkComponent={linkComponent}
+      wishlistIds={wishlistIds}
+      onToggleWishlist={onToggleWishlist}
+      productCardComponent={productCardComponent}
     />
   )
 }
