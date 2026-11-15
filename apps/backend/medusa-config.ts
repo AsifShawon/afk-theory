@@ -65,16 +65,18 @@ const isRealS3Config = Boolean(
 const fileProviders = [
   isRealS3Config
     ? {
-        resolve: "@medusajs/medusa/file-s3",
+        // Wraps @medusajs/file-s3 and converts every uploaded image to WebP.
+        resolve: "./src/modules/file-provider-s3",
         id: "s3",
+        // Option names are snake_case: that is what the S3 provider reads.
         options: {
-          fileUrl: s3Url,
-          accessKeyId: s3AccessKeyId,
-          secretAccessKey: s3SecretAccessKey,
+          file_url: s3Url,
+          access_key_id: s3AccessKeyId,
+          secret_access_key: s3SecretAccessKey,
           region: s3Region,
           bucket: s3Bucket,
           endpoint: s3Endpoint,
-          additionalClientConfig: {
+          additional_client_config: {
             forcePathStyle: true,
           },
         },

@@ -10,6 +10,7 @@ import {
   ProductView,
 } from "@dtc/commerce-contracts"
 import { CatalogView } from "@dtc/storefront-ui"
+import { quickAddToCart } from "@lib/data/cart"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { createMedusaRoutes } from "../../../../adapters/medusa/routes"
 
@@ -95,6 +96,7 @@ export default function MedusaCatalogClient({
       onResetFilters={handleResetFilters}
       routes={routes}
       capabilities={DEFAULT_MEDUSA_CAPABILITIES}
+      onQuickAdd={(request) => quickAddToCart(countryCode, request)}
       linkComponent={LocalizedClientLink}
     />
   )

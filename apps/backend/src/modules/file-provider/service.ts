@@ -4,37 +4,12 @@ import fs from "fs"
 import { createReadStream } from "fs"
 import path from "path"
 import { Readable } from "stream"
-import { optimizeImageBuffer, validateImageBuffer } from "../../services/image-optimization"
-
-function decodeFileContent(content: string | Buffer, mimeType?: string): Buffer {
-  if (Buffer.isBuffer(content)) {
-    return content
-  }
-  if (typeof content !== "string") {
-    return Buffer.from(content as any)
-  }
-
-  // 1. Check if the string directly decodes into a recognized image format
-  const decodedBase64 = Buffer.from(content, "base64")
-  const validation = validateImageBuffer(decodedBase64)
-  if (validation.valid) {
-    return decodedBase64
-  }
-
-  // 2. Exact base64 match check
-  if (decodedBase64.toString("base64") === content) {
-    return decodedBase64
-  }
-
-  const isTextContent =
-    mimeType?.startsWith("text/") ||
-    mimeType?.includes("csv") ||
-    mimeType?.includes("json") ||
-    mimeType?.includes("xml")
-  return isTextContent
-    ? Buffer.from(content, "utf8")
-    : Buffer.from(content, "binary")
-}
+import { randomBytes } from "crypto"
+import {
+  convertImageUploadToWebp,
+  decodeFileContent,
+  toSeoFilename,
+} from "../../services/upload-conversion"
 
 export interface OptimizedFileServiceOptions {
   upload_dir?: string
@@ -102,41 +77,34 @@ export default class OptimizedLocalFileService extends AbstractFileProviderServi
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "No filename provided")
     }
 
-    const parsedFilename = path.parse(file.filename)
-    const baseDir =
-      file.access === "public" ? this.uploadDir_ : this.privateUploadDir_
-    await this.ensureDirExists(baseDir, parsedFilename.dir)
+    const original = decodeFileContent(file.content, file.mimeType)
 
-    let content = decodeFileContent(file.content, file.mimeType)
-    let finalBase = parsedFilename.base
-
-    // Check if the uploaded buffer is an image
-    const validation = validateImageBuffer(content)
-    if (validation.valid) {
-      try {
-        // Optimize and compress down to WebP with responsive maximum width
-        const optimized = await optimizeImageBuffer(content, {
-          maxWidth: this.maxWidth_,
-          quality: this.quality_,
-          format: "webp",
-          preserveTransparency: true,
-        })
-        content = optimized.buffer
-        finalBase = `${parsedFilename.name}.webp`
-      } catch (err) {
+    // Convert images to WebP (HEIC is rejected, non-images pass through unchanged)
+    const converted = await convertImageUploadToWebp(
+      original,
+      file.filename,
+      file.mimeType,
+      { maxWidth: this.maxWidth_, quality: this.quality_ },
+      (err) => {
         console.warn(
           "[ImageOptimization] Auto-conversion to WebP failed, storing original:",
           err
         )
       }
-    }
-
-    // Sanitize filename to avoid spaces and broken URL encoding
-    const sanitizedBase = finalBase.replace(/[^a-zA-Z0-9._-]/g, "-")
-    const fileKey = path.posix.join(
-      parsedFilename.dir ? parsedFilename.dir.replace(/\\/g, "/") : "",
-      `${file.access === "public" ? "" : "private-"}${Date.now()}-${sanitizedBase}`
     )
+
+    // URL-friendly, SEO-readable name plus a short suffix so uploads never collide
+    const parsedFilename = path.posix.parse(toSeoFilename(converted.filename))
+    const baseDir =
+      file.access === "public" ? this.uploadDir_ : this.privateUploadDir_
+    await this.ensureDirExists(baseDir, parsedFilename.dir)
+
+    const uniqueSuffix = randomBytes(4).toString("hex")
+    const fileKey = path.posix.join(
+      parsedFilename.dir,
+      `${file.access === "public" ? "" : "private-"}${parsedFilename.name}-${uniqueSuffix}${parsedFilename.ext}`
+    )
+    const content = converted.content
 
     const filePath = this.getUploadFilePath(baseDir, fileKey)
     const fileUrl = this.getUploadFileUrl(fileKey)

@@ -115,4 +115,64 @@ describe("OptimizedLocalFileService", () => {
     const read = await fs.promises.readFile(filePath, "utf8")
     expect(read).toBe(csvContent)
   })
+
+  it("stores uploads under a clean SEO-friendly name with a short unique suffix", async () => {
+    const png = await sharp({
+      create: { width: 600, height: 800, channels: 3, background: "#20241F" },
+    })
+      .png()
+      .toBuffer()
+
+    const result = await service.upload({
+      filename: "Drop Shoulder Tee (Black) FRONT.PNG",
+      content: png.toString("base64"),
+      mimeType: "image/png",
+      access: "public",
+    })
+
+    expect(result.key).toMatch(/^drop-shoulder-tee-black-front-[0-9a-f]{8}\.webp$/)
+    expect(result.url).toContain(result.key)
+
+    const second = await service.upload({
+      filename: "Drop Shoulder Tee (Black) FRONT.PNG",
+      content: png.toString("base64"),
+      mimeType: "image/png",
+      access: "public",
+    })
+    expect(second.key).not.toBe(result.key)
+  })
+
+  it("strips EXIF metadata from stored images", async () => {
+    const jpeg = await sharp({
+      create: { width: 400, height: 300, channels: 3, background: "#336699" },
+    })
+      .withExif({ IFD0: { Copyright: "SECRET-OWNER" } })
+      .jpeg()
+      .toBuffer()
+
+    const result = await service.upload({
+      filename: "phone.jpg",
+      content: jpeg.toString("base64"),
+      mimeType: "image/jpeg",
+      access: "public",
+    })
+
+    const metadata = await sharp(path.join(testUploadDir, result.key)).metadata()
+    expect(metadata.exif).toBeUndefined()
+  })
+
+  it("rejects HEIC photos", async () => {
+    const heic = Buffer.alloc(64)
+    heic.writeUInt32BE(32, 0)
+    heic.write("ftypheic", 4, "ascii")
+
+    await expect(
+      service.upload({
+        filename: "IMG_1.HEIC",
+        content: heic.toString("base64"),
+        mimeType: "image/heic",
+        access: "public",
+      })
+    ).rejects.toThrow(/not supported/)
+  })
 })

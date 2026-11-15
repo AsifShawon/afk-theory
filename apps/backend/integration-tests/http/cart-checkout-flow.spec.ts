@@ -1,9 +1,17 @@
 import assert from "node:assert"
 
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) {
+    throw new Error(`Missing required environment variable ${name}. Set it before running this test.`)
+  }
+  return value
+}
+
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
-const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_b14587481fe492d53e44e769e5eeabd0109f9d128bd5879d40c34b7b4b2c8f1b"
+const PUBLISHABLE_KEY = requireEnv("NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY")
 const ADMIN_EMAIL = process.env.MEDUSA_ADMIN_EMAIL || "admin@afktheory.com"
-const ADMIN_PASSWORD = process.env.MEDUSA_ADMIN_PASSWORD || "supersecret123"
+const ADMIN_PASSWORD = requireEnv("MEDUSA_ADMIN_PASSWORD")
 
 const headers = {
   "Content-Type": "application/json",

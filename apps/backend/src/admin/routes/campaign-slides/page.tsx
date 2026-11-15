@@ -81,6 +81,9 @@ const CampaignSlidesPage = () => {
   const [currentSlide, setCurrentSlide] = useState<Partial<CampaignSlide>>(DEFAULT_SLIDE)
   const [previewViewport, setPreviewViewport] = useState<"desktop" | "mobile">("desktop")
   const [isSaving, setIsSaving] = useState(false)
+  const [uploadingField, setUploadingField] = useState<
+    "desktop_image_url" | "mobile_image_url" | null
+  >(null)
 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
@@ -111,6 +114,38 @@ const CampaignSlidesPage = () => {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Uploads go through the store's file service, which converts images to WebP.
+  const handleImageUpload = async (
+    field: "desktop_image_url" | "mobile_image_url",
+    file: File | undefined
+  ) => {
+    if (!file) return
+    setUploadingField(field)
+    try {
+      const formData = new FormData()
+      formData.append("files", file)
+      const res = await fetch("/admin/uploads", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data?.message || "Upload failed")
+      }
+      const url: string | undefined = data?.files?.[0]?.url
+      if (!url) {
+        throw new Error("Upload succeeded but no file URL was returned")
+      }
+      setCurrentSlide((prev) => ({ ...prev, [field]: url }))
+      toast.success("Image uploaded and optimised as WebP")
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload image")
+    } finally {
+      setUploadingField(null)
+    }
+  }
 
   const handleSaveSlide = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -418,22 +453,48 @@ const CampaignSlidesPage = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Text className="text-xs font-semibold mb-1">Desktop Image URL</Text>
+                    <Text className="text-xs font-semibold mb-1">Desktop Image</Text>
                     <Input
                       required
                       value={currentSlide.desktop_image_url || ""}
                       onChange={(e) => setCurrentSlide({ ...currentSlide, desktop_image_url: e.target.value })}
-                      placeholder="https://... or /brand/..."
+                      placeholder="Upload below, or paste https://... or /brand/..."
                     />
+                    <label className="mt-2 inline-flex items-center gap-2 text-xs text-ui-fg-subtle cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                        className="text-xs"
+                        disabled={uploadingField !== null}
+                        onChange={(e) => {
+                          handleImageUpload("desktop_image_url", e.target.files?.[0])
+                          e.target.value = ""
+                        }}
+                      />
+                      {uploadingField === "desktop_image_url" && <span>Uploading...</span>}
+                    </label>
                   </div>
 
                   <div>
-                    <Text className="text-xs font-semibold mb-1">Mobile Image URL (Optional)</Text>
+                    <Text className="text-xs font-semibold mb-1">Mobile Image (Optional)</Text>
                     <Input
                       value={currentSlide.mobile_image_url || ""}
                       onChange={(e) => setCurrentSlide({ ...currentSlide, mobile_image_url: e.target.value })}
                       placeholder="Leave empty to use desktop image"
                     />
+                    <label className="mt-2 inline-flex items-center gap-2 text-xs text-ui-fg-subtle cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                        className="text-xs"
+                        disabled={uploadingField !== null}
+                        onChange={(e) => {
+                          handleImageUpload("mobile_image_url", e.target.files?.[0])
+                          e.target.value = ""
+                        }}
+                      />
+                      {uploadingField === "mobile_image_url" && <span>Uploading...</span>}
+                    </label>
                   </div>
                 </div>
 

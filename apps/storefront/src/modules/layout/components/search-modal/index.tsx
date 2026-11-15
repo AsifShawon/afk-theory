@@ -38,7 +38,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
 
         const res = await fetch(
-          `${backendUrl}/store/products?q=${encodeURIComponent(query.trim())}&limit=6`,
+          `${backendUrl}/store/products?q=${encodeURIComponent(query.trim())}&limit=6&fields=${encodeURIComponent("+variants.inventory_quantity")}`,
           {
             headers: {
               "x-publishable-api-key": publishableKey,

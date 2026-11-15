@@ -2,7 +2,12 @@
 
 import React from "react"
 import clsx from "clsx"
-import { ProductOptionView, ProductVariantView, StoreCapabilities } from "@dtc/commerce-contracts"
+import {
+  ProductOptionView,
+  ProductVariantView,
+  StoreCapabilities,
+  getOptionValueAvailability,
+} from "@dtc/commerce-contracts"
 import { COLOR_SWATCHES } from "../../theme/colors"
 
 export interface VariantSelectorProps {
@@ -17,7 +22,7 @@ export interface VariantSelectorProps {
 
 export function VariantSelector({
   options,
-  variants: _variants,
+  variants = [],
   selectedOptions,
   onSelectOption,
   capabilities: _capabilities,
@@ -64,6 +69,9 @@ export function VariantSelector({
               {opt.values.map((val) => {
                 const isSelected = selectedVal?.toLowerCase() === val.toLowerCase()
                 const hex = isColor ? COLOR_SWATCHES[val.toLowerCase()] || "#cccccc" : undefined
+                const isSoldOut =
+                  variants.length > 0 &&
+                  getOptionValueAvailability(variants, selectedOptions, opt.title, val) === "sold_out"
 
                 return (
                   <button
@@ -71,7 +79,7 @@ export function VariantSelector({
                     type="button"
                     role="radio"
                     aria-checked={isSelected}
-                    aria-label={`${opt.title} ${val}`}
+                    aria-label={`${opt.title} ${val}${isSoldOut ? " (sold out)" : ""}`}
                     onClick={() => onSelectOption(opt.title, val)}
                     disabled={disabled}
                     className={clsx(
@@ -79,6 +87,7 @@ export function VariantSelector({
                       isSelected
                         ? "border-brand-primary bg-brand-primary text-white shadow-sm ring-1 ring-brand-primary"
                         : "border-brand-border bg-white text-brand-primary hover:border-brand-primary/60",
+                      isSoldOut && !isSelected && "text-brand-muted/60 line-through decoration-brand-muted/60 bg-brand-surface",
                       disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
                     )}
                   >
@@ -94,6 +103,14 @@ export function VariantSelector({
                 )
               })}
             </div>
+            {variants.length > 0 &&
+              opt.values.some(
+                (val) => getOptionValueAvailability(variants, selectedOptions, opt.title, val) === "sold_out"
+              ) && (
+                <p className="text-[11px] text-brand-muted">
+                  Crossed-out options are currently sold out.
+                </p>
+              )}
           </div>
         )
       })}

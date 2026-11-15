@@ -36,6 +36,8 @@ export async function generateMetadata(props: Params): Promise<Metadata> {
     title,
     description,
     canonical: `/${params.countryCode}/store`,
+    // Search result pages are thin, endless variations of the catalog: keep them out of search engines.
+    noIndex: Boolean(q),
   })
 }
 

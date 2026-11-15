@@ -1,9 +1,11 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
+  LOW_STOCK_THRESHOLD,
+  getVariantOption,
   ProductView,
   QuickAddRequest,
   QuickAddResult,
@@ -13,6 +15,10 @@ import { COLOR_SWATCHES } from "../../theme/colors"
 import { LinkComponent } from "../../types"
 import { MobileQuickAddSheet } from "./MobileQuickAddSheet"
 import { CheckIcon } from "../icons"
+import { AUTOPLAY_INTERVAL_MS, nextIndex } from "./carousel-autoplay"
+
+/** Images a card cycles through on hover (keeps lists light). */
+const MAX_HOVER_IMAGES = 4
 
 export interface ProductCardProps {
   product: ProductView
@@ -44,30 +50,73 @@ export function ProductCard({
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false)
 
   // Color-specific primary and secondary image
-  const primaryImage = useMemo(() => {
-    if (selectedColor) {
-      // 1. Variant image
-      const variantWithColor = product.variants.find(
-        (v) =>
-          (v.options["Color"] || v.options["color"])?.toLowerCase() ===
-          selectedColor.toLowerCase()
-      )
-      if (variantWithColor?.images && variantWithColor.images.length > 0) {
-        return variantWithColor.images[0]
+  // Images linked to any variant of the selected colour (first one is the card image).
+  const colorImages = useMemo(() => {
+    if (!selectedColor) return []
+    const seen = new Set<string>()
+    const images: typeof product.images = []
+    for (const v of product.variants) {
+      const variantColor = getVariantOption(v, "Color")?.toLowerCase()
+      if (variantColor !== selectedColor.toLowerCase()) continue
+      for (const img of v.images ?? []) {
+        if (!seen.has(img.id)) {
+          seen.add(img.id)
+          images.push(img)
+        }
       }
-      // 2. Alt text match
-      const altMatch = product.images.find((img) =>
-        img.altText?.toLowerCase().includes(selectedColor.toLowerCase())
-      )
-      if (altMatch) return altMatch
     }
-    return product.thumbnail || product.images[0]
-  }, [product.variants, product.images, product.thumbnail, selectedColor])
+    return images
+  }, [product.variants, selectedColor])
 
-  const secondaryImage = useMemo(() => {
-    const candidates = product.images.filter((img) => img.url !== primaryImage?.url)
-    return candidates.length > 0 ? candidates[0] : undefined
-  }, [product.images, primaryImage])
+  const primaryImage = useMemo(() => {
+    if (colorImages.length > 0) return colorImages[0]
+    return product.thumbnail || product.images[0]
+  }, [colorImages, product.images, product.thumbnail])
+
+  // Images shown by the card: the main image first, then others of the same colour
+  // (or any other product images).
+  const cardImages = useMemo(() => {
+    const pool = colorImages.length > 1 ? colorImages : product.images
+    const rest = pool.filter((img) => img.url !== primaryImage?.url)
+    const list = primaryImage ? [primaryImage, ...rest] : rest
+    return list.slice(0, MAX_HOVER_IMAGES)
+  }, [colorImages, product.images, primaryImage])
+
+  // Hover behaviour: the next image fades in immediately, then the card rotates
+  // through its images every 3 seconds while the pointer stays on it.
+  const [hoverIndex, setHoverIndex] = useState(0)
+  const [isHovering, setIsHovering] = useState(false)
+  const [hasHovered, setHasHovered] = useState(false)
+  const [canRotate, setCanRotate] = useState(true)
+  const isHoveringRef = useRef(false)
+
+  const startHover = useCallback(() => {
+    if (cardImages.length < 2) return
+    isHoveringRef.current = true
+    setCanRotate(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    setHasHovered(true)
+    setIsHovering(true)
+    setHoverIndex(1)
+  }, [cardImages.length])
+
+  const endHover = useCallback(() => {
+    isHoveringRef.current = false
+    setIsHovering(false)
+    setHoverIndex(0)
+  }, [])
+
+  useEffect(() => {
+    if (!isHovering || !canRotate || cardImages.length < 3) return
+    const timer = setInterval(() => {
+      setHoverIndex((index) => nextIndex(index, cardImages.length))
+    }, AUTOPLAY_INTERVAL_MS)
+    return () => clearInterval(timer)
+  }, [isHovering, canRotate, cardImages.length])
+
+  // A colour change swaps the image set: start again from the first image.
+  useEffect(() => {
+    setHoverIndex(isHoveringRef.current && cardImages.length > 1 ? 1 : 0)
+  }, [cardImages])
 
   // Stock status
   const isSoldOut =
@@ -76,7 +125,7 @@ export function ProductCard({
     !isSoldOut &&
     product.totalStock !== undefined &&
     product.totalStock > 0 &&
-    product.totalStock <= 5
+    product.totalStock <= LOW_STOCK_THRESHOLD
 
   const fabricInfo = product.material || product.subtitle || "240–280 GSM Heavyweight Cotton"
 
@@ -87,7 +136,7 @@ export function ProductCard({
     }
     const sizeSet = new Set<string>()
     for (const variant of product.variants) {
-      const sizeVal = variant.options["Size"] || variant.options["size"]
+      const sizeVal = getVariantOption(variant, "Size")
       if (sizeVal) sizeSet.add(sizeVal)
     }
     return sizeSet.size || product.variants.length
@@ -100,10 +149,10 @@ export function ProductCard({
       const variant = product.variants.find((v) => {
         const matchColor =
           !colorOption ||
-          (v.options["Color"] || v.options["color"])?.toLowerCase() ===
+          getVariantOption(v, "Color")?.toLowerCase() ===
             selectedColor.toLowerCase()
         const matchSize =
-          (v.options["Size"] || v.options["size"])?.toLowerCase() ===
+          getVariantOption(v, "Size")?.toLowerCase() ===
           size.toLowerCase()
         return matchColor && matchSize
       })
@@ -131,6 +180,7 @@ export function ProductCard({
 
       if (result && result.success === false) {
         setErrorMessage(result.message || "Could not add")
+        setTimeout(() => setErrorMessage(null), 4000)
       } else {
         setSuccessVariantId(variantId)
         setTimeout(() => setSuccessVariantId(null), 1800)
@@ -149,38 +199,44 @@ export function ProductCard({
         className="product-card group relative flex flex-col bg-white border border-brand-border hover:border-brand-primary overflow-hidden transition-all duration-300 shadow-xs"
       >
         {/* 1. Image Canvas & Badges */}
-        <div className="relative aspect-[3/4] w-full bg-brand-secondary overflow-hidden">
+        <div
+          className="relative aspect-[3/4] w-full bg-brand-secondary overflow-hidden"
+          onPointerEnter={(event) => {
+            if (event.pointerType === "mouse") startHover()
+          }}
+          onPointerLeave={(event) => {
+            if (event.pointerType === "mouse") endHover()
+          }}
+          onFocus={startHover}
+          onBlur={endHover}
+        >
           <LinkComp
             href={href}
             className="block w-full h-full relative"
             aria-label={`View details for ${product.title}`}
           >
-            {primaryImage?.url ? (
-              <Image
-                src={primaryImage.url}
-                alt={primaryImage.altText || product.title}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className={`object-cover object-center transition-all duration-500 ${
-                  secondaryImage
-                    ? "group-hover:opacity-0 group-hover:scale-103"
-                    : "group-hover:scale-103"
-                }`}
-              />
+            {cardImages.length > 0 ? (
+              cardImages.map((image, idx) =>
+                // The first two images are always mounted so the hover swap is instant;
+                // the rest load on first hover.
+                idx < 2 || hasHovered ? (
+                  <Image
+                    key={image.id || image.url}
+                    src={image.url}
+                    alt={idx === 0 ? image.altText || product.title : ""}
+                    aria-hidden={idx === 0 ? undefined : true}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className={`object-cover object-center transition-opacity duration-200 ease-out ${
+                      hoverIndex === idx ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                ) : null
+              )
             ) : (
               <div className="w-full h-full flex items-center justify-center text-brand-muted text-xs font-mono font-bold tracking-wider">
                 // AFK THEORY
               </div>
-            )}
-
-            {secondaryImage?.url && (
-              <Image
-                src={secondaryImage.url}
-                alt={secondaryImage.altText || `${product.title} alternate angle`}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover object-center absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-103 transition-all duration-500"
-              />
             )}
           </LinkComp>
 
@@ -216,7 +272,7 @@ export function ProductCard({
                   Quick Add
                 </span>
                 {errorMessage ? (
-                  <span className="text-[10px] text-rose-700 font-bold">Failed</span>
+                  <span role="alert" title={errorMessage} className="text-[10px] text-rose-700 font-bold truncate max-w-[70%]">{errorMessage}</span>
                 ) : successVariantId ? (
                   <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
                     <CheckIcon className="w-3 h-3" /> Added ✓

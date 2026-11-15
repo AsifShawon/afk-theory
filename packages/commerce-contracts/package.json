@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "test": "node -e \"const { createJiti } = require('jiti'); const jiti = createJiti(process.cwd()); jiti('./src/__tests__/bangladesh-delivery.test.ts');\"",
+    "test": "node -e \"const { createJiti } = require('jiti'); const jiti = createJiti(process.cwd()); jiti('./src/__tests__/bangladesh-delivery.test.ts'); jiti('./src/__tests__/variant-selection.test.ts'); jiti('./src/__tests__/stock.test.ts'); jiti('./src/__tests__/variant-availability.test.ts'); jiti('./src/__tests__/seo.test.ts');\"",
     "lint": "eslint src/"
   },
   "devDependencies": {

@@ -35,6 +35,30 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/gif",
 ])
 
+const HEIF_BRANDS = new Set(["heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevs"])
+
+export const HEIF_UNSUPPORTED_MESSAGE =
+  "HEIC/HEIF photos are not supported. Please export the image as JPEG, PNG or WebP and upload it again."
+
+/**
+ * Detects iPhone-style HEIC/HEIF images. Browsers cannot display them and the
+ * bundled image library cannot decode them, so they are rejected up front
+ * instead of being stored as unusable files.
+ */
+export function isHeifBuffer(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 16) return false
+  if (buffer.subarray(4, 8).toString("ascii") !== "ftyp") return false
+
+  const brand = buffer.subarray(8, 12).toString("ascii")
+  if (HEIF_BRANDS.has(brand)) return true
+
+  if (brand === "mif1" || brand === "msf1") {
+    const compatibleBrands = buffer.subarray(12, 64).toString("ascii")
+    return Array.from(HEIF_BRANDS).some((b) => compatibleBrands.includes(b))
+  }
+  return false
+}
+
 /**
  * Validate input image buffer by magic numbers to prevent MIME spoofing
  */
@@ -73,10 +97,25 @@ export function validateImageBuffer(buffer: Buffer): { valid: boolean; detectedM
     return { valid: true, detectedMime: "image/webp" }
   }
 
-  // AVIF: .... ftypavif
-  const ftypSlice = buffer.subarray(4, 12).toString("ascii")
-  if (ftypSlice.includes("ftyp")) {
-    return { valid: true, detectedMime: "image/avif" }
+  // ISO base media files (AVIF, HEIC/HEIF, and also MP4 video): .... ftyp<brand>
+  if (buffer.subarray(4, 8).toString("ascii") === "ftyp") {
+    const brand = buffer.subarray(8, 12).toString("ascii")
+    const compatibleBrands = buffer.subarray(12, 64).toString("ascii")
+
+    if (brand === "avif" || brand === "avis") {
+      return { valid: true, detectedMime: "image/avif" }
+    }
+    if ((brand === "mif1" || brand === "msf1") && compatibleBrands.includes("avif")) {
+      return { valid: true, detectedMime: "image/avif" }
+    }
+    if (isHeifBuffer(buffer)) {
+      return {
+        valid: false,
+        detectedMime: "image/heic",
+        error: HEIF_UNSUPPORTED_MESSAGE,
+      }
+    }
+    // Anything else (for example MP4 video) is not an image we convert.
   }
 
   // GIF: GIF87a or GIF89a
@@ -116,7 +155,10 @@ export async function optimizeImageBuffer(
     preserveTransparency = true,
   } = options
 
-  let pipeline = sharp(inputBuffer)
+  // Animated GIFs stay animated (as animated WebP) instead of being flattened to one frame.
+  let pipeline = sharp(inputBuffer, {
+    animated: validation.detectedMime === "image/gif",
+  })
 
   // 1. Auto-rotate based on EXIF before stripping metadata
   pipeline = pipeline.rotate()
@@ -124,8 +166,9 @@ export async function optimizeImageBuffer(
   // 2. Fetch metadata to evaluate transparency and dimensions
   const metadata = await pipeline.metadata()
 
-  // 3. Keep ICC color profile for accurate textile color fidelity while stripping privacy EXIF
-  pipeline = pipeline.withMetadata({ orientation: 1 })
+  // 3. Keep only the ICC colour profile (accurate textile colours). All other metadata,
+  //    including EXIF such as GPS location and camera owner, is removed.
+  pipeline = pipeline.keepIccProfile()
 
   // 4. Resize if bounds specified
   if (maxWidth || maxHeight) {

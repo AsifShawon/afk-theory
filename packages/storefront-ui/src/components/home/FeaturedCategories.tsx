@@ -90,11 +90,12 @@ export function FeaturedCategories({
         </div>
 
         {/* Asymmetric Editorial Mosaic */}
+        {/* w-full on the first tile: grid items with an aspect-ratio do not stretch, so min-h-[400px] would otherwise force a 320px width and overflow small phones */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Main Department (Hero Left Tile) */}
           <LinkComp
             href={mainDept.href}
-            className="group lg:col-span-7 relative aspect-[4/5] sm:aspect-[16/11] lg:aspect-auto lg:h-full min-h-[400px] overflow-hidden border border-brand-border bg-brand-primary flex flex-col justify-end p-6 sm:p-10"
+            className="group lg:col-span-7 relative w-full min-w-0 aspect-[4/5] sm:aspect-[16/11] lg:aspect-auto lg:h-full min-h-[400px] overflow-hidden border border-brand-border bg-brand-primary flex flex-col justify-end p-6 sm:p-10"
           >
             <Image
               src={mainDept.image}

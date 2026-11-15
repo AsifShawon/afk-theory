@@ -1,3 +1,5 @@
+import { escapeHtml } from "./layout"
+
 export type OrderPlacedTemplateData = {
   order: {
     id: string
@@ -51,9 +53,9 @@ export function generateOrderPlacedEmail(data: OrderPlacedTemplateData): {
       (item) => `
       <tr>
         <td style="padding: 12px 0; border-bottom: 1px solid #E5E0D8;">
-          <strong style="color: #111111; font-size: 14px;">${item.product_title || item.title || "Garment"}</strong>
-          ${item.variant_title ? `<br/><span style="color: #666666; font-size: 12px;">Variant: ${item.variant_title}</span>` : ""}
-          ${item.variant_sku ? `<br/><span style="color: #888888; font-size: 11px; font-family: monospace;">SKU: ${item.variant_sku}</span>` : ""}
+          <strong style="color: #111111; font-size: 14px;">${escapeHtml(item.product_title || item.title || "Garment")}</strong>
+          ${item.variant_title ? `<br/><span style="color: #666666; font-size: 12px;">Variant: ${escapeHtml(item.variant_title)}</span>` : ""}
+          ${item.variant_sku ? `<br/><span style="color: #888888; font-size: 11px; font-family: monospace;">SKU: ${escapeHtml(item.variant_sku)}</span>` : ""}
         </td>
         <td style="padding: 12px 0; border-bottom: 1px solid #E5E0D8; text-align: center; color: #111111; font-size: 13px;">
           ${item.quantity}
@@ -68,7 +70,7 @@ export function generateOrderPlacedEmail(data: OrderPlacedTemplateData): {
 
   const address = order.shipping_address
   const addressText = address
-    ? `${address.first_name || ""} ${address.last_name || ""}<br/>${address.address_1 || ""}${address.address_2 ? `<br/>${address.address_2}` : ""}<br/>${address.city || ""}, ${address.postal_code || ""}<br/>Phone: ${address.phone || "N/A"}`
+    ? `${escapeHtml(address.first_name || "")} ${escapeHtml(address.last_name || "")}<br/>${escapeHtml(address.address_1 || "")}${address.address_2 ? `<br/>${escapeHtml(address.address_2)}` : ""}<br/>${escapeHtml(address.city || "")}, ${escapeHtml(address.postal_code || "")}<br/>Phone: ${escapeHtml(address.phone || "N/A")}`
     : "Standard Delivery"
 
   const html = `
@@ -103,7 +105,7 @@ export function generateOrderPlacedEmail(data: OrderPlacedTemplateData): {
                 Order Confirmed (Cash on Delivery)
               </div>
               <h2 style="margin: 0 0 8px; font-size: 22px; color: #EDE6DC; font-weight: 600;">
-                Thank you for your order, ${address?.first_name || "Valued Customer"}
+                Thank you for your order, ${escapeHtml(address?.first_name || "Valued Customer")}
               </h2>
               <p style="margin: 0; color: #CCCCCC; font-size: 14px; line-height: 1.6;">
                 Your order <strong>#${displayId}</strong> has been received and is currently being prepared at our Dhaka Central Warehouse. Total payable upon delivery: <strong>${formattedTotal}</strong>.

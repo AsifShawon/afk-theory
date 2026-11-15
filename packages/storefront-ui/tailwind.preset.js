@@ -116,6 +116,10 @@ module.exports = {
           "99%": { height: "0" },
           "100%": { visibility: "hidden" },
         },
+        "reveal-up": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
         "mega-enter": {
           "0%": { opacity: "0", transform: "translateY(-4px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
@@ -178,6 +182,8 @@ module.exports = {
         "fade-in-right": "fade-in-right 0.3s cubic-bezier(0.5, 0, 0.5, 1) forwards",
         "fade-in-top": "fade-in-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",
         "fade-out-top": "fade-out-top 0.2s cubic-bezier(0.5, 0, 0.5, 1) forwards",
+        // "backwards" (not "both"): after the animation the element has no leftover transform.
+        "reveal-up": "reveal-up 600ms cubic-bezier(0.16, 1, 0.3, 1) backwards",
         "mega-enter": "mega-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "accordion-open": "accordion-slide-down 300ms cubic-bezier(0.87, 0, 0.13, 1) forwards",
         "accordion-close": "accordion-slide-up 300ms cubic-bezier(0.87, 0, 0.13, 1) forwards",

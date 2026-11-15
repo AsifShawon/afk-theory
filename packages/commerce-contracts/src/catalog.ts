@@ -30,6 +30,7 @@ export interface ProductVariantView {
   options: Record<string, string>
   inventoryQuantity?: number
   manageInventory: boolean
+  allowBackorder?: boolean
   inStock: boolean
   images?: ImageView[]
 }

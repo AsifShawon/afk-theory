@@ -1,5 +1,5 @@
 import React from "react"
-import { ProductVariantView, ProductView } from "@dtc/commerce-contracts"
+import { LOW_STOCK_THRESHOLD, ProductVariantView, ProductView } from "@dtc/commerce-contracts"
 
 export interface ProductInfoProps {
   product: ProductView
@@ -17,7 +17,7 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
     ? selectedVariant.inventoryQuantity
     : product.totalStock
 
-  const isLowStock = !isSoldOut && stockQty !== undefined && stockQty > 0 && stockQty <= 5
+  const isLowStock = !isSoldOut && stockQty !== undefined && stockQty > 0 && stockQty <= LOW_STOCK_THRESHOLD
 
   return (
     <div className="space-y-4 border-b border-brand-border pb-6">

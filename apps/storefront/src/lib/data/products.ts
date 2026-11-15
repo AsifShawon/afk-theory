@@ -151,3 +151,32 @@ export const listProductsWithSort = async ({
     queryParams,
   }
 }
+
+/**
+ * Fetches every product for a region by walking through the pages, for the
+ * sitemap and static page generation. A page cap protects against a runaway loop.
+ */
+export const listAllProducts = async ({
+  countryCode,
+  fields,
+}: {
+  countryCode: string
+  fields?: string
+}): Promise<HttpTypes.StoreProduct[]> => {
+  const MAX_PAGES = 50
+  const all: HttpTypes.StoreProduct[] = []
+  let page = 1
+
+  for (let i = 0; i < MAX_PAGES; i++) {
+    const { response, nextPage } = await listProducts({
+      pageParam: page,
+      countryCode,
+      queryParams: { limit: 100, ...(fields ? { fields } : {}) },
+    })
+    all.push(...response.products)
+    if (!nextPage) break
+    page = nextPage
+  }
+
+  return all
+}

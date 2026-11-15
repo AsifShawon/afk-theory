@@ -4,9 +4,13 @@ import React, { useMemo, useState } from "react"
 import {
   DEFAULT_MEDUSA_CAPABILITIES,
   ProductView,
+  applyOptionChange,
+  findVariantByOptions,
+  getMaxPurchasableQuantity,
+  pickInitialSelection,
 } from "@dtc/commerce-contracts"
 import { ProductDetailView } from "@dtc/storefront-ui"
-import { addToCart } from "@lib/data/cart"
+import { addToCartWithResult } from "@lib/data/cart"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { createMedusaRoutes } from "../../../../adapters/medusa/routes"
 
@@ -21,43 +25,53 @@ export default function MedusaProductDetailClient({
   countryCode,
   children,
 }: MedusaProductDetailClientProps) {
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
-    return product.variants[0]?.options || {}
-  })
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() =>
+    pickInitialSelection(product.variants)
+  )
   const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
+  const [addToCartError, setAddToCartError] = useState<string | null>(null)
 
   const routes = createMedusaRoutes(countryCode)
 
   const handleSelectOption = (title: string, value: string) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [title.toLowerCase()]: value,
-    }))
+    setAddToCartError(null)
+    setSelectedOptions((prev) => applyOptionChange(product.variants, prev, title, value))
   }
 
-  const selectedVariant = useMemo(() => {
-    return (
-      product.variants.find((v) => {
-        return Object.entries(selectedOptions).every(
-          ([optKey, optVal]) =>
-            v.options[optKey.toLowerCase()]?.toLowerCase() === optVal.toLowerCase()
-        )
-      }) || product.variants[0]
-    )
-  }, [product.variants, selectedOptions])
+  // Exact match only. A missing combination must never resolve to another variant.
+  const selectedVariant = useMemo(
+    () => findVariantByOptions(product.variants, selectedOptions),
+    [product.variants, selectedOptions]
+  )
+
+  // Keep the quantity within stock when the customer switches to a variant with less of it.
+  const maxQuantity = getMaxPurchasableQuantity(selectedVariant)
+  const effectiveQuantity =
+    maxQuantity !== undefined && maxQuantity > 0 ? Math.min(quantity, maxQuantity) : quantity
 
   const handleAddToCart = async () => {
-    if (!selectedVariant) return
+    if (!selectedVariant) {
+      setAddToCartError("Please choose an available size and colour.")
+      return
+    }
+
+    setAddToCartError(null)
+    setIsAdding(true)
+
     try {
-      setIsAdding(true)
-      await addToCart({
+      const result = await addToCartWithResult({
         variantId: selectedVariant.id,
-        quantity,
+        quantity: effectiveQuantity,
         countryCode,
       })
+
+      if (!result.success) {
+        setAddToCartError(result.message)
+      }
     } catch (error) {
       console.error("Failed to add to bag:", error)
+      setAddToCartError("We couldn't add this item to your bag. Please try again.")
     } finally {
       setIsAdding(false)
     }
@@ -69,10 +83,11 @@ export default function MedusaProductDetailClient({
       selectedOptions={selectedOptions}
       onSelectOption={handleSelectOption}
       selectedVariant={selectedVariant}
-      quantity={quantity}
+      quantity={effectiveQuantity}
       onQuantityChange={setQuantity}
       onAddToCart={handleAddToCart}
       isAddingToCart={isAdding}
+      addToCartError={addToCartError}
       routes={routes}
       capabilities={DEFAULT_MEDUSA_CAPABILITIES}
       linkComponent={LocalizedClientLink}

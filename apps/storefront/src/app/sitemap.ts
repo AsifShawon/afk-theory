@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next"
-import { listProducts } from "@lib/data/products"
+import { listAllProducts } from "@lib/data/products"
 import { listCollections } from "@lib/data/collections"
 import { listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
@@ -26,12 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const primaryCountry = countryCodes[0] || "bd"
 
     // Fetch all catalog entities
-    const [{ response: productRes }, { collections }, categories] =
+    const [allProducts, { collections }, categories] =
       await Promise.all([
-        listProducts({
+        listAllProducts({
           countryCode: primaryCountry,
-          queryParams: { limit: 100, fields: "id,handle,updated_at" },
-        }).catch(() => ({ response: { products: [] } })),
+          fields: "id,handle,updated_at",
+        }).catch(() => []),
         listCollections({ fields: "id,handle,updated_at" }).catch(() => ({
           collections: [],
         })),
@@ -78,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 2. Dynamic Product Pages
     const productEntries: MetadataRoute.Sitemap = []
     for (const country of countryCodes.length > 0 ? countryCodes : ["bd"]) {
-      for (const product of productRes?.products || []) {
+      for (const product of allProducts) {
         if (product.handle) {
           productEntries.push({
             url: `${baseUrl}/${country}/products/${product.handle}`,

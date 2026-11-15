@@ -5,7 +5,13 @@ import { createPortal } from "react-dom"
 import Link from "next/link"
 import Image from "next/image"
 import clsx from "clsx"
-import { ProductView, QuickAddRequest, QuickAddResult } from "@dtc/commerce-contracts"
+import {
+  ProductView,
+  QuickAddRequest,
+  QuickAddResult,
+  getGalleryImages,
+  getVariantOption,
+} from "@dtc/commerce-contracts"
 import { COLOR_SWATCHES } from "../../theme/colors"
 import { LinkComponent } from "../../types"
 import { XMarkIcon, CheckIcon } from "../icons"
@@ -102,8 +108,8 @@ export function MobileQuickAddSheet({
       if (selectedSize) {
         const variantForNewColor = product.variants.find(
           (v) =>
-            v.options["Color"]?.toLowerCase() === newColor.toLowerCase() &&
-            v.options["Size"]?.toLowerCase() === selectedSize.toLowerCase()
+            getVariantOption(v, "Color")?.toLowerCase() === newColor.toLowerCase() &&
+            getVariantOption(v, "Size")?.toLowerCase() === selectedSize.toLowerCase()
         )
         if (!variantForNewColor) {
           // Combination does not exist for this color, clear size selection
@@ -134,23 +140,23 @@ export function MobileQuickAddSheet({
     }
     return product.variants.find((v) => {
       const matchColor =
-        !colorOption || v.options["Color"]?.toLowerCase() === selectedColor.toLowerCase()
+        !colorOption || getVariantOption(v, "Color")?.toLowerCase() === selectedColor.toLowerCase()
       const matchSize =
-        !sizeOption || v.options["Size"]?.toLowerCase() === selectedSize.toLowerCase()
+        !sizeOption || getVariantOption(v, "Size")?.toLowerCase() === selectedSize.toLowerCase()
       return matchColor && matchSize
     })
   }, [product.variants, colorOption, sizeOption, selectedColor, selectedSize])
 
-  // Color-specific imagery
+  // Color-specific imagery: images linked to variants of the selected colour
   const activeThumbnail = useMemo(() => {
-    if (selectedColor) {
-      const match = product.images.find((img) =>
-        img.altText?.toLowerCase().includes(selectedColor.toLowerCase())
-      )
-      if (match) return match
+    if (colorOption && selectedColor) {
+      const linked = getGalleryImages(product, {
+        [colorOption.title.toLowerCase()]: selectedColor,
+      })[0]
+      if (linked) return linked
     }
     return product.thumbnail || product.images[0]
-  }, [product.images, product.thumbnail, selectedColor])
+  }, [product, colorOption, selectedColor])
 
   const isSizeRequired = Boolean(sizeOption && sizeOption.values.length > 1 && !selectedSize)
   const isCombinationMissing = Boolean(selectedSize && !activeVariant)
@@ -314,8 +320,8 @@ export function MobileQuickAddSheet({
                 const isSelected = selectedSize.toLowerCase() === size.toLowerCase()
                 const variant = product.variants.find((v) => {
                   const matchColor =
-                    !colorOption || v.options["Color"]?.toLowerCase() === selectedColor.toLowerCase()
-                  const matchSize = v.options["Size"]?.toLowerCase() === size.toLowerCase()
+                    !colorOption || getVariantOption(v, "Color")?.toLowerCase() === selectedColor.toLowerCase()
+                  const matchSize = getVariantOption(v, "Size")?.toLowerCase() === size.toLowerCase()
                   return matchColor && matchSize
                 })
                 const combinationMissing = !variant

@@ -16,6 +16,8 @@ export interface CartViewProps {
   onApplyPromoCode?: (code: string) => Promise<boolean | void> | boolean | void
   onRemovePromoCode?: (code: string) => Promise<void> | void
   promoError?: string
+  /** Shown above the items when a quantity change was refused (for example, low stock). */
+  quantityError?: string
   routes: StoreRoutes
   capabilities?: StoreCapabilities
   onProceedToCheckout?: () => void
@@ -31,6 +33,7 @@ export function CartView({
   onApplyPromoCode,
   onRemovePromoCode,
   promoError,
+  quantityError,
   routes,
   capabilities,
   onProceedToCheckout,
@@ -51,7 +54,7 @@ export function CartView({
               Your Shopping Bag is Empty
             </h1>
             <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-              You haven&apos;t added any British smart-casual clothing to your bag yet. Explore our authentic heavyweight tees, oxford shirts, and chinos.
+              Your bag is empty. Explore our oversized drop shoulder tees and street essentials.
             </p>
           </div>
           <div className="pt-2">
@@ -97,6 +100,14 @@ export function CartView({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
           {/* Items List (7 cols) */}
           <div className="lg:col-span-7">
+            {quantityError && (
+              <p
+                role="alert"
+                className="mb-4 text-xs font-heading font-semibold text-rose-800 bg-rose-50 border border-rose-200 px-3 py-2"
+              >
+                {quantityError}
+              </p>
+            )}
             <CartItemList
               items={cart.items}
               onUpdateQuantity={onUpdateQuantity}

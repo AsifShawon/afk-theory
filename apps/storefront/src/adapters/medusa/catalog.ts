@@ -7,22 +7,33 @@ import {
   ProductOptionView,
   ProductVariantView,
   ProductView,
+  buildImageAlt,
+  resolveVariantStock,
+  sumTrackedStock,
 } from "@dtc/commerce-contracts"
 import { normalizeImageUrl } from "@lib/util/image-url"
 
-export function toImageView(image: { id?: string; url: string }): ImageView {
+export function toImageView(
+  image: { id?: string; url: string },
+  altText: string = "AFK THEORY Streetwear Apparel"
+): ImageView {
   const url = normalizeImageUrl(image.url) || image.url
   return {
     id: image.id || image.url,
     url,
-    altText: "AFK THEORY Streetwear Apparel",
+    altText,
   }
 }
 
 export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCode: string = "bdt"): ProductView {
-  const images: ImageView[] = (medusaProduct.images || []).map(toImageView)
+  const images: ImageView[] = (medusaProduct.images || []).map((image, position) =>
+    toImageView(image, buildImageAlt({ productTitle: medusaProduct.title, position }))
+  )
   const thumbnail: ImageView | undefined = medusaProduct.thumbnail
-    ? toImageView({ id: medusaProduct.id, url: medusaProduct.thumbnail })
+    ? toImageView(
+        { id: medusaProduct.id, url: medusaProduct.thumbnail },
+        buildImageAlt({ productTitle: medusaProduct.title })
+      )
     : images[0]
 
   // Options
@@ -55,10 +66,11 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
       })
     }
 
-    const inventoryQty = v.inventory_quantity ?? 10
-    const inStock = Boolean(
-      !v.manage_inventory || v.allow_backorder || (inventoryQty !== null && inventoryQty > 0)
-    )
+    const stock = resolveVariantStock({
+      manageInventory: Boolean(v.manage_inventory),
+      allowBackorder: Boolean(v.allow_backorder),
+      inventoryQuantity: v.inventory_quantity,
+    })
 
     return {
       id: v.id,
@@ -67,11 +79,24 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
       price: createMoneyView(calculatedPrice, currencyCode),
       originalPrice: originalPrice ? createMoneyView(originalPrice, currencyCode) : undefined,
       options: optionMap,
-      inventoryQuantity: inventoryQty,
+      inventoryQuantity: stock.inventoryQuantity,
       manageInventory: Boolean(v.manage_inventory),
-      inStock,
+      allowBackorder: Boolean(v.allow_backorder),
+      inStock: stock.inStock,
+      images: (v.images || []).map((image, position) =>
+        toImageView(
+          image,
+          buildImageAlt({
+            productTitle: medusaProduct.title,
+            color: optionMap["color"] || optionMap["colour"],
+            position,
+          })
+        )
+      ),
     }
   })
+
+  const totalStock = sumTrackedStock(variants)
 
   if (minAmount === Infinity) minAmount = 0
   if (maxAmount === 0) maxAmount = minAmount
@@ -106,6 +131,7 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
     maxPrice: createMoneyView(maxAmount, currencyCode),
     isNewArrival,
     isBestSeller,
+    totalStock,
     inStock,
     metadata: (medusaProduct.metadata as Record<string, string | number | boolean | null>) || undefined,
   }

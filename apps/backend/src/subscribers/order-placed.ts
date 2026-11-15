@@ -2,6 +2,7 @@ import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { generateOrderPlacedEmail, OrderPlacedTemplateData } from "../modules/email-notifications/templates/order-placed"
 import { emailService } from "../modules/email-notifications/email-service"
+import { notifyOwnerNewOrder } from "../modules/email-notifications/order-notifications"
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -32,6 +33,18 @@ export default async function orderPlacedHandler({
     })
 
     const order = orders[0]
+
+    // Alert the store owner (optional: set ORDER_NOTIFICATION_EMAIL). A failure here must
+    // never stop the customer's confirmation email.
+    if (order) {
+      try {
+        await notifyOwnerNewOrder(order as unknown as OrderPlacedTemplateData["order"])
+      } catch (alertError: unknown) {
+        const msg = alertError instanceof Error ? alertError.message : String(alertError)
+        logger.error(`[Subscriber: order.placed] Failed to send owner alert: ${msg}`)
+      }
+    }
+
     if (!order || !order.email) {
       logger.warn(`[Subscriber: order.placed] Order ${data.id} has no email address or was not found.`)
       return

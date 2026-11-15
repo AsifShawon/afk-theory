@@ -9,6 +9,7 @@ import {
   validateDeliveryOptionForAddress,
   classifyAddress,
 } from "./shipping-validator"
+import { RATE_LIMITS, rateLimit } from "./rate-limit"
 
 /**
  * Authoritative backend validation when customer or API selects a shipping method.
@@ -241,6 +242,23 @@ async function handleCartAddressChange(
 
 export default defineMiddlewares({
   routes: [
+    // Brute-force and abuse protection (see rate-limit.ts).
+    // Every matching middleware runs, so the stricter password-reset limit stacks on the general auth one.
+    {
+      matcher: "/auth/*",
+      method: ["POST"],
+      middlewares: [rateLimit(RATE_LIMITS.auth)],
+    },
+    {
+      matcher: "/auth/customer/emailpass/reset-password",
+      method: ["POST"],
+      middlewares: [rateLimit(RATE_LIMITS.passwordReset)],
+    },
+    {
+      matcher: "/store/customers",
+      method: ["POST"],
+      middlewares: [rateLimit(RATE_LIMITS.register)],
+    },
     {
       matcher: "/admin/campaign-slides*",
       middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
@@ -257,7 +275,7 @@ export default defineMiddlewares({
     {
       matcher: "/store/carts/:id/complete",
       method: "POST",
-      middlewares: [validateCartBeforeCompletion],
+      middlewares: [rateLimit(RATE_LIMITS.checkout), validateCartBeforeCompletion],
     },
     {
       matcher: "/store/carts/:id",

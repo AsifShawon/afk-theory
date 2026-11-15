@@ -1,15 +1,14 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
+import { listAllProducts, listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
+import { getSeoOverrides } from "@dtc/commerce-contracts"
 import { constructMetadata, getBreadcrumbSchema, getProductSchema } from "@lib/util/seo"
 import JsonLd from "@modules/common/components/json-ld"
 import ProductTemplate from "@modules/products/templates"
-import { HttpTypes } from "@medusajs/types"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
-  searchParams: Promise<{ v_id?: string }>
 }
 
 export async function generateStaticParams() {
@@ -22,15 +21,17 @@ export async function generateStaticParams() {
       return []
     }
 
-    const promises = countryCodes.map(async (country) => {
-      const { response } = await listProducts({
+    const promises = countryCodes
+      .filter((country): country is string => Boolean(country))
+      .map(async (country) => {
+      const products = await listAllProducts({
         countryCode: country,
-        queryParams: { limit: 100, fields: "handle" },
+        fields: "handle",
       })
 
       return {
         country,
-        products: response.products,
+        products,
       }
     })
 
@@ -54,23 +55,6 @@ export async function generateStaticParams() {
   }
 }
 
-function getImagesForVariant(
-  product: HttpTypes.StoreProduct,
-  selectedVariantId?: string
-) {
-  if (!selectedVariantId || !product.variants) {
-    return product.images
-  }
-
-  const variant = product.variants!.find((v) => v.id === selectedVariantId)
-  if (!variant || !variant.images?.length) {
-    return product.images
-  }
-
-  const imageIdsMap = new Map(variant.images!.map((i) => [i.id, true]))
-  return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? null
-}
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
   const { handle, countryCode } = params
@@ -89,8 +73,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
-  const title = `${product.title} | AFK THEORY`
+  // Owner-written SEO text (admin: product > SEO) wins; otherwise fall back to the product copy.
+  const seo = getSeoOverrides(product.metadata)
+  const title = seo.title || product.title
   const description =
+    seo.description ||
     product.description ||
     product.subtitle ||
     `${product.title} - Modern independent streetwear crafted with premium high-density cotton for Bangladesh.`
@@ -108,9 +95,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function ProductPage(props: Props) {
   const params = await props.params
   const region = await getRegion(params.countryCode)
-  const searchParams = await props.searchParams
-
-  const selectedVariantId = searchParams.v_id
 
   if (!region) {
     notFound()
@@ -124,8 +108,6 @@ export default async function ProductPage(props: Props) {
   if (!pricedProduct) {
     notFound()
   }
-
-  const images = getImagesForVariant(pricedProduct, selectedVariantId)
 
   const productSchema = getProductSchema({
     product: pricedProduct,
@@ -149,7 +131,6 @@ export default async function ProductPage(props: Props) {
         product={pricedProduct}
         region={region}
         countryCode={params.countryCode}
-        images={images ?? []}
       />
     </>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useMemo, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -11,6 +11,8 @@ import {
   QuickAddResult,
   StoreCapabilities,
   StoreRoutes,
+  getGalleryImages,
+  getMaxPurchasableQuantity,
 } from "@dtc/commerce-contracts"
 import { ImageGallery } from "../components/product/ImageGallery"
 import { ProductInfo } from "../components/product/ProductInfo"
@@ -34,6 +36,8 @@ export interface ProductDetailViewProps {
   onAddToCart: () => void | Promise<void>
   onQuickAdd?: (req: QuickAddRequest) => Promise<QuickAddResult>
   isAddingToCart?: boolean
+  /** Customer-facing message shown when adding to the bag failed. */
+  addToCartError?: string | null
   routes: StoreRoutes
   capabilities?: StoreCapabilities
   breadcrumbs?: Array<{ label: string; href: string }>
@@ -55,6 +59,7 @@ export function ProductDetailView({
   onAddToCart,
   onQuickAdd,
   isAddingToCart = false,
+  addToCartError = null,
   routes,
   capabilities,
   breadcrumbs,
@@ -69,6 +74,17 @@ export function ProductDetailView({
   const isSoldOut = selectedVariant
     ? !selectedVariant.inStock
     : !product.inStock
+
+  // Stock-based limit for the quantity stepper (undefined = no limit known).
+  const maxQuantity = getMaxPurchasableQuantity(selectedVariant)
+  const isAtMaxQuantity = maxQuantity !== undefined && quantity >= maxQuantity
+
+  // Gallery follows the selected colour when images are linked to variants.
+  const galleryImages = useMemo(
+    () => getGalleryImages({ images: product.images, options, variants }, selectedOptions),
+    [product.images, options, variants, selectedOptions]
+  )
+  const galleryKey = galleryImages.map((img) => img.id).join("|")
 
   // Mobile scroll observer: show sticky bottom bar when main CTA is scrolled past
   useEffect(() => {
@@ -126,7 +142,7 @@ export function ProductDetailView({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
           {/* Left Media Gallery */}
           <div className="lg:col-span-7">
-            <ImageGallery images={product.images} title={product.title} />
+            <ImageGallery key={galleryKey} images={galleryImages} title={product.title} />
           </div>
 
           {/* Right Product Actions & Details (Desktop Sticky Column) */}
@@ -163,8 +179,12 @@ export function ProductDetailView({
                   </span>
                   <button
                     type="button"
-                    onClick={() => onQuantityChange(quantity + 1)}
-                    disabled={isSoldOut}
+                    onClick={() =>
+                      onQuantityChange(
+                        maxQuantity !== undefined ? Math.min(maxQuantity, quantity + 1) : quantity + 1
+                      )
+                    }
+                    disabled={isSoldOut || isAtMaxQuantity}
                     className="w-9 h-full flex items-center justify-center text-brand-primary hover:bg-brand-secondary rounded-full disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     aria-label="Increase quantity"
                   >
@@ -184,6 +204,21 @@ export function ProductDetailView({
                   {isSoldOut ? "Sold Out" : `Add to Bag • ${selectedVariant?.price.formatted || product.minPrice.formatted}`}
                 </Button>
               </div>
+
+              {isAtMaxQuantity && !isSoldOut && (
+                <p className="text-[11px] font-heading text-brand-muted">
+                  You&apos;ve selected the maximum available quantity ({maxQuantity}).
+                </p>
+              )}
+
+              {addToCartError && (
+                <p
+                  role="alert"
+                  className="text-xs font-heading font-semibold text-rose-800 bg-rose-50 border border-rose-200 px-3 py-2"
+                >
+                  {addToCartError}
+                </p>
+              )}
 
               {shareSlot}
             </div>
@@ -241,9 +276,15 @@ export function ProductDetailView({
               <p className="font-heading font-bold text-xs text-brand-primary truncate">
                 {product.title}
               </p>
-              <p className="font-heading font-semibold text-[11px] text-brand-primary/80">
-                {selectedVariant?.price.formatted || product.minPrice.formatted}
-              </p>
+              {addToCartError ? (
+                <p role="alert" className="font-heading font-semibold text-[11px] text-rose-800 line-clamp-2">
+                  {addToCartError}
+                </p>
+              ) : (
+                <p className="font-heading font-semibold text-[11px] text-brand-primary/80">
+                  {selectedVariant?.price.formatted || product.minPrice.formatted}
+                </p>
+              )}
             </div>
           </div>
 

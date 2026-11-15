@@ -3,6 +3,7 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
+import type { QuickAddRequest, QuickAddResult } from "@dtc/commerce-contracts"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
@@ -165,6 +166,64 @@ export async function addToCart({
     .catch(medusaError)
 }
 
+export type AddToCartResult =
+  | { success: true }
+  | { success: false; message: string }
+
+function toCustomerFacingCartError(
+  error: unknown,
+  fallback = "We couldn't add this item to your bag. Please try again."
+): string {
+  const raw = error instanceof Error ? error.message : ""
+
+  if (/inventory|stock|available quantity|required quantity/i.test(raw)) {
+    return "Sorry, this size is no longer available in the quantity you selected."
+  }
+
+  return fallback
+}
+
+/**
+ * Same as addToCart, but returns a result instead of throwing.
+ *
+ * Next.js replaces the message of errors thrown from server actions with a
+ * generic one in production, so client components cannot show a useful message
+ * from a thrown error. Returning the result keeps the message intact.
+ */
+export async function addToCartWithResult(args: {
+  variantId: string
+  quantity: number
+  countryCode: string
+}): Promise<AddToCartResult> {
+  try {
+    await addToCart(args)
+    return { success: true }
+  } catch (error) {
+    console.error("[addToCart] failed:", error)
+    return { success: false, message: toCustomerFacingCartError(error) }
+  }
+}
+
+/**
+ * Quick Add from product cards and rails. Takes the country code as its first
+ * argument so it can be bound on the server (quickAddToCart.bind(null, code))
+ * or called from client components.
+ */
+export async function quickAddToCart(
+  countryCode: string,
+  request: QuickAddRequest
+): Promise<QuickAddResult> {
+  const result = await addToCartWithResult({
+    variantId: request.variantId,
+    quantity: request.quantity,
+    countryCode,
+  })
+
+  return result.success
+    ? { success: true }
+    : { success: false, message: result.message }
+}
+
 export async function updateLineItem({
   lineId,
   quantity,
@@ -196,6 +255,29 @@ export async function updateLineItem({
       revalidateTag(fulfillmentCacheTag)
     })
     .catch(medusaError)
+}
+
+/**
+ * Same as updateLineItem, but returns a result so the cart page can show why a
+ * quantity change was refused (for example, not enough stock).
+ */
+export async function updateLineItemWithResult(args: {
+  lineId: string
+  quantity: number
+}): Promise<AddToCartResult> {
+  try {
+    await updateLineItem(args)
+    return { success: true }
+  } catch (error) {
+    console.error("[updateLineItem] failed:", error)
+    return {
+      success: false,
+      message: toCustomerFacingCartError(
+        error,
+        "We couldn't update your bag. Please try again."
+      ),
+    }
+  }
 }
 
 export async function deleteLineItem(lineId: string) {

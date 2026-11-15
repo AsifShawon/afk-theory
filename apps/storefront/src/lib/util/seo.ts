@@ -1,6 +1,12 @@
 import { getBaseURL } from "./env"
 import { Metadata } from "next"
 import { HttpTypes } from "@medusajs/types"
+import {
+  buildPageTitle,
+  getSeoOverrides,
+  resolveVariantStock,
+  truncateMetaDescription,
+} from "@dtc/commerce-contracts"
 
 export const DEFAULT_STORE_NAME = "AFK THEORY"
 export const DEFAULT_STORE_TAGLINE = "PAUSE THE GAME. KEEP YOUR STYLE."
@@ -41,9 +47,13 @@ export function constructMetadata({
 
   const canonicalUrl = canonical ? getCanonicalUrl(canonical) : undefined
 
+  // Brand once in the <title> (the layout template adds it), snippet-length description.
+  const { metaTitle, socialTitle } = buildPageTitle(title)
+  const metaDescription = truncateMetaDescription(description) || DEFAULT_STORE_DESCRIPTION
+
   return {
-    title,
-    description,
+    title: metaTitle,
+    description: metaDescription,
     metadataBase: new URL(base),
     ...(canonicalUrl && {
       alternates: {
@@ -51,16 +61,16 @@ export function constructMetadata({
       },
     }),
     openGraph: {
-      title,
-      description,
+      title: socialTitle,
+      description: metaDescription,
       url: canonicalUrl || base,
       siteName: DEFAULT_STORE_NAME,
       images: [
         {
           url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
+          // The default share image is 1200x630; product photos have their own proportions.
+          ...(image ? {} : { width: 1200, height: 630 }),
+          alt: socialTitle,
         },
       ],
       type: "website",
@@ -68,8 +78,8 @@ export function constructMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: socialTitle,
+      description: metaDescription,
       images: [ogImage],
     },
     ...(noIndex && {
@@ -156,60 +166,75 @@ export function getProductSchema({
     images.unshift(product.thumbnail)
   }
 
-  // Calculate cheapest price or price from variants (only consider positive numbers)
-  let minPrice: number | null = null
-  let inStock = false
   const currency = region.currency_code.toUpperCase()
+  const seo = getSeoOverrides(product.metadata)
 
-  if (product.variants && product.variants.length > 0) {
-    const prices = product.variants
-      .map((v) => v.calculated_price?.calculated_amount)
-      .filter((p): p is number => typeof p === "number" && !isNaN(p) && p > 0)
-    if (prices.length > 0) {
-      minPrice = Math.min(...prices)
-    }
+  // One offer per purchasable-or-not variant, each with its own price, SKU and availability.
+  const offers = (product.variants || [])
+    .map((v) => {
+      const price = v.calculated_price?.calculated_amount
+      if (typeof price !== "number" || Number.isNaN(price) || price <= 0) return null
 
-    inStock = product.variants.some((v) => {
-      if (!v.manage_inventory) return true
-      if (v.allow_backorder) return true
-      return (v.inventory_quantity || 0) > 0
+      const stock = resolveVariantStock({
+        manageInventory: Boolean(v.manage_inventory),
+        allowBackorder: Boolean(v.allow_backorder),
+        inventoryQuantity: v.inventory_quantity,
+      })
+
+      return {
+        "@type": "Offer",
+        url: canonicalUrl,
+        sku: v.sku || undefined,
+        priceCurrency: currency,
+        price: price.toString(),
+        availability: stock.inStock
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: {
+          "@type": "Organization",
+          name: DEFAULT_STORE_NAME,
+        },
+      }
     })
-  }
+    .filter((offer): offer is NonNullable<typeof offer> => offer !== null)
 
   const defaultSku = product.variants?.[0]?.sku || `AFK-${product.id.slice(-6).toUpperCase()}`
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: (product.metadata?.seo_title as string) || product.title,
-    description:
-      (product.metadata?.seo_description as string) ||
-      product.description ||
-      product.subtitle ||
-      product.title,
+    // The product's real name; SEO title overrides are for the page <title> only.
+    name: product.title,
+    description: truncateMetaDescription(
+      seo.description || product.description || product.subtitle || product.title,
+      5000
+    ),
     image: images.length > 0 ? images : [`${base}/opengraph-image.jpg`],
     sku: defaultSku,
+    url: canonicalUrl,
     brand: {
       "@type": "Brand",
       name: DEFAULT_STORE_NAME,
     },
+    ...(product.material ? { material: product.material } : {}),
   }
 
-  // Only include offer if a genuine price exists (never output price: "0")
-  if (minPrice !== null) {
+  // Only include offers when a genuine price exists (never output price: "0")
+  if (offers.length === 1) {
+    schema.offers = offers[0]
+  } else if (offers.length > 1) {
+    const prices = offers.map((offer) => Number(offer.price))
     schema.offers = {
-      "@type": "Offer",
-      url: canonicalUrl,
+      "@type": "AggregateOffer",
       priceCurrency: currency,
-      price: minPrice.toString(),
-      availability: inStock
+      lowPrice: Math.min(...prices).toString(),
+      highPrice: Math.max(...prices).toString(),
+      offerCount: offers.length,
+      availability: offers.some((offer) => offer.availability === "https://schema.org/InStock")
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      itemCondition: "https://schema.org/NewCondition",
-      seller: {
-        "@type": "Organization",
-        name: DEFAULT_STORE_NAME,
-      },
+      offers,
     }
   }
 

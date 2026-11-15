@@ -8,7 +8,7 @@ import {
   DEFAULT_MEDUSA_CAPABILITIES,
 } from "@dtc/commerce-contracts"
 import { CartView } from "@dtc/storefront-ui"
-import { applyPromotions, deleteLineItem, updateLineItem } from "@lib/data/cart"
+import { applyPromotions, deleteLineItem, updateLineItemWithResult } from "@lib/data/cart"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { createMedusaRoutes } from "../../../../adapters/medusa/routes"
 
@@ -26,12 +26,20 @@ export default function MedusaCartClient({ cart }: MedusaCartClientProps) {
 
   const [promoError, setPromoError] = useState<string | undefined>()
 
+  const [quantityError, setQuantityError] = useState<string | undefined>()
+
   const handleUpdateQuantity = async (lineId: string, quantity: number) => {
+    setQuantityError(undefined)
     try {
-      await updateLineItem({ lineId, quantity })
+      const result = await updateLineItemWithResult({ lineId, quantity })
+      if (!result.success) {
+        setQuantityError(result.message)
+        return
+      }
       router.refresh()
     } catch (error: unknown) {
       console.error("Error updating quantity:", getErrorMessage(error))
+      setQuantityError("We couldn't update your bag. Please try again.")
     }
   }
 
@@ -76,6 +84,7 @@ export default function MedusaCartClient({ cart }: MedusaCartClientProps) {
       onRemoveItem={handleRemoveItem}
       onApplyPromoCode={handleApplyPromoCode}
       promoError={promoError}
+      quantityError={quantityError}
       routes={routes}
       capabilities={DEFAULT_MEDUSA_CAPABILITIES}
       linkComponent={LocalizedClientLink}
