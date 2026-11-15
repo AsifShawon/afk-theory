@@ -5,7 +5,13 @@ import { createPortal } from "react-dom"
 import Link from "next/link"
 import Image from "next/image"
 import clsx from "clsx"
-import { ProductView, QuickAddRequest, QuickAddResult } from "@dtc/commerce-contracts"
+import {
+  ProductView,
+  QuickAddRequest,
+  QuickAddResult,
+  resolvePriceDisplay,
+  getVariantOptionValue,
+} from "@dtc/commerce-contracts"
 import { COLOR_SWATCHES } from "../../theme/colors"
 import { LinkComponent } from "../../types"
 import { XMarkIcon, CheckIcon } from "../icons"
@@ -100,11 +106,16 @@ export function MobileQuickAddSheet({
       setErrorMessage(null)
 
       if (selectedSize) {
-        const variantForNewColor = product.variants.find(
-          (v) =>
-            v.options["Color"]?.toLowerCase() === newColor.toLowerCase() &&
-            v.options["Size"]?.toLowerCase() === selectedSize.toLowerCase()
-        )
+        const variantForNewColor = product.variants.find((v) => {
+          const colorVal = getVariantOptionValue(v, "color")
+          const sizeVal = getVariantOptionValue(v, "size")
+          return (
+            colorVal &&
+            colorVal.toLowerCase() === newColor.toLowerCase() &&
+            sizeVal &&
+            sizeVal.toLowerCase() === selectedSize.toLowerCase()
+          )
+        })
         if (!variantForNewColor) {
           // Combination does not exist for this color, clear size selection
           setSelectedSize("")
@@ -133,13 +144,24 @@ export function MobileQuickAddSheet({
       return undefined
     }
     return product.variants.find((v) => {
+      const colorVal = getVariantOptionValue(v, "color")
       const matchColor =
-        !colorOption || v.options["Color"]?.toLowerCase() === selectedColor.toLowerCase()
+        !colorOption ||
+        (colorVal && colorVal.toLowerCase() === selectedColor.toLowerCase())
+      const sizeVal = getVariantOptionValue(v, "size")
       const matchSize =
-        !sizeOption || v.options["Size"]?.toLowerCase() === selectedSize.toLowerCase()
+        !sizeOption || (sizeVal && sizeVal.toLowerCase() === selectedSize.toLowerCase())
       return matchColor && matchSize
     })
   }, [product.variants, colorOption, sizeOption, selectedColor, selectedSize])
+
+  // Price display
+  const activePriceDisplay = useMemo(() => {
+    return resolvePriceDisplay(
+      activeVariant ? activeVariant.price : product.minPrice,
+      activeVariant ? activeVariant.originalPrice : product.minOriginalPrice
+    )
+  }, [activeVariant, product.minPrice, product.minOriginalPrice])
 
   // Color-specific imagery
   const activeThumbnail = useMemo(() => {
@@ -232,9 +254,21 @@ export function MobileQuickAddSheet({
               <h3 className="font-heading font-bold text-sm text-brand-primary line-clamp-2 leading-snug">
                 {product.title}
               </h3>
-              <p className="font-heading font-bold text-xs text-brand-primary mt-1 tabular-nums">
-                {activeVariant?.price.formatted || product.minPrice.formatted}
-              </p>
+              <div className="flex items-baseline gap-1.5 mt-1 flex-wrap">
+                <span className="font-heading font-bold text-xs text-brand-primary tabular-nums">
+                  {activePriceDisplay.currentPrice.formatted}
+                </span>
+                {activePriceDisplay.hasDiscount && activePriceDisplay.originalPrice && (
+                  <>
+                    <span className="text-[10px] text-brand-muted line-through">
+                      {activePriceDisplay.originalPrice.formatted}
+                    </span>
+                    <span className="text-[9px] font-heading font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">
+                      {activePriceDisplay.discountFormatted}
+                    </span>
+                  </>
+                )}
+              </div>
               <LinkComp
                 href={href}
                 onClick={onClose}
@@ -313,9 +347,12 @@ export function MobileQuickAddSheet({
               {sizeOption.values.map((size) => {
                 const isSelected = selectedSize.toLowerCase() === size.toLowerCase()
                 const variant = product.variants.find((v) => {
+                  const colorVal = getVariantOptionValue(v, "color")
                   const matchColor =
-                    !colorOption || v.options["Color"]?.toLowerCase() === selectedColor.toLowerCase()
-                  const matchSize = v.options["Size"]?.toLowerCase() === size.toLowerCase()
+                    !colorOption ||
+                    (colorVal && colorVal.toLowerCase() === selectedColor.toLowerCase())
+                  const sizeVal = getVariantOptionValue(v, "size")
+                  const matchSize = sizeVal && sizeVal.toLowerCase() === size.toLowerCase()
                   return matchColor && matchSize
                 })
                 const combinationMissing = !variant
@@ -382,7 +419,7 @@ export function MobileQuickAddSheet({
             <span>Sold Out</span>
           ) : (
             <span>
-              Add to Bag • {activeVariant?.price.formatted || product.minPrice.formatted}
+              Add to Bag • {activePriceDisplay.currentPrice.formatted}
             </span>
           )}
         </button>

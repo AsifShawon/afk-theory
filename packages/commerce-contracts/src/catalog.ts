@@ -51,8 +51,10 @@ export interface ProductView {
   tags: string[]
   minPrice: MoneyView
   maxPrice: MoneyView
+  minOriginalPrice?: MoneyView
   isNewArrival?: boolean
   isBestSeller?: boolean
+  isSale?: boolean
   totalStock?: number
   inStock: boolean
   metadata?: Record<string, string | number | boolean | null>

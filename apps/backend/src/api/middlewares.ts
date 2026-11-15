@@ -250,6 +250,14 @@ export default defineMiddlewares({
       middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
     },
     {
+      matcher: "/admin/products*",
+      middlewares: [authenticate("user", ["session", "bearer", "api-key"])],
+    },
+    {
+      matcher: "/store/wishlist*",
+      middlewares: [authenticate("customer", ["session", "bearer"], { allowUnauthenticated: true })],
+    },
+    {
       matcher: "/store/carts/:id/shipping-methods",
       method: "POST",
       middlewares: [validateShippingMethodSelection],

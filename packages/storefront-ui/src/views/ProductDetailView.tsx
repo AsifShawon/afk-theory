@@ -19,6 +19,7 @@ import { SizeGuideModal } from "../components/product/SizeGuideModal"
 import { ProductTabs } from "../components/product/ProductTabs"
 import { ProductRails } from "../components/home/ProductRails"
 import { Button } from "../components/ui/button"
+import { HeartIcon } from "../components/icons"
 import { LinkComponent } from "../types"
 
 export interface ProductDetailViewProps {
@@ -39,6 +40,9 @@ export interface ProductDetailViewProps {
   breadcrumbs?: Array<{ label: string; href: string }>
   shareSlot?: React.ReactNode
   linkComponent?: LinkComponent
+  isWishlisted?: boolean
+  onToggleWishlist?: (productId: string) => void | Promise<void>
+  wishlistIds?: string[]
   children?: React.ReactNode
 }
 
@@ -60,6 +64,9 @@ export function ProductDetailView({
   breadcrumbs,
   shareSlot,
   linkComponent: LinkComp = Link,
+  isWishlisted = false,
+  onToggleWishlist,
+  wishlistIds,
   children,
 }: ProductDetailViewProps) {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false)
@@ -183,6 +190,25 @@ export function ProductDetailView({
                 >
                   {isSoldOut ? "Sold Out" : `Add to Bag • ${selectedVariant?.price.formatted || product.minPrice.formatted}`}
                 </Button>
+
+                {/* Wishlist CTA Button */}
+                {onToggleWishlist && (
+                  <button
+                    type="button"
+                    onClick={() => onToggleWishlist(product.id)}
+                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-200 cursor-pointer flex-shrink-0 ${
+                      isWishlisted
+                        ? "bg-[#20241F] text-rose-400 border-[#20241F]"
+                        : "bg-white hover:bg-brand-secondary text-brand-primary border-brand-border"
+                    }`}
+                  >
+                    <HeartIcon
+                      className={`w-5 h-5 transition-transform ${isWishlisted ? "scale-110" : ""}`}
+                      filled={isWishlisted}
+                    />
+                  </button>
+                )}
               </div>
 
               {shareSlot}
@@ -193,6 +219,36 @@ export function ProductDetailView({
               description={product.description}
               material={product.material}
               metadata={product.metadata}
+              richDescription={
+                typeof product.metadata?.rich_description === "string"
+                  ? product.metadata.rich_description
+                  : undefined
+              }
+              fabricTabTitle={
+                typeof product.metadata?.fabric_tab_title === "string"
+                  ? product.metadata.fabric_tab_title
+                  : undefined
+              }
+              fabricMaterial={
+                typeof product.metadata?.fabric_material === "string"
+                  ? product.metadata.fabric_material
+                  : undefined
+              }
+              fabricOrigin={
+                typeof product.metadata?.fabric_origin === "string"
+                  ? product.metadata.fabric_origin
+                  : undefined
+              }
+              fabricCareInstructions={
+                typeof product.metadata?.fabric_care_instructions === "string"
+                  ? product.metadata.fabric_care_instructions
+                  : undefined
+              }
+              fabricCustomContent={
+                typeof product.metadata?.fabric_custom_content === "string"
+                  ? product.metadata.fabric_custom_content
+                  : undefined
+              }
             />
           </div>
         </div>
@@ -210,6 +266,8 @@ export function ProductDetailView({
           capabilities={capabilities}
           onQuickAdd={onQuickAdd}
           linkComponent={LinkComp}
+          wishlistIds={wishlistIds}
+          onToggleWishlist={onToggleWishlist}
         />
       )}
 

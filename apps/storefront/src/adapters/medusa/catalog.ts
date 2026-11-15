@@ -3,6 +3,7 @@ import {
   CategoryView,
   CollectionView,
   createMoneyView,
+  MoneyView,
   ImageView,
   ProductOptionView,
   ProductVariantView,
@@ -35,14 +36,30 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
   // Variants
   let minAmount = Infinity
   let maxAmount = 0
+  let minOriginalPrice: MoneyView | undefined = undefined
 
   const variants: ProductVariantView[] = (medusaProduct.variants || []).map((v) => {
     // Determine price
     const calculatedPrice = v.calculated_price?.calculated_amount ?? 0
-    const originalPrice = v.calculated_price?.original_amount
+    const rawOriginalPrice = v.calculated_price?.original_amount
 
-    if (calculatedPrice < minAmount) minAmount = calculatedPrice
-    if (calculatedPrice > maxAmount) maxAmount = calculatedPrice
+    // Genuine discount rule: original price must be strictly greater than calculated price
+    const hasGenuineDiscount =
+      typeof rawOriginalPrice === "number" &&
+      !Number.isNaN(rawOriginalPrice) &&
+      rawOriginalPrice > calculatedPrice
+
+    const originalPriceView = hasGenuineDiscount
+      ? createMoneyView(rawOriginalPrice, currencyCode)
+      : undefined
+
+    if (calculatedPrice < minAmount) {
+      minAmount = calculatedPrice
+      minOriginalPrice = originalPriceView
+    }
+    if (calculatedPrice > maxAmount) {
+      maxAmount = calculatedPrice
+    }
 
     const optionMap: Record<string, string> = {}
     if (v.options) {
@@ -50,25 +67,33 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
         // Find matching option title
         const optDef = medusaProduct.options?.find((o) => o.id === optVal.option_id)
         if (optDef) {
+          // Provide both lowercase and raw title for robust resolution
           optionMap[optDef.title.toLowerCase()] = optVal.value
+          optionMap[optDef.title] = optVal.value
         }
       })
     }
 
-    const inventoryQty = v.inventory_quantity ?? 10
-    const inStock = Boolean(
-      !v.manage_inventory || v.allow_backorder || (inventoryQty !== null && inventoryQty > 0)
-    )
+    // Accurate Medusa inventory semantics: do not invent 10
+    const manageInventory = Boolean(v.manage_inventory)
+    const allowBackorder = Boolean(v.allow_backorder)
+    const inventoryQty =
+      typeof v.inventory_quantity === "number" ? v.inventory_quantity : undefined
+
+    let inStock = true
+    if (manageInventory && !allowBackorder) {
+      inStock = inventoryQty !== undefined ? inventoryQty > 0 : false
+    }
 
     return {
       id: v.id,
       title: v.title || "Default",
       sku: v.sku || v.id,
       price: createMoneyView(calculatedPrice, currencyCode),
-      originalPrice: originalPrice ? createMoneyView(originalPrice, currencyCode) : undefined,
+      originalPrice: originalPriceView,
       options: optionMap,
       inventoryQuantity: inventoryQty,
-      manageInventory: Boolean(v.manage_inventory),
+      manageInventory,
       inStock,
     }
   })
@@ -84,6 +109,7 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
     medusaProduct.tags?.some((t) => t.value?.toLowerCase().includes("best")) ||
     medusaProduct.collection?.handle === "best-sellers"
   )
+  const isSale = variants.some((v) => Boolean(v.originalPrice))
 
   const inStock = variants.length === 0 ? true : variants.some((v) => v.inStock)
 
@@ -104,8 +130,10 @@ export function toProductView(medusaProduct: HttpTypes.StoreProduct, currencyCod
     tags: medusaProduct.tags?.map((t) => t.value) || [],
     minPrice: createMoneyView(minAmount, currencyCode),
     maxPrice: createMoneyView(maxAmount, currencyCode),
+    minOriginalPrice,
     isNewArrival,
     isBestSeller,
+    isSale,
     inStock,
     metadata: (medusaProduct.metadata as Record<string, string | number | boolean | null>) || undefined,
   }

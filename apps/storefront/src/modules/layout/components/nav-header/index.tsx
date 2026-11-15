@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react"
 import { usePathname } from "next/navigation"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Header as SharedHeader, createStoreNavigation } from "@dtc/storefront-ui"
+import { Header as SharedHeader, createStoreNavigation, HeartIcon } from "@dtc/storefront-ui"
 import { createMedusaRoutes } from "@adapters/medusa/routes"
+import { useWishlist } from "@lib/context/wishlist-context"
 import SearchModal from "../search-modal"
 import { HttpTypes } from "@medusajs/types"
 import { Locale } from "@lib/data/locales"
@@ -27,6 +28,7 @@ export default function NavHeader({
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const countryToggleState = useToggleState()
   const pathname = usePathname()
+  const { wishlistCount } = useWishlist()
 
   const routes = useMemo(() => createMedusaRoutes("bd"), [])
   const navItems = useMemo(() => createStoreNavigation(routes), [routes])
@@ -52,8 +54,23 @@ export default function NavHeader({
           ) : null
         }
         headerActionsSlot={
-          <div className="hidden sm:flex items-center text-[11px] font-heading font-semibold uppercase tracking-wider text-brand-primary/80 bg-brand-secondary/80 border border-brand-border px-3 py-1 rounded-full">
-            <span>🇧🇩 BDT (৳)</span>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <LocalizedClientLink
+              href="/wishlist"
+              className="relative p-2 text-brand-primary hover:bg-brand-primary hover:text-brand-secondary transition-all duration-200 flex items-center justify-center rounded-lg min-h-[44px] min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+              aria-label={`Wishlist with ${wishlistCount} saved items`}
+              data-testid="nav-wishlist-link"
+            >
+              <HeartIcon className="w-5 h-5 flex-shrink-0" filled={wishlistCount > 0} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-brand-primary text-brand-accent text-[9px] font-heading font-bold rounded-full flex items-center justify-center tabular-nums leading-none shadow-2xs">
+                  {wishlistCount}
+                </span>
+              )}
+            </LocalizedClientLink>
+            <div className="hidden sm:flex items-center text-[11px] font-heading font-semibold uppercase tracking-wider text-brand-primary/80 bg-brand-secondary/80 border border-brand-border px-3 py-1 rounded-full">
+              <span>🇧🇩 BDT (৳)</span>
+            </div>
           </div>
         }
       />

@@ -23,9 +23,10 @@ export function formatMoney(amount: number, currencyCode: CurrencyCode = "bdt"):
   }).format(amount)
 }
 
-export function createMoneyView(amount: number, currencyCode: CurrencyCode = "bdt", approxUsdRate = 120): MoneyView {
+export function createMoneyView(amount: number, currencyCode: CurrencyCode = "bdt", approxUsdRate?: number): MoneyView {
+  // Approximate USD display is disabled for Bangladesh DTC launch (BDT only)
   const isBdt = currencyCode.toLowerCase() === "bdt"
-  const approxUsd = isBdt && approxUsdRate > 0
+  const approxUsd = !isBdt && approxUsdRate && approxUsdRate > 0
     ? (amount / approxUsdRate).toFixed(2)
     : undefined
 

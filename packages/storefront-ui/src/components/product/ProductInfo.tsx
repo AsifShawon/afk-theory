@@ -1,5 +1,5 @@
 import React from "react"
-import { ProductVariantView, ProductView } from "@dtc/commerce-contracts"
+import { ProductVariantView, ProductView, resolvePriceDisplay } from "@dtc/commerce-contracts"
 
 export interface ProductInfoProps {
   product: ProductView
@@ -7,8 +7,10 @@ export interface ProductInfoProps {
 }
 
 export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
-  const activePrice = selectedVariant?.price || product.minPrice
-  const originalPrice = selectedVariant?.originalPrice
+  const priceDisplay = resolvePriceDisplay(
+    selectedVariant ? selectedVariant.price : product.minPrice,
+    selectedVariant ? selectedVariant.originalPrice : product.minOriginalPrice
+  )
   const isSoldOut = selectedVariant
     ? !selectedVariant.inStock
     : !product.inStock
@@ -54,19 +56,19 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
 
       {/* Pricing & Stock Messaging */}
       <div className="pt-2 flex flex-wrap items-baseline justify-between gap-4">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-baseline gap-2 flex-wrap">
           <span className="font-heading font-bold text-xl sm:text-2xl text-brand-primary">
-            {activePrice.formatted}
+            {priceDisplay.currentPrice.formatted}
           </span>
-          {originalPrice && (
-            <span className="font-heading text-sm text-brand-muted line-through">
-              {originalPrice.formatted}
-            </span>
-          )}
-          {activePrice.approxUsd && (
-            <span className="text-xs text-brand-muted">
-              (approx. ${activePrice.approxUsd})
-            </span>
+          {priceDisplay.hasDiscount && priceDisplay.originalPrice && (
+            <>
+              <span className="font-heading text-sm text-brand-muted line-through">
+                {priceDisplay.originalPrice.formatted}
+              </span>
+              <span className="text-xs font-heading font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">
+                {priceDisplay.discountFormatted}
+              </span>
+            </>
           )}
         </div>
 

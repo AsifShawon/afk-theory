@@ -10,6 +10,7 @@ import {
   ProductView,
 } from "@dtc/commerce-contracts"
 import { CategoryView } from "@dtc/storefront-ui"
+import StorefrontProductCard from "@modules/products/components/product-card-client"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { createMedusaRoutes } from "../../../../adapters/medusa/routes"
 
@@ -77,6 +78,7 @@ export default function MedusaCategoryClient({
       routes={routes}
       capabilities={DEFAULT_MEDUSA_CAPABILITIES}
       linkComponent={LocalizedClientLink}
+      productCardComponent={StorefrontProductCard}
     />
   )
 }

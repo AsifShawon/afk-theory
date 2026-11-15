@@ -7,7 +7,7 @@ import {
   StoreCapabilities,
   StoreRoutes,
 } from "@dtc/commerce-contracts"
-import { ProductCard } from "./ProductCard"
+import { ProductCard, ProductCardProps } from "./ProductCard"
 import { LinkComponent } from "../../types"
 
 export interface ProductGridProps {
@@ -18,6 +18,9 @@ export interface ProductGridProps {
   emptyStateTitle?: string
   emptyStateMessage?: string
   linkComponent?: LinkComponent
+  wishlistIds?: string[]
+  onToggleWishlist?: (productId: string) => void | Promise<void>
+  productCardComponent?: React.ComponentType<ProductCardProps>
 }
 
 export function ProductGrid({
@@ -28,6 +31,9 @@ export function ProductGrid({
   emptyStateTitle = "No garments found",
   emptyStateMessage = "Try adjusting your filters or search keywords.",
   linkComponent: LinkComp = Link,
+  wishlistIds,
+  onToggleWishlist,
+  productCardComponent: Card = ProductCard,
 }: ProductGridProps) {
   if (!products || products.length === 0) {
     return (
@@ -53,13 +59,15 @@ export function ProductGrid({
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
       {products.map((product) => (
-        <ProductCard
+        <Card
           key={product.id}
           product={product}
           href={routes.product(product.handle)}
           capabilities={capabilities}
           onQuickAdd={onQuickAdd}
           linkComponent={LinkComp}
+          isWishlisted={wishlistIds ? wishlistIds.includes(product.id) : false}
+          onToggleWishlist={onToggleWishlist}
         />
       ))}
     </div>

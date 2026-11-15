@@ -8,11 +8,13 @@ import {
   QuickAddRequest,
   QuickAddResult,
   StoreCapabilities,
+  resolvePriceDisplay,
+  getVariantOptionValue,
 } from "@dtc/commerce-contracts"
 import { COLOR_SWATCHES } from "../../theme/colors"
 import { LinkComponent } from "../../types"
 import { MobileQuickAddSheet } from "./MobileQuickAddSheet"
-import { CheckIcon } from "../icons"
+import { CheckIcon, HeartIcon } from "../icons"
 
 export interface ProductCardProps {
   product: ProductView
@@ -20,6 +22,8 @@ export interface ProductCardProps {
   capabilities?: StoreCapabilities
   onQuickAdd?: (req: QuickAddRequest) => Promise<QuickAddResult>
   linkComponent?: LinkComponent
+  isWishlisted?: boolean
+  onToggleWishlist?: (productId: string) => void | Promise<void>
 }
 
 export function ProductCard({
@@ -28,6 +32,8 @@ export function ProductCard({
   capabilities,
   onQuickAdd,
   linkComponent: LinkComp = Link,
+  isWishlisted = false,
+  onToggleWishlist,
 }: ProductCardProps) {
   const colorOption = product.options?.find((o) => o.title.toLowerCase() === "color")
   const sizeOption = product.options?.find((o) => o.title.toLowerCase() === "size")
@@ -47,11 +53,10 @@ export function ProductCard({
   const primaryImage = useMemo(() => {
     if (selectedColor) {
       // 1. Variant image
-      const variantWithColor = product.variants.find(
-        (v) =>
-          (v.options["Color"] || v.options["color"])?.toLowerCase() ===
-          selectedColor.toLowerCase()
-      )
+      const variantWithColor = product.variants.find((v) => {
+        const cVal = getVariantOptionValue(v, "color")
+        return cVal && cVal.toLowerCase() === selectedColor.toLowerCase()
+      })
       if (variantWithColor?.images && variantWithColor.images.length > 0) {
         return variantWithColor.images[0]
       }
@@ -80,6 +85,11 @@ export function ProductCard({
 
   const fabricInfo = product.material || product.subtitle || "240–280 GSM Heavyweight Cotton"
 
+  // Pricing display
+  const priceDisplay = useMemo(() => {
+    return resolvePriceDisplay(product.minPrice, product.minOriginalPrice)
+  }, [product.minPrice, product.minOriginalPrice])
+
   // Unique sizes count
   const uniqueSizesCount = useMemo(() => {
     if (sizeOption?.values?.length) {
@@ -87,7 +97,7 @@ export function ProductCard({
     }
     const sizeSet = new Set<string>()
     for (const variant of product.variants) {
-      const sizeVal = variant.options["Size"] || variant.options["size"]
+      const sizeVal = getVariantOptionValue(variant, "size")
       if (sizeVal) sizeSet.add(sizeVal)
     }
     return sizeSet.size || product.variants.length
@@ -95,16 +105,15 @@ export function ProductCard({
 
   // Sizes available for the selected color
   const availableSizes = useMemo(() => {
-    if (!sizeOption) return []
+    if (!sizeOption || !sizeOption.values.length) return []
     return sizeOption.values.map((size) => {
       const variant = product.variants.find((v) => {
+        const colorVal = getVariantOptionValue(v, "color")
         const matchColor =
           !colorOption ||
-          (v.options["Color"] || v.options["color"])?.toLowerCase() ===
-            selectedColor.toLowerCase()
-        const matchSize =
-          (v.options["Size"] || v.options["size"])?.toLowerCase() ===
-          size.toLowerCase()
+          (colorVal && colorVal.toLowerCase() === selectedColor.toLowerCase())
+        const sizeVal = getVariantOptionValue(v, "size")
+        const matchSize = sizeVal && sizeVal.toLowerCase() === size.toLowerCase()
         return matchColor && matchSize
       })
       return {
@@ -114,6 +123,19 @@ export function ProductCard({
       }
     })
   }, [product.variants, sizeOption, colorOption, selectedColor])
+
+  // Fallback single purchasable variant (when product has no size option)
+  const singleVariant = useMemo(() => {
+    if (availableSizes.length > 0) return undefined
+    if (product.variants.length === 1) return product.variants[0]
+    if (!sizeOption && colorOption) {
+      return product.variants.find((v) => {
+        const cVal = getVariantOptionValue(v, "color")
+        return cVal && cVal.toLowerCase() === selectedColor.toLowerCase()
+      })
+    }
+    return undefined
+  }, [availableSizes, product.variants, sizeOption, colorOption, selectedColor])
 
   // Quick Add size click handler
   const handleQuickAddSize = async (variantId: string | undefined) => {
@@ -184,8 +206,38 @@ export function ProductCard({
             )}
           </LinkComp>
 
+          {/* Wishlist Heart Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onToggleWishlist?.(product.id)
+            }}
+            aria-label={
+              isWishlisted
+                ? `Remove ${product.title} from wishlist`
+                : `Add ${product.title} to wishlist`
+            }
+            className={`absolute top-2.5 right-2.5 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-xs border cursor-pointer ${
+              isWishlisted
+                ? "bg-[#20241F] text-rose-400 border-[#20241F]"
+                : "bg-[#F5F3ED]/90 hover:bg-[#F5F3ED] text-[#20241F] border-brand-border/60 hover:scale-105"
+            }`}
+          >
+            <HeartIcon
+              className={`w-4 h-4 transition-transform ${isWishlisted ? "scale-110" : ""}`}
+              filled={isWishlisted}
+            />
+          </button>
+
           {/* Status Badges */}
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 pointer-events-none">
+            {priceDisplay.hasDiscount && (
+              <span className="bg-rose-950 text-rose-200 border border-rose-800 text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+                SALE {priceDisplay.discountFormatted}
+              </span>
+            )}
             {product.isNewArrival && (
               <span className="bg-brand-accent text-brand-primary text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
                 DROP 01
@@ -209,7 +261,7 @@ export function ProductCard({
           </div>
 
           {/* Desktop Quick Add Hover Tray */}
-          {onQuickAdd && !isSoldOut && availableSizes.length > 0 && (
+          {onQuickAdd && !isSoldOut && (availableSizes.length > 0 || singleVariant) && (
             <div className="hidden lg:flex absolute inset-x-2 bottom-2 z-20 bg-white/95 backdrop-blur-sm border border-brand-border/90 rounded-lg p-2 flex-col gap-1.5 shadow-md transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-all duration-200">
               <div className="flex items-center justify-between px-1">
                 <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-brand-muted">
@@ -224,40 +276,59 @@ export function ProductCard({
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-1">
-                {availableSizes.map(({ size, variantId, inStock }) => {
-                  const isPending = pendingVariantId === variantId
-                  const isSuccess = successVariantId === variantId
+              {availableSizes.length > 0 ? (
+                <div className="flex items-center gap-1">
+                  {availableSizes.map(({ size, variantId, inStock }) => {
+                    const isPending = pendingVariantId === variantId
+                    const isSuccess = successVariantId === variantId
 
-                  return (
-                    <button
-                      key={size}
-                      type="button"
-                      disabled={!inStock || isPending || Boolean(pendingVariantId)}
-                      onClick={() => handleQuickAddSize(variantId)}
-                      aria-label={`Quick add size ${size}`}
-                      className={`flex-1 h-8 rounded text-[11px] font-heading font-semibold uppercase tracking-wider transition-all flex items-center justify-center ${
-                        !inStock
-                          ? "opacity-30 line-through cursor-not-allowed bg-brand-surface text-brand-muted"
-                          : isSuccess
-                            ? "bg-emerald-700 text-white"
-                            : isPending
-                              ? "bg-brand-secondary text-brand-primary animate-pulse"
-                              : "bg-white hover:bg-brand-primary hover:text-white border border-brand-border text-brand-primary"
-                      }`}
-                    >
-                      {isPending ? (
-                        <span
-                          className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        size
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        disabled={!inStock || isPending || Boolean(pendingVariantId)}
+                        onClick={() => handleQuickAddSize(variantId)}
+                        aria-label={`Quick add size ${size}`}
+                        className={`flex-1 h-8 rounded text-[11px] font-heading font-semibold uppercase tracking-wider transition-all flex items-center justify-center ${
+                          !inStock
+                            ? "opacity-30 line-through cursor-not-allowed bg-brand-surface text-brand-muted"
+                            : isSuccess
+                              ? "bg-emerald-700 text-white"
+                              : isPending
+                                ? "bg-brand-secondary text-brand-primary animate-pulse"
+                                : "bg-white hover:bg-brand-primary hover:text-white border border-brand-border text-brand-primary"
+                        }`}
+                      >
+                        {isPending ? (
+                          <span
+                            className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          size
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : singleVariant ? (
+                <button
+                  type="button"
+                  disabled={!singleVariant.inStock || Boolean(pendingVariantId)}
+                  onClick={() => handleQuickAddSize(singleVariant.id)}
+                  aria-label={`Quick add ${product.title}`}
+                  className="w-full h-8 rounded text-[11px] font-heading font-semibold uppercase tracking-wider transition-all flex items-center justify-center bg-white hover:bg-brand-primary hover:text-white border border-brand-border text-brand-primary"
+                >
+                  {pendingVariantId === singleVariant.id ? (
+                    <span
+                      className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    "+ Add to Bag"
+                  )}
+                </button>
+              ) : null}
             </div>
           )}
 
@@ -334,14 +405,19 @@ export function ProductCard({
 
           {/* Pricing & Variant Info */}
           <div className="pt-2 border-t border-brand-border/50 flex items-center justify-between">
-            <div className="flex items-baseline gap-1.5">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
               <span className="font-heading font-bold text-xs sm:text-sm text-brand-primary">
-                {product.minPrice.formatted}
+                {priceDisplay.currentPrice.formatted}
               </span>
-              {product.minPrice.approxUsd && (
-                <span className="text-[10px] text-brand-muted font-mono">
-                  (≈${product.minPrice.approxUsd})
-                </span>
+              {priceDisplay.hasDiscount && priceDisplay.originalPrice && (
+                <>
+                  <span className="text-[10px] sm:text-xs text-brand-muted line-through">
+                    {priceDisplay.originalPrice.formatted}
+                  </span>
+                  <span className="text-[9px] font-heading font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">
+                    {priceDisplay.discountFormatted}
+                  </span>
+                </>
               )}
             </div>
 

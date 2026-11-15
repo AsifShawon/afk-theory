@@ -10,6 +10,7 @@ export interface ProductRailScrollerProps {
   subtitle?: string
   viewAllHref?: string
   viewAllLabel?: string
+  showControls?: boolean
   children: React.ReactNode
   linkComponent?: LinkComponent
 }
@@ -19,6 +20,7 @@ export function ProductRailScroller({
   subtitle,
   viewAllHref,
   viewAllLabel = "View All",
+  showControls = true,
   children,
   linkComponent: LinkComp = Link,
 }: ProductRailScrollerProps) {
@@ -59,24 +61,26 @@ export function ProductRailScroller({
             )}
 
             {/* Desktop Previous / Next Controls */}
-            <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-brand-border/60">
-              <button
-                type="button"
-                onClick={() => scroll("left")}
-                aria-label="Previous garments"
-                className="w-8 h-8 rounded-full border border-brand-border bg-white hover:bg-brand-secondary text-brand-primary flex items-center justify-center transition-colors"
-              >
-                <ArrowLeftIcon className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scroll("right")}
-                aria-label="Next garments"
-                className="w-8 h-8 rounded-full border border-brand-border bg-white hover:bg-brand-secondary text-brand-primary flex items-center justify-center transition-colors"
-              >
-                <ArrowRightIcon className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            {showControls && (
+              <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-brand-border/60">
+                <button
+                  type="button"
+                  onClick={() => scroll("left")}
+                  aria-label="Previous garments"
+                  className="w-8 h-8 rounded-full border border-brand-border bg-white hover:bg-brand-secondary text-brand-primary flex items-center justify-center transition-colors"
+                >
+                  <ArrowLeftIcon className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scroll("right")}
+                  aria-label="Next garments"
+                  className="w-8 h-8 rounded-full border border-brand-border bg-white hover:bg-brand-secondary text-brand-primary flex items-center justify-center transition-colors"
+                >
+                  <ArrowRightIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
