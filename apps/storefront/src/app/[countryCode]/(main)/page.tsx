@@ -20,7 +20,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return constructMetadata({
     title: "AFK THEORY | Pause The Game. Keep Your Style.",
     description:
-      "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Explore oversized drop shoulder t-shirts and contemporary street essentials.",
+      "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Shop oversized drop shoulder tees and hoodies.",
     canonical: `/${countryCode}`,
   })
 }

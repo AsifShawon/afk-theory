@@ -103,7 +103,7 @@ const RefinementList = ({
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search shirts, tees, polos..."
-            className="w-full px-3 py-2 text-xs border border-brand-border bg-white text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary"
+            className="w-full px-3 py-2 text-xs border border-brand-border bg-surface text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary"
           />
           <button
             type="submit"
@@ -150,7 +150,7 @@ const RefinementList = ({
           <button
             type="button"
             onClick={handleClearAll}
-            className="w-full py-2 bg-brand-secondary hover:bg-brand-primary hover:text-white border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider transition-colors"
+            className="w-full py-2 bg-brand-secondary hover:bg-accent hover:text-on-accent border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider transition-colors"
           >
             Clear All Filters
           </button>

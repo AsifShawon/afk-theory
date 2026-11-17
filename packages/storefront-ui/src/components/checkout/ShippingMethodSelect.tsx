@@ -38,7 +38,7 @@ export function ShippingMethodSelect({
               "flex items-center justify-between p-4 border cursor-pointer transition-all duration-150",
               isSelected
                 ? "border-brand-primary bg-brand-surface ring-1 ring-brand-primary"
-                : "border-brand-border bg-white hover:border-brand-primary/60",
+                : "border-brand-border bg-surface hover:border-brand-primary/60",
               disabled && "opacity-50 pointer-events-none"
             )}
           >

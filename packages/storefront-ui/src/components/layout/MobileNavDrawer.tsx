@@ -53,7 +53,7 @@ export function MobileNavDrawer({
       position="left"
       title={
         <div className="flex flex-col gap-1">
-          <BrandLogo variant="compact" className="h-7 w-auto" alt="AFK THEORY" />
+          <BrandLogo variant="compact-light" className="h-7 w-auto" alt="AFK THEORY" />
           <span className="text-[9px] font-heading font-extrabold uppercase tracking-widest text-brand-muted">
             PAUSE THE GAME. KEEP YOUR STYLE.
           </span>
@@ -71,7 +71,7 @@ export function MobileNavDrawer({
                 onClose()
                 onOpenSearch()
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-brand-surface border border-brand-border text-xs font-heading font-medium text-brand-primary/80 hover:text-brand-primary hover:bg-brand-secondary transition-colors text-left min-h-[44px] rounded-lg"
+              className="w-full flex items-center gap-3 px-4 py-3 bg-brand-surface border border-brand-border text-xs font-heading font-medium text-brand-primary/80 hover:text-brand-primary hover:bg-raised transition-colors text-left min-h-[44px] rounded-lg"
             >
               <MagnifyingGlassIcon className="w-4 h-4 text-brand-primary/60 flex-shrink-0" />
               <span>Search garments, colors, fabrics...</span>
@@ -97,8 +97,8 @@ export function MobileNavDrawer({
                             href={item.href}
                             onClick={onClose}
                             className={clsx(
-                              "flex-1 py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-black transition-colors min-h-[44px] flex items-center gap-2",
-                              isActive && "font-bold text-black"
+                              "flex-1 py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-accent transition-colors min-h-[44px] flex items-center gap-2",
+                              isActive && "font-bold text-accent"
                             )}
                           >
                             <span>{item.label}</span>
@@ -193,8 +193,8 @@ export function MobileNavDrawer({
                         href={item.href}
                         onClick={onClose}
                         className={clsx(
-                          "block py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-black transition-colors min-h-[44px] flex items-center justify-between",
-                          isActive && "font-bold text-black"
+                          "block py-3 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-accent transition-colors min-h-[44px] flex items-center justify-between",
+                          isActive && "font-bold text-accent"
                         )}
                       >
                         <span>{item.label}</span>
@@ -214,7 +214,7 @@ export function MobileNavDrawer({
                   key={link.href}
                   href={link.href}
                   onClick={onClose}
-                  className="block py-3.5 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-black transition-colors min-h-[44px] flex items-center"
+                  className="block py-3.5 px-2 text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:text-accent transition-colors min-h-[44px] flex items-center"
                 >
                   {link.label}
                 </LinkComp>
@@ -261,12 +261,12 @@ export function MobileNavDrawer({
         </div>
 
         {/* Footer Action Buttons */}
-        <div className="pt-4 border-t border-brand-border space-y-3 bg-[#F5F3ED] mt-auto">
+        <div className="pt-4 border-t border-brand-border space-y-3 bg-canvas mt-auto">
           <div className="grid grid-cols-2 gap-3">
             <LinkComp
               href={accountHref}
               onClick={onClose}
-              className="flex items-center justify-center gap-2 p-3 bg-white border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-brand-stone/50 transition-colors min-h-[44px] rounded-lg"
+              className="flex items-center justify-center gap-2 p-3 bg-surface border border-brand-border text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-brand-stone/50 transition-colors min-h-[44px] rounded-lg"
             >
               <UserIcon className="w-4 h-4 text-brand-primary" />
               <span>Account</span>
@@ -275,7 +275,7 @@ export function MobileNavDrawer({
             <LinkComp
               href={cartHref}
               onClick={onClose}
-              className="flex items-center justify-center gap-2 p-3 bg-brand-primary text-brand-secondary border border-brand-primary text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors min-h-[44px] rounded-lg"
+              className="flex items-center justify-center gap-2 p-3 bg-accent text-on-accent border border-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors min-h-[44px] rounded-lg"
             >
               <ShoppingBagIcon className="w-4 h-4 text-brand-accent" />
               <span>Bag ({cartCount})</span>

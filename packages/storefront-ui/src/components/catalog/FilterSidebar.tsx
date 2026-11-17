@@ -14,8 +14,9 @@ export interface FilterSidebarProps {
   onResetFilters?: () => void
 }
 
-const DEFAULT_SIZES = ["S", "M", "L", "XL", "30", "32", "34", "36", "One Size"]
-const DEFAULT_COLORS = ["Black", "White", "Forest Green", "Midnight Navy", "Khaki", "Sky Blue"]
+const DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"]
+// No invented colors: the real colors come from the products when they are passed in.
+const DEFAULT_COLORS: string[] = []
 
 export function FilterSidebar({
   filters,
@@ -121,7 +122,7 @@ export function FilterSidebar({
                 onClick={() => handleSizeSelect(size)}
                 className={`py-2 px-1 text-center font-heading font-medium text-xs border transition-colors ${
                   isSelected
-                    ? "bg-brand-primary text-white border-brand-primary"
+                    ? "bg-ink text-canvas border-ink"
                     : "bg-brand-surface text-brand-primary border-brand-border hover:border-brand-primary"
                 }`}
               >
@@ -133,7 +134,7 @@ export function FilterSidebar({
       </div>
 
       {/* Color Facet if enabled */}
-      {capabilities?.hasColorSwatches && (
+      {capabilities?.hasColorSwatches && availableColors.length > 0 && (
         <div className="space-y-3 pb-6 border-b border-brand-border">
           <h4 className="font-heading font-semibold uppercase tracking-wider text-brand-primary">
             Color

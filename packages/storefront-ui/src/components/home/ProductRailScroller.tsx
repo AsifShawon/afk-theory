@@ -32,7 +32,7 @@ export function ProductRailScroller({
   }
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-white border-b border-brand-border/80">
+    <section className="py-12 sm:py-16 lg:py-20 bg-surface border-b border-brand-border/80">
       <div className="editorial-container space-y-6 sm:space-y-8">
         {/* Rail Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-brand-border/60 pb-4">
@@ -64,7 +64,7 @@ export function ProductRailScroller({
                 type="button"
                 onClick={() => scroll("left")}
                 aria-label="Previous garments"
-                className="w-8 h-8 rounded-full border border-brand-border bg-white hover:bg-brand-secondary text-brand-primary flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full border border-brand-border bg-surface hover:bg-raised text-brand-primary flex items-center justify-center transition-colors"
               >
                 <ArrowLeftIcon className="w-3.5 h-3.5" />
               </button>
@@ -72,7 +72,7 @@ export function ProductRailScroller({
                 type="button"
                 onClick={() => scroll("right")}
                 aria-label="Next garments"
-                className="w-8 h-8 rounded-full border border-brand-border bg-white hover:bg-brand-secondary text-brand-primary flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full border border-brand-border bg-surface hover:bg-raised text-brand-primary flex items-center justify-center transition-colors"
               >
                 <ArrowRightIcon className="w-3.5 h-3.5" />
               </button>

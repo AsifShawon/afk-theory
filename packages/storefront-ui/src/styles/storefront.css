@@ -8,9 +8,94 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /*
+   * Theme tokens. Values are "R G B" channels (see tailwind.preset.js).
+   * Dark olive is the brand theme; data-theme="light" remains available as a fallback.
+   */
+  :root,
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --canvas: 11 13 8; /* #0B0D08 */
+    --surface: 19 23 16; /* #131710 */
+    --raised: 28 33 21; /* #1C2115 */
+    --panel: 7 8 6; /* #070806 */
+    --ink: 241 237 227; /* #F1EDE3 */
+    --bone: 241 237 227;
+    --muted: 160 167 148; /* #A0A794 */
+    --faint: 134 144 121; /* #869079 */
+    --line: 38 45 29; /* #262D1D */
+    --line-strong: 53 63 43; /* #353F2B */
+    --control: 105 116 92; /* #69745C */
+    --accent: 216 244 82; /* #D8F452 */
+    --accent-hover: 230 255 107; /* #E6FF6B */
+    --on-accent: 11 13 8;
+    --band: 237 230 220; /* #EDE6DC */
+    --band-ink: 11 13 8;
+    --ok: 155 216 107;
+    --err: 242 139 130;
+    --warn: 245 196 81;
+
+    /* Medusa UI components (older checkout and account screens) read these. */
+    --bg-base: rgb(var(--surface));
+    --bg-base-hover: rgb(var(--raised));
+    --bg-base-pressed: rgb(var(--raised));
+    --bg-subtle: rgb(var(--canvas));
+    --bg-subtle-hover: rgb(var(--surface));
+    --bg-subtle-pressed: rgb(var(--raised));
+    --bg-component: rgb(var(--raised));
+    --bg-component-hover: rgb(var(--line));
+    --bg-component-pressed: rgb(var(--line-strong));
+    --bg-field: rgb(var(--raised));
+    --bg-field-hover: rgb(var(--line));
+    --bg-field-component: rgb(var(--surface));
+    --bg-field-component-hover: rgb(var(--raised));
+    --bg-disabled: rgb(var(--raised));
+    --bg-interactive: rgb(var(--accent));
+    --fg-base: rgb(var(--ink));
+    --fg-subtle: rgb(var(--muted));
+    --fg-muted: rgb(var(--faint));
+    --fg-disabled: rgb(var(--faint));
+    --fg-interactive: rgb(var(--accent));
+    --fg-interactive-hover: rgb(var(--accent-hover));
+    --fg-error: rgb(var(--err));
+    --fg-on-color: rgb(var(--on-accent));
+    --border-base: rgb(var(--line));
+    --border-strong: rgb(var(--control));
+    --border-interactive: rgb(var(--accent));
+    --border-error: rgb(var(--err));
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+    --canvas: 245 243 237;
+    --surface: 255 255 255;
+    --raised: 237 234 226;
+    --panel: 22 24 21;
+    --ink: 32 36 31;
+    --bone: 245 243 237;
+    --muted: 104 112 101;
+    --faint: 107 115 102;
+    --line: 228 225 216;
+    --line-strong: 207 203 191;
+    --control: 140 146 133;
+    --accent: 216 244 82;
+    --accent-hover: 196 224 63;
+    --on-accent: 32 36 31;
+    --band: 32 36 31;
+    --band-ink: 245 243 237;
+    --ok: 31 107 58;
+    --err: 155 44 44;
+    --warn: 146 94 0;
+  }
+
   body {
-    background-color: #F5F3ED;
-    color: #20241F;
+    background-color: rgb(var(--canvas));
+    color: rgb(var(--ink));
+  }
+
+  ::selection {
+    background-color: rgb(var(--accent));
+    color: rgb(var(--on-accent));
   }
 
   /* Accessible focus indicators */
@@ -57,27 +142,27 @@
   }
 
   .contrast-btn {
-    @apply px-6 py-3 rounded-none bg-brand-primary text-white hover:bg-black transition-colors duration-200 font-heading font-semibold text-xs uppercase tracking-wider;
+    @apply px-6 py-3 rounded-none bg-accent text-on-accent hover:bg-accent-hover transition-colors duration-200 font-heading font-semibold text-xs uppercase tracking-wider;
   }
 
   .pill-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 bg-brand-primary text-white hover:bg-black font-heading font-semibold text-xs uppercase tracking-wider transition-all duration-200 shadow-subtle hover:shadow-editorial;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 bg-accent text-on-accent hover:bg-accent-hover font-heading font-semibold text-xs uppercase tracking-wider transition-all duration-200 shadow-subtle hover:shadow-editorial;
   }
 
   .pill-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 bg-white hover:bg-brand-secondary text-brand-primary border border-brand-border font-heading font-semibold text-xs uppercase tracking-wider transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 bg-surface hover:bg-raised text-ink border border-control font-heading font-semibold text-xs uppercase tracking-wider transition-all duration-200;
   }
 
   .badge-tag {
-    @apply inline-flex items-center px-2.5 py-0.5 text-[10px] font-heading font-semibold tracking-widest uppercase bg-brand-secondary text-brand-accent border border-brand-border/70 rounded-full;
+    @apply inline-flex items-center px-2.5 py-0.5 text-[10px] font-heading font-semibold tracking-widest uppercase bg-raised text-brand-accent border border-brand-border rounded-full;
   }
 
   .editorial-chip {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-heading font-medium tracking-wide bg-brand-secondary/80 text-brand-primary border border-brand-border/60 rounded-full transition-colors hover:border-brand-primary/40;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-heading font-medium tracking-wide bg-raised/80 text-ink border border-brand-border rounded-full transition-colors hover:border-accent/60;
   }
 
   .image-canvas-editorial {
-    @apply relative overflow-hidden rounded-2xl border border-brand-border/60 bg-brand-secondary;
+    @apply relative overflow-hidden rounded-2xl border border-brand-border bg-raised;
   }
 
   .text-xsmall-regular {

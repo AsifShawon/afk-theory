@@ -297,7 +297,7 @@ export function ImageGallery({ images, title = "Garment" }: ImageGalleryProps) {
               onClick={() => handleManualNavigation(active - 1)}
               disabled={active === 0}
               aria-label="Previous image"
-              className="hidden lg:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 text-brand-primary border border-brand-border items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-0 transition-opacity duration-200"
+              className="hidden lg:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface/90 text-brand-primary border border-brand-border items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-0 transition-opacity duration-200"
             >
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
@@ -306,7 +306,7 @@ export function ImageGallery({ images, title = "Garment" }: ImageGalleryProps) {
               onClick={() => handleManualNavigation(active + 1)}
               disabled={active === count - 1}
               aria-label="Next image"
-              className="hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 text-brand-primary border border-brand-border items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-0 transition-opacity duration-200"
+              className="hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface/90 text-brand-primary border border-brand-border items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 disabled:opacity-0 transition-opacity duration-200"
             >
               <ChevronRightIcon className="w-5 h-5" />
             </button>
@@ -322,7 +322,7 @@ export function ImageGallery({ images, title = "Garment" }: ImageGalleryProps) {
                   aria-current={active === idx}
                   className={clsx(
                     "h-1.5 rounded-full transition-all duration-300",
-                    active === idx ? "w-5 bg-white" : "w-1.5 bg-white/60 hover:bg-white/90"
+                    active === idx ? "w-5 bg-accent" : "w-1.5 bg-white/60 hover:bg-white/90"
                   )}
                 />
               ))}
@@ -335,7 +335,7 @@ export function ImageGallery({ images, title = "Garment" }: ImageGalleryProps) {
                 onClick={() => setIsUserPaused((paused) => !paused)}
                 aria-label={isUserPaused ? "Play image rotation" : "Pause image rotation"}
                 aria-pressed={isUserPaused}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 text-brand-primary border border-brand-border flex items-center justify-center"
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 text-brand-primary border border-brand-border flex items-center justify-center"
               >
                 {isUserPaused ? (
                   <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden="true">

@@ -33,12 +33,11 @@ describe("Shared Predictive Search Contract & Combobox Suite", () => {
 
   test("2. Suggestions filtering matches catalog terms and creates category-scoped suggestions", () => {
     const catalogSuggestions = [
-      "Drop Shoulder",
-      "Oversized Tee",
-      "Graphic Tee",
-      "Essentials",
-      "Heavyweight T-Shirt",
-      "Twill Cap",
+      "Drop Shoulder Tee",
+      "Hoodie",
+      "Basic Hoodie",
+      "Drop Shoulder Hoodie",
+      "Oversized",
     ]
 
     function filterSuggestions(query: string) {
@@ -47,10 +46,10 @@ describe("Shared Predictive Search Contract & Combobox Suite", () => {
       return catalogSuggestions.filter((s) => s.toLowerCase().includes(q))
     }
 
-    const matches = filterSuggestions("tee")
-    assert.equal(matches.length, 2)
-    assert.ok(matches.includes("Oversized Tee"))
-    assert.ok(matches.includes("Graphic Tee"))
+    const matches = filterSuggestions("hoodie")
+    assert.equal(matches.length, 3)
+    assert.ok(matches.includes("Basic Hoodie"))
+    assert.ok(matches.includes("Drop Shoulder Hoodie"))
   })
 
   test("3. Combobox ArrowUp/ArrowDown cycling updates active index and loops smoothly", () => {

@@ -213,7 +213,7 @@ export function MobileQuickAddSheet({
       {/* Bottom Sheet Container */}
       <div
         className={clsx(
-          "relative z-10 w-full max-w-lg bg-[#FAFAF7] rounded-t-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[85dvh] overflow-y-auto pb-[max(1.25rem,env(safe-area-inset-bottom))] transition-transform duration-250 ease-out border-t border-brand-border",
+          "relative z-10 w-full max-w-lg bg-surface rounded-t-2xl shadow-2xl p-5 sm:p-6 space-y-4 max-h-[85dvh] overflow-y-auto pb-[max(1.25rem,env(safe-area-inset-bottom))] transition-transform duration-250 ease-out border-t border-brand-border",
           isClosing ? "animate-sheet-exit" : "animate-sheet-enter"
         )}
       >
@@ -286,8 +286,8 @@ export function MobileQuickAddSheet({
                     className={clsx(
                       "flex items-center gap-2 px-3 py-2 border rounded-lg text-xs font-heading transition-colors min-h-[44px]",
                       isSelected
-                        ? "border-brand-primary bg-white text-brand-primary font-bold shadow-xs ring-1 ring-brand-primary"
-                        : "border-brand-border bg-white text-brand-primary/80 hover:border-brand-primary"
+                        ? "border-brand-primary bg-surface text-brand-primary font-bold shadow-xs ring-1 ring-brand-primary"
+                        : "border-brand-border bg-surface text-brand-primary/80 hover:border-brand-primary"
                     )}
                   >
                     <span
@@ -307,7 +307,7 @@ export function MobileQuickAddSheet({
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="font-heading font-semibold uppercase tracking-wider text-brand-muted text-[11px]">
-                Size {isSizeRequired && <span className="text-amber-700 font-bold">*Required</span>}
+                Size {isSizeRequired && <span className="text-warn font-bold">*Required</span>}
               </span>
               {selectedSize && (
                 <span className="font-heading font-semibold text-brand-primary text-xs">
@@ -342,8 +342,8 @@ export function MobileQuickAddSheet({
                       sizeOutOfStock
                         ? "border-brand-border/40 text-brand-muted line-through bg-brand-surface opacity-40 cursor-not-allowed"
                         : isSelected
-                          ? "border-brand-primary bg-brand-primary text-white shadow-xs"
-                          : "border-brand-border bg-white text-brand-primary hover:border-brand-primary"
+                          ? "border-ink bg-ink text-canvas shadow-xs"
+                          : "border-brand-border bg-surface text-brand-primary hover:border-brand-primary"
                     )}
                   >
                     {size}
@@ -356,14 +356,14 @@ export function MobileQuickAddSheet({
 
         {/* Feedback messages */}
         {errorMessage && (
-          <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 p-2.5 rounded-lg text-center font-medium">
+          <p className="text-xs text-err bg-err/10 border border-err/30 p-2.5 rounded-lg text-center font-medium">
             {errorMessage}
           </p>
         )}
 
         {successMessage && (
-          <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg font-bold">
-            <CheckIcon className="w-4 h-4 text-emerald-700" />
+          <div className="flex items-center justify-center gap-1.5 text-xs text-ok bg-ok/10 border border-ok/30 p-2.5 rounded-lg font-bold">
+            <CheckIcon className="w-4 h-4 text-ok" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -373,7 +373,7 @@ export function MobileQuickAddSheet({
           type="button"
           onClick={handleAdd}
           disabled={!canAdd}
-          className="w-full h-12 rounded-full bg-brand-primary hover:bg-black text-white text-xs font-heading font-bold uppercase tracking-wider transition-all disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-subtle min-h-[48px]"
+          className="w-full h-12 rounded-full bg-accent hover:bg-accent-hover text-on-accent text-xs font-heading font-bold uppercase tracking-wider transition-all disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2 shadow-subtle min-h-[48px]"
         >
           {isPending ? (
             <span className="flex items-center gap-2">

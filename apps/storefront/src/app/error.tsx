@@ -20,7 +20,7 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="bg-white min-h-[60vh] flex items-center justify-center py-20 px-4">
+    <div className="bg-surface min-h-[60vh] flex items-center justify-center py-20 px-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="inline-block px-3 py-1 bg-brand-secondary border border-brand-border text-[10px] font-heading font-semibold uppercase tracking-widest text-brand-primary">
           Something went wrong
@@ -43,7 +43,7 @@ export default function Error({
           <button
             type="button"
             onClick={reset}
-            className="px-6 py-3 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+            className="px-6 py-3 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
           >
             Try again
           </button>

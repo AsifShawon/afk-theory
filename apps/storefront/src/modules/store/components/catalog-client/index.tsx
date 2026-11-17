@@ -81,12 +81,12 @@ export default function MedusaCatalogClient({
 
   return (
     <CatalogView
-      title={title || (currentQuery ? `Search Results for "${currentQuery}"` : "All Clothing & Essentials")}
+      title={title || (currentQuery ? `Search Results for "${currentQuery}"` : "Shop All")}
       description={
         description ||
         (currentQuery
           ? "Showing garments matching your search query."
-          : "Discover our full range of 240 GSM heavyweight tees, tailored Oxford shirts, pique knit polos, and tailored chinos.")
+          : "Drop shoulder tees and hoodies, cut oversized and built to last.")
       }
       products={products}
       totalCount={totalCount}

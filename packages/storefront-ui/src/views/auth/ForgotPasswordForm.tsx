@@ -33,14 +33,14 @@ export function ForgotPasswordForm({
   return (
     <div className="w-full space-y-6" data-testid="forgot-password-page">
       {successMessage ? (
-        <div className="w-full p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center space-y-3">
+        <div className="w-full p-4 bg-ok/10 border border-ok/30 text-ok text-xs text-center space-y-3">
           <p className="font-semibold text-sm">✓ Reset Link Dispatched</p>
           <p>{successMessage}</p>
           {onNavigateToLogin && (
             <button
               type="button"
               onClick={onNavigateToLogin}
-              className="inline-block mt-2 px-4 py-2 bg-brand-primary text-white text-[11px] font-heading font-semibold uppercase tracking-wider hover:bg-brand-accent transition-colors"
+              className="inline-block mt-2 px-4 py-2 bg-accent text-on-accent text-[11px] font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
             >
               Back to Sign In
             </button>
@@ -66,7 +66,7 @@ export function ForgotPasswordForm({
 
           {errorMessage && (
             <div
-              className="p-3 bg-red-50 border border-rose-300 text-rose-800 text-xs font-medium"
+              className="p-3 bg-err/10 border border-err/30 text-err text-xs font-medium"
               data-testid="forgot-password-error"
             >
               {errorMessage}

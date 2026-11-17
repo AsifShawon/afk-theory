@@ -20,7 +20,7 @@ export default function NewsletterSection() {
   }
 
   return (
-    <section className="py-20 bg-brand-primary text-brand-secondary border-b border-white/10">
+    <section className="py-20 bg-panel text-bone border-b border-white/10">
       <div className="content-container max-w-3xl mx-auto text-center space-y-6">
         <div className="inline-block px-3 py-1 bg-white/10 text-white text-[10px] font-heading font-semibold uppercase tracking-widest">
           COMMUNITY // EARLY ACCESS
@@ -57,7 +57,7 @@ export default function NewsletterSection() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3.5 bg-white text-brand-primary hover:bg-brand-secondary text-xs font-heading font-semibold uppercase tracking-widest transition-colors flex items-center justify-center min-w-[120px]"
+              className="px-6 py-3.5 bg-surface text-brand-primary hover:bg-raised text-xs font-heading font-semibold uppercase tracking-widest transition-colors flex items-center justify-center min-w-[120px]"
             >
               {loading ? "Joining..." : "Subscribe"}
             </button>

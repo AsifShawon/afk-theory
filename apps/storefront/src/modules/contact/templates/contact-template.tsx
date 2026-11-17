@@ -19,7 +19,7 @@ export default function ContactTemplate() {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
       <div className="bg-brand-secondary border-b border-brand-border py-12 sm:py-16">
         <div className="content-container max-w-4xl text-center space-y-3">
@@ -99,7 +99,7 @@ export default function ContactTemplate() {
                   href="/return-policy"
                   className="px-3 py-1 bg-brand-secondary border border-brand-border text-brand-primary hover:border-brand-primary"
                 >
-                  24h Return Policy
+                  48h Exchange Policy
                 </LocalizedClientLink>
                 <LocalizedClientLink
                   href="/faq"
@@ -130,7 +130,7 @@ export default function ContactTemplate() {
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
-                  className="mt-4 px-6 py-2 bg-brand-primary text-white text-xs font-semibold uppercase tracking-wider hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+                  className="mt-4 px-6 py-2 bg-accent text-on-accent text-xs font-semibold uppercase tracking-wider hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
                 >
                   Send Another Message
                 </button>
@@ -150,7 +150,7 @@ export default function ContactTemplate() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="e.g., Asif Shawon"
-                      className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
+                      className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
                     />
                   </div>
 
@@ -166,7 +166,7 @@ export default function ContactTemplate() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="e.g., asif@example.com"
-                      className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
+                      className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function ContactTemplate() {
                       value={formData.orderNumber}
                       onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value })}
                       placeholder="e.g., order_01M..."
-                      className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
+                      className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
                     />
                   </div>
 
@@ -196,11 +196,11 @@ export default function ContactTemplate() {
                       name="subject"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
+                      className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
                     >
                       <option>Order &amp; Delivery Status</option>
                       <option>Size &amp; Fit Consultation</option>
-                      <option>24h Return / Exchange Request</option>
+                      <option>Size Exchange Request (48h)</option>
                       <option>Fabric &amp; 240 GSM Inquiry</option>
                       <option>Other Question</option>
                     </select>
@@ -219,13 +219,13 @@ export default function ContactTemplate() {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Provide details about your question or order..."
-                    className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
+                    className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-accent"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-brand-primary text-white hover:bg-black font-heading font-semibold text-xs uppercase tracking-widest transition-colors shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
+                  className="w-full py-3 bg-accent text-on-accent hover:bg-accent-hover font-heading font-semibold text-xs uppercase tracking-widest transition-colors shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
                 >
                   Submit Inquiry →
                 </button>

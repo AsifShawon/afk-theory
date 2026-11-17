@@ -158,7 +158,7 @@ const StripePaymentButton = ({
         disabled={disabled}
         onClick={handlePayment}
         data-testid={dataTestId}
-        className="w-full py-4 bg-brand-primary hover:bg-black text-white text-xs font-heading font-semibold uppercase tracking-widest transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-4 bg-accent hover:bg-accent-hover text-on-accent text-xs font-heading font-semibold uppercase tracking-widest transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {submitting && <Spinner className="animate-spin text-white" />}
         <span>{submitting ? "Processing Order..." : "Place Order (Stripe)"}</span>
@@ -201,7 +201,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
           <span className="font-heading font-bold uppercase tracking-wider text-brand-primary">
             Cash on Delivery
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-heading font-bold uppercase bg-brand-accent text-brand-primary">
+          <span className="px-2 py-0.5 text-[10px] font-heading font-bold uppercase bg-brand-accent text-on-accent">
             Pay on Delivery
           </span>
         </div>
@@ -214,7 +214,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         disabled={notReady || submitting}
         onClick={handlePayment}
         data-testid="submit-order-button"
-        className="w-full py-4 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-bold uppercase tracking-widest transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full py-4 bg-brand-accent hover:bg-brand-accent-hover text-on-accent text-xs font-heading font-bold uppercase tracking-widest transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
       >
         {submitting && <Spinner className="animate-spin text-brand-primary" />}
         <span>{submitting ? "Placing COD Order..." : "Confirm Order (Cash on Delivery) →"}</span>

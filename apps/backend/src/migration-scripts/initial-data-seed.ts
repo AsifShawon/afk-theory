@@ -516,14 +516,14 @@ export default async function initial_data_seed({
     logger.info("All Bangladesh delivery options already exist.")
   }
 
-  // 9. Categories: Drop Shoulder T-Shirts, Regular T-Shirts, Shirts, Trousers & Pants, Accessories (Idempotent)
+  // 9. Categories (Idempotent). The catalog is two product lines: Drop Shoulder Tees (a
+  // collection) and Hoodies (a collection) with two hoodie styles, which are categories.
+  // "Drop Shoulder T-Shirts" is kept as the category earlier tee listings used.
   logger.info("Ensuring AFK THEORY product categories...")
   const categoryNames = [
     "Drop Shoulder T-Shirts",
-    "Regular T-Shirts",
-    "Shirts",
-    "Trousers & Pants",
-    "Accessories",
+    "Basic Hoodie",
+    "Drop Shoulder Hoodie",
   ]
   const { data: existingCategories } = await query.graph({
     entity: "product_category",
@@ -553,12 +553,11 @@ export default async function initial_data_seed({
     allCategories.map((c: { name: string; id: string }) => [c.name, c.id])
   )
 
-  // 10. Collections: Drop 01: Offline by Choice, Essentials, Archive (Idempotent)
+  // 10. Collections: the two product lines (Idempotent)
   logger.info("Ensuring AFK THEORY product collections...")
   const collectionData = [
-    { title: "Drop 01: Offline by Choice", handle: "drop-01-offline-by-choice" },
-    { title: "Essentials", handle: "essentials" },
-    { title: "Archive", handle: "archive" },
+    { title: "Drop Shoulder Tees", handle: "drop-shoulder-tees" },
+    { title: "Hoodies", handle: "hoodies" },
   ]
   const { data: existingCollections } = await query.graph({
     entity: "product_collection",
@@ -651,10 +650,9 @@ export default async function initial_data_seed({
             status: ProductStatus.DRAFT, // MUST REMAIN DRAFT UNTIL USER SUPPLIES FINAL SPECS
             shipping_profile_id: shippingProfile.id,
             collection_id:
-              colMap["drop-01-offline-by-choice"] || colMap["essentials"],
+              colMap["drop-shoulder-tees"],
             category_ids: [
               catMap["Drop Shoulder T-Shirts"],
-              catMap["Regular T-Shirts"],
             ].filter(Boolean),
             tag_ids: [
               tagMap["drop-shoulder"],

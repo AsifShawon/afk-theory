@@ -43,7 +43,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ setCurrentView }) => {
       </p>
 
       {message ? (
-        <div className="w-full p-4 bg-green-50 border border-brand-accent/30 text-brand-accent text-xs space-y-3 text-center">
+        <div className="w-full p-4 bg-ok/10 border border-brand-accent/30 text-brand-accent text-xs space-y-3 text-center">
           <p className="font-medium">{message}</p>
           <button
             type="button"
@@ -67,12 +67,12 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ setCurrentView }) => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
               disabled={isLoading}
-              className="w-full px-3 py-2.5 bg-white border border-brand-border text-xs text-brand-primary focus:outline-none focus:border-brand-primary"
+              className="w-full px-3 py-2.5 bg-surface border border-brand-border text-xs text-brand-primary focus:outline-none focus:border-brand-primary"
             />
           </div>
 
           {errorMessage && (
-            <div className="p-2.5 bg-red-50 border border-brand-accent-alt/30 text-brand-accent-alt text-[11px]">
+            <div className="p-2.5 bg-err/10 border border-brand-accent-alt/30 text-brand-accent-alt text-[11px]">
               {errorMessage}
             </div>
           )}
@@ -80,7 +80,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ setCurrentView }) => {
           <button
             type="submit"
             disabled={isLoading || !email}
-            className="w-full py-3.5 bg-brand-primary hover:bg-black text-white text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-accent hover:bg-accent-hover text-on-accent text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoading && <Spinner className="animate-spin text-white" />}
             <span>{isLoading ? "Sending..." : "Send Reset Link &rarr;"}</span>

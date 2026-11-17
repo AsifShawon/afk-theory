@@ -18,7 +18,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
       component: <ProductCareTab product={product} />,
     },
     {
-      label: "Bangladesh Shipping & 24h Returns",
+      label: "Bangladesh Shipping & 48h Exchanges",
       component: <ShippingInfoTab />,
     },
   ]
@@ -122,10 +122,10 @@ const ShippingInfoTab = () => {
 
       <div className="p-3 bg-brand-secondary/60 border border-brand-border space-y-1">
         <h5 className="font-heading font-bold uppercase tracking-wider text-[11px] text-brand-accent">
-          🛡️ 24-Hour Return &amp; Exchange Policy
+          🛡️ 48-Hour Size Exchange
         </h5>
         <p className="text-[11px] text-brand-primary/80">
-          Size not fitting right? Submit a return or exchange request within 24 hours of delivery. Items must be unworn with original tags attached.
+          Size not fitting right? Submit a return or exchange request within 48 hours of delivery. Items must be unworn with original tags attached.
         </p>
       </div>
     </div>

@@ -45,7 +45,7 @@ export function AccountOverview({
           <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-brand-muted block">
             Account Status
           </span>
-          <span className="font-heading font-bold text-base text-emerald-800 flex items-center gap-1.5 pt-1">
+          <span className="font-heading font-bold text-base text-ok flex items-center gap-1.5 pt-1">
             <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block" />
             Verified Customer
           </span>
@@ -55,7 +55,7 @@ export function AccountOverview({
       {/* Profile & Default Address 2-Column */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
         {/* Profile Card */}
-        <div className="border border-brand-border bg-white p-5 space-y-4">
+        <div className="border border-brand-border bg-surface p-5 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-brand-border">
             <div className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-brand-primary text-[11px]">
               <UserIcon className="w-3.5 h-3.5" />
@@ -78,7 +78,7 @@ export function AccountOverview({
         </div>
 
         {/* Default Shipping Destination */}
-        <div className="border border-brand-border bg-white p-5 space-y-4">
+        <div className="border border-brand-border bg-surface p-5 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-brand-border">
             <div className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-brand-primary text-[11px]">
               <MapPinIcon className="w-3.5 h-3.5" />
@@ -114,7 +114,7 @@ export function AccountOverview({
       </div>
 
       {/* Recent Orders Preview */}
-      <div className="border border-brand-border bg-white space-y-4 p-5">
+      <div className="border border-brand-border bg-surface space-y-4 p-5">
         <div className="flex items-center justify-between pb-3 border-b border-brand-border">
           <div className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-brand-primary text-[11px]">
             <PackageIcon className="w-3.5 h-3.5" />

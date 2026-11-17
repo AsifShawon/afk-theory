@@ -105,13 +105,13 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
               placeholder="e.g., AFK10"
               disabled={isLoading}
               data-testid="discount-input"
-              className="flex-1 px-3 py-2 bg-white border border-brand-border text-brand-primary text-xs uppercase placeholder:normal-case placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary"
+              className="flex-1 px-3 py-2 bg-surface border border-brand-border text-brand-primary text-xs uppercase placeholder:normal-case placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary"
             />
             <button
               type="submit"
               disabled={isLoading || !code.trim()}
               data-testid="discount-apply-button"
-              className="px-4 py-2 bg-brand-primary hover:bg-black text-white text-xs font-heading font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              className="px-4 py-2 bg-accent hover:bg-accent-hover text-on-accent text-xs font-heading font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
               {isLoading && <Spinner className="animate-spin text-white" />}
               <span>Apply</span>
@@ -120,7 +120,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
 
           {errorMessage && (
             <div
-              className="p-2 bg-red-50 border border-brand-accent-alt/30 text-brand-accent-alt text-[11px] font-medium"
+              className="p-2 bg-err/10 border border-brand-accent-alt/30 text-brand-accent-alt text-[11px] font-medium"
               data-testid="discount-error-message"
             >
               {errorMessage}
@@ -128,7 +128,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
           )}
 
           {successMessage && (
-            <div className="p-2 bg-green-50 border border-brand-accent/30 text-brand-accent text-[11px] font-medium">
+            <div className="p-2 bg-ok/10 border border-brand-accent/30 text-brand-accent text-[11px] font-medium">
               {successMessage}
             </div>
           )}
@@ -149,7 +149,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
               data-testid="discount-row"
             >
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-brand-primary text-white text-[10px] font-mono font-bold" data-testid="discount-code">
+                <span className="px-2 py-0.5 bg-accent text-on-accent text-[10px] font-mono font-bold" data-testid="discount-code">
                   {promotion.code}
                 </span>
                 {promotion.application_method?.value !== undefined && (

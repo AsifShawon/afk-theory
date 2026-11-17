@@ -52,7 +52,7 @@ export function ContactView({
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
       <div className="bg-brand-secondary border-b border-brand-border py-12 sm:py-16">
         <div className="content-container max-w-4xl text-center space-y-3">
@@ -134,7 +134,7 @@ export function ContactView({
                   href={returnPolicyHref || (routes ? routes.returnPolicy() : "/return-policy")}
                   className="px-3 py-1 bg-brand-secondary border border-brand-border text-brand-primary hover:border-brand-primary"
                 >
-                  24h Return Policy
+                  48h Exchange Policy
                 </LinkComp>
                 <LinkComp
                   href={faqHref || (routes ? routes.faq() : "/faq")}
@@ -207,11 +207,11 @@ export function ContactView({
                     <select
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary focus:outline-none focus:border-brand-primary text-xs"
+                      className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary focus:outline-none focus:border-brand-primary text-xs"
                     >
                       <option>Order &amp; Delivery Status</option>
                       <option>Size &amp; Fit Consultation</option>
-                      <option>24h Return / Exchange Request</option>
+                      <option>Size Exchange Request (48h)</option>
                       <option>Fabric &amp; 240 GSM Inquiry</option>
                       <option>Other Question</option>
                     </select>
@@ -228,7 +228,7 @@ export function ContactView({
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Provide details about your question or order..."
-                    className="w-full px-3.5 py-2.5 bg-white border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary text-xs"
+                    className="w-full px-3.5 py-2.5 bg-surface border border-brand-border text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary text-xs"
                   />
                 </div>
 

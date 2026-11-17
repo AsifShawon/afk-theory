@@ -26,11 +26,11 @@ export async function generateMetadata(props: Params): Promise<Metadata> {
 
   const title = q
     ? `Search Results for "${q}" | AFK THEORY`
-    : "Shop All Streetwear | AFK THEORY"
+    : "Shop All | AFK THEORY"
 
   const description = q
     ? `Search results for "${q}" across AFK THEORY oversized drop shoulder tees and streetwear collections.`
-    : "Explore the complete AFK THEORY streetwear collection: oversized drop shoulder T-shirts, heavy cotton essentials, and street staples."
+    : "Shop the complete AFK THEORY range: oversized drop shoulder tees and hoodies, made for Bangladesh."
 
   return constructMetadata({
     title,

@@ -43,7 +43,7 @@ export function Footer({
   const displayCustomerCareLinks = deduplicateFooterLinks(customerCareLinks)
 
   return (
-    <footer className="bg-brand-primary text-brand-secondary border-t border-white/10 w-full mt-auto">
+    <footer className="bg-panel text-bone border-t border-white/10 w-full mt-auto">
       {/* Upper Reassurance Strip */}
       <div className="border-b border-white/10 py-8 bg-black/40">
         <div className="editorial-container grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
@@ -120,7 +120,7 @@ export function Footer({
           {/* Column 3: Departments */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="font-heading text-xs font-bold tracking-widest uppercase text-white">
-              Departments
+              Hoodie Styles
             </h4>
             <ul className="space-y-2 text-xs text-brand-sand/80 font-sans">
               {displayCategories.map((cat) => (
@@ -156,7 +156,7 @@ export function Footer({
 
           {/* Payment Badges */}
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-heading font-bold uppercase tracking-wider">
-            <span className="px-2.5 py-1 bg-brand-accent text-brand-primary">
+            <span className="px-2.5 py-1 bg-brand-accent text-on-accent">
               Cash on Delivery (COD)
             </span>
             <span className="px-2.5 py-1 bg-white/10 text-white/80 border border-white/15">

@@ -6,6 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import clsx from "clsx"
 import {
+  PRODUCT_LINES,
   ProductView,
   SearchCategorySuggestion,
   StoreRoutes,
@@ -25,7 +26,7 @@ export interface SearchOverlayProps {
   querySuggestions?: string[]
   categorySuggestions?: SearchCategorySuggestion[]
   popularSearches?: string[]
-  trendingCategories?: Array<{ name: string; handle: string }>
+  trendingCategories?: Array<{ name: string; handle: string; kind?: "collection" | "category" }>
   bestsellerProducts?: ProductView[]
   routes: StoreRoutes
   onSelectProduct?: (product: ProductView) => void
@@ -47,18 +48,25 @@ export function SearchOverlay({
   querySuggestions = [],
   categorySuggestions = [],
   popularSearches = [
-    "Drop Shoulder",
-    "Oversized Tee",
-    "Graphic Tee",
-    "Essentials",
-    "Heavyweight T-Shirt",
-    "Twill Cap",
+    "Drop Shoulder Tee",
+    "Hoodie",
+    "Basic Hoodie",
+    "Drop Shoulder Hoodie",
+    "Oversized",
   ],
   trendingCategories = [
-    { name: "Drop 01", handle: "drop-01" },
-    { name: "Drop Shoulder T-Shirts", handle: "drop-shoulder-t-shirts" },
-    { name: "Regular T-Shirts", handle: "regular-t-shirts" },
-    { name: "Accessories", handle: "accessories" },
+    ...PRODUCT_LINES.map((line) => ({
+      name: line.title,
+      handle: line.handle,
+      kind: "collection" as const,
+    })),
+    ...PRODUCT_LINES.flatMap((line) =>
+      line.styles.map((style) => ({
+        name: style.title,
+        handle: style.handle,
+        kind: "category" as const,
+      }))
+    ),
   ],
   bestsellerProducts = [],
   routes,
@@ -213,12 +221,12 @@ export function SearchOverlay({
       {/* Main Search Panel Container */}
       <div
         className={clsx(
-          "relative z-10 w-full max-w-5xl mx-auto bg-white shadow-2xl border-b sm:border border-brand-border flex flex-col max-h-[92vh] sm:rounded-2xl overflow-hidden transition-all duration-200",
+          "relative z-10 w-full max-w-5xl mx-auto bg-surface shadow-2xl border-b sm:border border-brand-border flex flex-col max-h-[92vh] sm:rounded-2xl overflow-hidden transition-all duration-200",
           isClosing ? "scale-98 opacity-0" : "animate-mega-enter"
         )}
       >
         {/* Search Header Bar */}
-        <div className="p-4 sm:p-6 border-b border-brand-border bg-white flex items-center gap-3">
+        <div className="p-4 sm:p-6 border-b border-brand-border bg-surface flex items-center gap-3">
           <MagnifyingGlassIcon className="w-5 h-5 text-brand-primary/50 flex-shrink-0" />
 
           <form onSubmit={handleSubmit} className="flex-1 flex items-center">
@@ -254,7 +262,7 @@ export function SearchOverlay({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-brand-primary/70 hover:text-brand-primary hover:bg-brand-secondary rounded-full transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
+            className="p-2 text-brand-primary/70 hover:text-brand-primary hover:bg-raised rounded-full transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             aria-label="Close search overlay"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -289,7 +297,7 @@ export function SearchOverlay({
                         onQueryChange(term)
                         onSelectSuggestion?.(term)
                       }}
-                      className="px-3.5 py-1.5 rounded-full bg-brand-secondary hover:bg-brand-primary hover:text-white border border-brand-border text-xs font-heading font-medium text-brand-primary transition-colors min-h-[36px]"
+                      className="px-3.5 py-1.5 rounded-full bg-brand-secondary hover:bg-accent hover:text-on-accent border border-brand-border text-xs font-heading font-medium text-brand-primary transition-colors min-h-[36px]"
                     >
                       {term}
                     </button>
@@ -306,9 +314,15 @@ export function SearchOverlay({
                   {trendingCategories.map((cat) => (
                     <LinkComp
                       key={cat.handle}
-                      href={routes.category ? routes.category(cat.handle) : routes.catalog({ category: cat.handle })}
+                      href={
+                        cat.kind === "collection"
+                          ? routes.collection(cat.handle)
+                          : routes.category
+                            ? routes.category(cat.handle)
+                            : routes.catalog({ category: cat.handle })
+                      }
                       onClick={onClose}
-                      className="p-3.5 bg-white hover:bg-brand-secondary border border-brand-border/80 rounded-xl text-center transition-colors group"
+                      className="p-3.5 bg-surface hover:bg-raised border border-brand-border/80 rounded-xl text-center transition-colors group"
                     >
                       <span className="text-xs font-heading font-bold text-brand-primary group-hover:text-brand-accent transition-colors block">
                         {cat.name}
@@ -342,7 +356,7 @@ export function SearchOverlay({
                         key={p.id}
                         href={routes.product(p.handle)}
                         onClick={onClose}
-                        className="group flex flex-col bg-white border border-brand-border rounded-xl p-2.5 hover:border-brand-primary transition-colors"
+                        className="group flex flex-col bg-surface border border-brand-border rounded-xl p-2.5 hover:border-brand-primary transition-colors"
                       >
                         <div className="relative aspect-[3/4] w-full bg-brand-secondary rounded-lg overflow-hidden mb-2">
                           {p.thumbnail && (
@@ -423,7 +437,7 @@ export function SearchOverlay({
                     <button
                       type="button"
                       onClick={() => onQueryChange("")}
-                      className="px-4 py-2 rounded-full bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+                      className="px-4 py-2 rounded-full bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
                     >
                       Clear Search
                     </button>
@@ -442,7 +456,7 @@ export function SearchOverlay({
                         onClose()
                         onSelectProduct?.(prod)
                       }}
-                      className="group flex items-center gap-3.5 p-3 bg-white border border-brand-border rounded-xl hover:border-brand-primary hover:shadow-subtle transition-all duration-200"
+                      className="group flex items-center gap-3.5 p-3 bg-surface border border-brand-border rounded-xl hover:border-brand-primary hover:shadow-subtle transition-all duration-200"
                     >
                       <div className="relative w-16 h-20 bg-brand-secondary rounded-lg overflow-hidden flex-shrink-0">
                         {prod.thumbnail && (
@@ -468,11 +482,11 @@ export function SearchOverlay({
                             {prod.minPrice.formatted}
                           </span>
                           {prod.inStock ? (
-                            <span className="text-[9px] uppercase font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[9px] uppercase font-bold text-ok bg-ok/10 px-1.5 py-0.5 rounded">
                               In Stock
                             </span>
                           ) : (
-                            <span className="text-[9px] uppercase font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[9px] uppercase font-bold text-err bg-err/10 px-1.5 py-0.5 rounded">
                               Sold Out
                             </span>
                           )}

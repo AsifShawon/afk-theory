@@ -14,7 +14,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
 }) => {
   if (!customer) {
     return (
-      <div className="bg-white min-h-screen py-12">
+      <div className="bg-surface min-h-screen py-12">
         <div className="content-container max-w-md mx-auto">{children}</div>
       </div>
     )

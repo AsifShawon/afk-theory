@@ -44,7 +44,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
   const maxQuantity = 10
 
   return (
-    <Table.Row className="w-full border-b border-brand-border/40 hover:bg-brand-secondary/20 transition-colors" data-testid="product-row">
+    <Table.Row className="w-full border-b border-brand-border/40 hover:bg-raised transition-colors" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24 align-top">
         <LocalizedClientLink
           href={`/products/${item.product_handle}`}
@@ -87,7 +87,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
                   value={item.quantity}
                   disabled={updating}
                   onChange={(value) => changeQuantity(parseInt(value.target.value))}
-                  className="w-16 h-9 px-2 text-xs font-semibold bg-white border border-brand-border text-brand-primary focus:border-brand-primary"
+                  className="w-16 h-9 px-2 text-xs font-semibold bg-surface border border-brand-border text-brand-primary focus:border-brand-primary"
                   data-testid="product-select-button"
                 >
                   {Array.from(

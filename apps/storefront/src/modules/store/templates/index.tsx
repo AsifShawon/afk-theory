@@ -1,3 +1,4 @@
+import { getShownCategoryHandles } from "@dtc/commerce-contracts"
 import { HttpTypes } from "@medusajs/types"
 import { OptionValueIds } from "@lib/util/product-option-filters"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -50,7 +51,10 @@ const StoreTemplate = async ({
   ])
 
   const productViews = (response.products || []).map((p) => toProductView(p, "bdt"))
-  const categoryViews = (categoriesData || []).map(toCategoryView)
+  const shownHandles = new Set(getShownCategoryHandles())
+  const categoryViews = (categoriesData || [])
+    .filter((category) => shownHandles.has(category.handle))
+    .map(toCategoryView)
 
   return (
     <MedusaCatalogClient

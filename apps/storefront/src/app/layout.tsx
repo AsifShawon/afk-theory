@@ -2,7 +2,7 @@ import { getBaseURL } from "@lib/util/env"
 import { getOrganizationSchema } from "@lib/util/seo"
 import JsonLd from "@modules/common/components/json-ld"
 import SkipLink from "@modules/layout/components/skip-link"
-import { Metadata } from "next"
+import { Metadata, Viewport } from "next"
 import { Space_Grotesk, Manrope } from "next/font/google"
 import "styles/globals.css"
 
@@ -18,6 +18,12 @@ const manrope = Manrope({
   display: "swap",
 })
 
+export const viewport: Viewport = {
+  // Colours the browser address bar / status bar on phones to match the page.
+  themeColor: "#0B0D08",
+  colorScheme: "dark",
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
   title: {
@@ -25,11 +31,11 @@ export const metadata: Metadata = {
     template: "%s | AFK THEORY",
   },
   description:
-    "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Explore oversized drop shoulder t-shirts and contemporary street essentials.",
+    "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Shop oversized drop shoulder tees and hoodies.",
   openGraph: {
     title: "AFK THEORY | Pause The Game. Keep Your Style.",
     description:
-      "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Explore oversized drop shoulder t-shirts and contemporary street essentials.",
+      "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Shop oversized drop shoulder tees and hoodies.",
     siteName: "AFK THEORY",
     type: "website",
     locale: "en_BD",
@@ -39,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AFK THEORY | Pause The Game. Keep Your Style.",
     description:
-      "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Explore oversized drop shoulder t-shirts and contemporary street essentials.",
+      "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Shop oversized drop shoulder tees and hoodies.",
     images: ["/brand/logo-chartreuse.png"],
   },
 }
@@ -50,13 +56,13 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      data-mode="light"
+      data-theme="dark"
       className={`${spaceGrotesk.variable} ${manrope.variable}`}
     >
       <head>
         <JsonLd data={organizationSchema} />
       </head>
-      <body className="bg-brand-secondary text-brand-primary font-sans antialiased selection:bg-brand-accent selection:text-brand-primary">
+      <body className="bg-canvas text-ink font-sans antialiased">
         <SkipLink />
         <div className="relative min-h-screen flex flex-col">{props.children}</div>
       </body>

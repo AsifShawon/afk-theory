@@ -17,3 +17,8 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Dark scrollbars to match the theme (Firefox and WebKit). */
+html {
+  scrollbar-color: rgb(var(--control)) rgb(var(--canvas));
+}

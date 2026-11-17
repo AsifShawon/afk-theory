@@ -113,13 +113,13 @@ export function AddressForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="block text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary">
-            District <span className="text-red-500">*</span>
+            District <span className="text-err">*</span>
           </label>
           <select
             value={formData.district || ""}
             onChange={(e) => updateField("district", e.target.value)}
             disabled={disabled}
-            className="w-full px-3.5 py-2.5 bg-white border border-brand-border rounded-lg text-xs font-sans text-brand-primary focus:outline-none focus:border-brand-primary transition-colors disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 bg-surface border border-brand-border rounded-lg text-xs font-sans text-brand-primary focus:outline-none focus:border-brand-primary transition-colors disabled:opacity-50"
           >
             <option value="">Select your district (64 Districts)</option>
             {BANGLADESH_DIVISIONS.map((division) => (
@@ -135,7 +135,7 @@ export function AddressForm({
             ))}
           </select>
           {errors.district && (
-            <p className="text-xs text-red-500 mt-0.5">{errors.district}</p>
+            <p className="text-xs text-err mt-0.5">{errors.district}</p>
           )}
         </div>
 
@@ -193,7 +193,7 @@ export function AddressForm({
           onChange={(e) => updateField("notes", e.target.value)}
           disabled={disabled}
           placeholder="e.g. Near Banani Graveyard gate, deliver after 2 PM"
-          className="w-full px-3.5 py-2.5 bg-white border border-brand-border rounded-lg text-xs font-sans text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary transition-colors disabled:opacity-50"
+          className="w-full px-3.5 py-2.5 bg-surface border border-brand-border rounded-lg text-xs font-sans text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary transition-colors disabled:opacity-50"
         />
       </div>
 
@@ -207,7 +207,7 @@ export function AddressForm({
             Delivery Charge: ৳{zoneInfo.rateBdt} • Est. {zoneInfo.estimatedDays}
           </span>
         </div>
-        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-brand-accent text-brand-primary">
+        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-brand-accent text-on-accent">
           Cash On Delivery
         </span>
       </div>

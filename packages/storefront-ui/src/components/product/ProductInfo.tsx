@@ -8,7 +8,11 @@ export interface ProductInfoProps {
 
 export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
   const activePrice = selectedVariant?.price || product.minPrice
-  const originalPrice = selectedVariant?.originalPrice
+  // Only show a struck-through price when it is actually higher than the price being charged.
+  const originalPrice =
+    selectedVariant?.originalPrice && selectedVariant.originalPrice.amount > activePrice.amount
+      ? selectedVariant.originalPrice
+      : undefined
   const isSoldOut = selectedVariant
     ? !selectedVariant.inStock
     : !product.inStock
@@ -29,7 +33,7 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
           </span>
         )}
         {product.isNewArrival && (
-          <span className="badge-tag bg-brand-primary text-white border-none">
+          <span className="badge-tag bg-ink text-canvas border-none">
             New In
           </span>
         )}
@@ -73,16 +77,16 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
         {/* Stock Messaging */}
         <div>
           {isSoldOut ? (
-            <span className="text-xs font-heading font-bold text-rose-800 uppercase tracking-wider">
+            <span className="text-xs font-heading font-bold text-err uppercase tracking-wider">
               Sold Out
             </span>
           ) : isLowStock ? (
-            <span className="text-xs font-heading font-bold text-amber-700 uppercase tracking-wider">
+            <span className="text-xs font-heading font-bold text-warn uppercase tracking-wider">
               Only {stockQty} Left
             </span>
           ) : (
-            <span className="text-xs font-heading font-semibold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-700" />
+            <span className="text-xs font-heading font-semibold text-ok uppercase tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-ok" />
               <span>In Stock • Ready to Dispatch</span>
             </span>
           )}

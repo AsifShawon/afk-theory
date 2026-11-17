@@ -116,7 +116,7 @@ export function ProductDetailView({
   const primaryThumb = product.thumbnail || product.images[0]
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Breadcrumb Navigation */}
       <div className="border-b border-brand-border/80 py-4 bg-brand-surface">
         <div className="editorial-container">
@@ -164,12 +164,12 @@ export function ProductDetailView({
             <div ref={mainCtaRef} className="space-y-4 pt-2">
               <div className="flex items-center gap-3">
                 {/* Quantity input */}
-                <div className="flex items-center border border-brand-border rounded-full bg-white h-12 text-xs px-1">
+                <div className="flex items-center border border-brand-border rounded-full bg-surface h-12 text-xs px-1">
                   <button
                     type="button"
                     onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1 || isSoldOut}
-                    className="w-9 h-full flex items-center justify-center text-brand-primary hover:bg-brand-secondary rounded-full disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="w-9 h-full flex items-center justify-center text-brand-primary hover:bg-raised rounded-full disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     aria-label="Decrease quantity"
                   >
                     -
@@ -185,7 +185,7 @@ export function ProductDetailView({
                       )
                     }
                     disabled={isSoldOut || isAtMaxQuantity}
-                    className="w-9 h-full flex items-center justify-center text-brand-primary hover:bg-brand-secondary rounded-full disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="w-9 h-full flex items-center justify-center text-brand-primary hover:bg-raised rounded-full disabled:opacity-30 disabled:pointer-events-none transition-colors"
                     aria-label="Increase quantity"
                   >
                     +
@@ -214,7 +214,7 @@ export function ProductDetailView({
               {addToCartError && (
                 <p
                   role="alert"
-                  className="text-xs font-heading font-semibold text-rose-800 bg-rose-50 border border-rose-200 px-3 py-2"
+                  className="text-xs font-heading font-semibold text-err bg-err/10 border border-err/30 px-3 py-2"
                 >
                   {addToCartError}
                 </p>
@@ -259,7 +259,7 @@ export function ProductDetailView({
 
       {/* Mobile Sticky Bottom Bar */}
       {showStickyMobileBar && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-brand-border p-3 shadow-2xl flex items-center justify-between gap-3 animate-mega-enter">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-brand-border p-3 shadow-2xl flex items-center justify-between gap-3 animate-mega-enter">
           <div className="flex items-center gap-2.5 min-w-0">
             {primaryThumb && (
               <div className="relative w-10 h-12 bg-brand-secondary rounded overflow-hidden flex-shrink-0">
@@ -277,7 +277,7 @@ export function ProductDetailView({
                 {product.title}
               </p>
               {addToCartError ? (
-                <p role="alert" className="font-heading font-semibold text-[11px] text-rose-800 line-clamp-2">
+                <p role="alert" className="font-heading font-semibold text-[11px] text-err line-clamp-2">
                   {addToCartError}
                 </p>
               ) : (

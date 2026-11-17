@@ -144,12 +144,12 @@ function FreeShippingInline({
   return (
     <div className="bg-neutral-100 p-2 rounded-lg border">
       <div className="space-y-1.5">
-        <div className="flex justify-between text-xs text-neutral-600">
+        <div className="flex justify-between text-xs text-muted">
           <div>
             {price.target_reached ? (
               <div className="flex items-center gap-1.5">
                 {" "}
-                <CheckCircleSolid className="text-green-500 inline-block" />{" "}
+                <CheckCircleSolid className="text-ok inline-block" />{" "}
                 Free Shipping unlocked!
               </div>
             ) : (
@@ -163,7 +163,7 @@ function FreeShippingInline({
             })}
           >
             Only{" "}
-            <span className="text-neutral-950">
+            <span className="text-ink">
               {convertToLocale({
                 amount: price.target_remaining,
                 currency_code: cart.currency_code,
@@ -218,14 +218,14 @@ function FreeShippingPopup({
         </Button>
       </div>
 
-      <div className="w-[400px] bg-black text-white p-6 rounded-lg ">
+      <div className="w-[400px] bg-panel text-bone border border-line p-6 rounded-lg ">
         <div className="pb-4">
           <div className="space-y-3">
-            <div className="flex justify-between text-[15px] text-neutral-400">
+            <div className="flex justify-between text-[15px] text-muted">
               <div>
                 {price.target_reached ? (
                   <div className="flex items-center gap-1.5">
-                    <CheckCircleSolid className="text-green-500 inline-block" />{" "}
+                    <CheckCircleSolid className="text-ok inline-block" />{" "}
                     Free Shipping unlocked!
                   </div>
                 ) : (
@@ -272,7 +272,7 @@ function FreeShippingPopup({
           </LocalizedClientLink>
 
           <LocalizedClientLink
-            className="flex-grow rounded-2xl bg-white text-neutral-950 shadow-none outline-none border-[1px] border-white text-[15px] py-2.5 px-4 text-center"
+            className="flex-grow rounded-2xl bg-surface text-ink shadow-none outline-none border-[1px] border-white text-[15px] py-2.5 px-4 text-center"
             href="/store"
           >
             View products

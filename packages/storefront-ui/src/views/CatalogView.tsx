@@ -59,6 +59,10 @@ export function CatalogView({
 
   // Build active filter chips
   const activeChips: Array<{ id: string; label: string; onRemove: () => void }> = []
+  const hasActiveFilters = Boolean(
+    filters.category || filters.size || filters.color || filters.inStockOnly || filters.search
+  )
+
   if (filters.category) {
     const catName = categories?.find((c) => c.handle === filters.category)?.name || filters.category
     activeChips.push({
@@ -97,7 +101,7 @@ export function CatalogView({
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Catalog Header Banner */}
       <div className="border-b border-brand-border/80 bg-brand-surface py-10 sm:py-14">
         <div className="editorial-container space-y-4">
@@ -144,7 +148,7 @@ export function CatalogView({
           <button
             type="button"
             onClick={() => setIsMobileFilterOpen(true)}
-            className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-brand-surface border border-brand-border rounded-full text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-brand-secondary transition-colors"
+            className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-brand-surface border border-brand-border rounded-full text-xs font-heading font-semibold uppercase tracking-wider text-brand-primary hover:bg-raised transition-colors"
           >
             <AdjustmentsIcon className="w-4 h-4 text-brand-accent" />
             <span>Refine ({activeChips.length})</span>
@@ -188,7 +192,7 @@ export function CatalogView({
                 <button
                   type="button"
                   onClick={chip.onRemove}
-                  className="hover:text-rose-700 transition-colors p-0.5"
+                  className="hover:text-err transition-colors p-0.5"
                   aria-label={`Remove filter ${chip.label}`}
                 >
                   <XMarkIcon className="w-3 h-3" />
@@ -235,8 +239,12 @@ export function CatalogView({
                 routes={routes}
                 capabilities={capabilities}
                 onQuickAdd={onQuickAdd}
-                emptyStateTitle="No garments match your filters"
-                emptyStateMessage="Try adjusting size, color, or category choices, or clear all filters to view our full collection."
+                emptyStateTitle={hasActiveFilters ? "No garments match your filters" : "Coming soon"}
+                emptyStateMessage={
+                  hasActiveFilters
+                    ? "Try adjusting size, color, or category choices, or clear all filters to view our full collection."
+                    : "We are adding pieces here. Join the drop registry to hear first."
+                }
                 linkComponent={LinkComp}
               />
             )}

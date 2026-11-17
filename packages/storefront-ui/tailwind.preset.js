@@ -1,4 +1,8 @@
 /** @type {import('tailwindcss').Config} */
+
+// "rgb(var(--name) / <alpha-value>)" lets Tailwind apply opacity modifiers to a CSS variable colour.
+const themeColor = (name) => `rgb(var(--${name}) / <alpha-value>)`
+
 module.exports = {
   theme: {
     extend: {
@@ -10,32 +14,57 @@ module.exports = {
         visibility: "visibility",
         padding: "padding-top padding-right padding-bottom padding-left",
       },
+      // Colours are CSS variables (see src/styles/storefront.css) so the whole store can be
+      // themed from one place. Channels are stored as "R G B" to keep opacity utilities working
+      // (bg-surface/80, border-line/50, ...).
       colors: {
+        // ---- Role tokens (use these in new code) ----
+        canvas: themeColor("canvas"), // page background
+        surface: themeColor("surface"), // cards, sections, panels on the page
+        raised: themeColor("raised"), // inputs, hover fills, drawers
+        panel: themeColor("panel"), // always-dark blocks: hero tiles, footer, top bar
+        ink: themeColor("ink"), // main text
+        bone: themeColor("bone"), // off-white that stays light in every theme (text on photos/panels)
+        muted: themeColor("muted"),
+        faint: themeColor("faint"),
+        line: themeColor("line"), // hairlines and card borders
+        "line-strong": themeColor("line-strong"),
+        control: themeColor("control"), // borders of inputs and buttons (3:1 contrast)
+        accent: themeColor("accent"), // chartreuse
+        "accent-hover": themeColor("accent-hover"),
+        "on-accent": themeColor("on-accent"), // text on accent fills
+        band: themeColor("band"), // light bands on a dark page
+        "band-ink": themeColor("band-ink"),
+        ok: themeColor("ok"),
+        err: themeColor("err"),
+        warn: themeColor("warn"),
+
+        // ---- Legacy names, kept so older markup keeps working. Prefer the role tokens above. ----
         brand: {
-          primary: "#20241F",
-          secondary: "#F5F3ED",
-          accent: "#D8F452",
-          "accent-hover": "#C4E03F",
-          "accent-alt": "#161815",
+          primary: themeColor("ink"),
+          secondary: themeColor("canvas"),
+          accent: themeColor("accent"),
+          "accent-hover": themeColor("accent-hover"),
+          "accent-alt": themeColor("on-accent"),
           chartreuse: "#D8F452",
-          stone: "#E4E1D8",
-          "stone-light": "#EDEAE2",
-          olive: "#687065",
-          graphite: "#20241F",
-          "graphite-dark": "#161815",
-          "graphite-light": "#323730",
-          bone: "#F5F3ED",
-          "bone-light": "#FCFAF5",
-          muted: "#687065",
-          "muted-light": "#8E968B",
-          surface: "#FFFFFF",
-          card: "#E4E1D8",
-          border: "#E4E1D8",
-          "border-light": "#EDEAE2",
-          "border-dark": "#20241F",
-          sand: "#E4E1D8",
-          ivory: "#F5F3ED",
-          subtle: "#F5F3ED",
+          stone: themeColor("raised"),
+          "stone-light": themeColor("surface"),
+          olive: themeColor("muted"),
+          graphite: themeColor("panel"),
+          "graphite-dark": themeColor("panel"),
+          "graphite-light": themeColor("raised"),
+          bone: themeColor("bone"),
+          "bone-light": themeColor("bone"),
+          muted: themeColor("muted"),
+          "muted-light": themeColor("faint"),
+          surface: themeColor("surface"),
+          card: themeColor("raised"),
+          border: themeColor("line"),
+          "border-light": themeColor("line"),
+          "border-dark": themeColor("line-strong"),
+          sand: themeColor("bone"),
+          ivory: themeColor("canvas"),
+          subtle: themeColor("raised"),
         },
         grey: {
           0: "#FFFFFF",

@@ -61,18 +61,18 @@ export function ResetPasswordForm({
       )}
 
       {token === "" && (
-        <div className="p-3 bg-red-50 border border-rose-300 text-rose-800 text-xs">
+        <div className="p-3 bg-err/10 border border-err/30 text-err text-xs">
           Reset token is missing or expired. Please request a new password reset link.
         </div>
       )}
 
       {successMessage ? (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center space-y-3">
+        <div className="p-4 bg-ok/10 border border-ok/30 text-ok text-xs text-center space-y-3">
           <p className="font-semibold text-sm">✓ Password Updated</p>
           <p>{successMessage}</p>
           <LinkComp
             href={loginHref}
-            className="inline-block mt-2 px-5 py-2.5 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-brand-accent transition-colors"
+            className="inline-block mt-2 px-5 py-2.5 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
           >
             Sign In Now
           </LinkComp>
@@ -109,7 +109,7 @@ export function ResetPasswordForm({
 
           {effectiveError && (
             <div
-              className="p-3 bg-red-50 border border-rose-300 text-rose-800 text-xs font-medium"
+              className="p-3 bg-err/10 border border-err/30 text-err text-xs font-medium"
               data-testid="reset-password-error"
             >
               {effectiveError}

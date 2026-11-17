@@ -65,8 +65,8 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               disabled={disabled}
               className={`min-w-[44px] h-10 px-3.5 flex items-center justify-center text-xs font-semibold uppercase tracking-wider transition-all duration-150 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 ${
                 isSelected
-                  ? "border-brand-primary bg-brand-primary text-white shadow-sm ring-1 ring-brand-primary"
-                  : "border-brand-border bg-brand-card text-brand-primary hover:border-brand-primary/60 hover:bg-white"
+                  ? "border-ink bg-ink text-canvas shadow-sm ring-1 ring-ink"
+                  : "border-brand-border bg-brand-card text-brand-primary hover:border-brand-primary/60 hover:bg-surface"
               } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
               data-testid="option-button"
             >

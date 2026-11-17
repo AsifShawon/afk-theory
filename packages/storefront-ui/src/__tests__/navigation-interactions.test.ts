@@ -33,20 +33,25 @@ const mockRoutes: StoreRoutes = {
 }
 
 describe("Shared Mega Navigation IA & Interaction Suite", () => {
-  test("1. Centralized IA produces seven primary menswear departments", () => {
+  test("1. Centralized IA reflects the two product lines", () => {
     const nav = createStoreNavigation(mockRoutes)
-    assert.equal(nav.length, 7)
+    assert.equal(nav.length, 3)
 
     const labels = nav.map((n) => n.label)
-    assert.deepEqual(labels, [
-      "New & Trending",
-      "Shirts",
-      "Polos & Tees",
-      "Trousers",
-      "Outerwear & Linen",
-      "Accessories",
-      "Collections",
-    ])
+    assert.deepEqual(labels, ["Shop All", "Drop Shoulder Tees", "Hoodies"])
+  })
+
+  test("1b. Hoodie menu lists both styles with their color counts", () => {
+    const nav = createStoreNavigation(mockRoutes)
+    const hoodies = nav.find((n) => n.id === "hoodies")!
+    assert.deepEqual(
+      hoodies.featuredLinks.map((l) => [l.label, l.badge]),
+      [
+        ["Basic Hoodie", "2 colors"],
+        ["Drop Shoulder Hoodie", "3 colors"],
+      ]
+    )
+    assert.equal(hoodies.href, "/collection?handle=hoodies")
   })
 
   test("2. All mega destinations resolve cleanly through StoreRoutes without hardcoded paths", () => {
@@ -97,9 +102,9 @@ describe("Shared Mega Navigation IA & Interaction Suite", () => {
       }
     }
 
-    // Open "shirts"
-    handleTriggerToggle("shirts")
-    assert.equal(activeId, "shirts")
+    // Open "hoodies"
+    handleTriggerToggle("hoodies")
+    assert.equal(activeId, "hoodies")
 
     // Escape closes and restores focus
     handleClose({ restoreFocus: true })
@@ -108,16 +113,16 @@ describe("Shared Mega Navigation IA & Interaction Suite", () => {
   })
 
   test("5. Switching between nav items updates active menu without flickering", () => {
-    let activeId: string | null = "new-arrivals"
+    let activeId: string | null = "shop-all"
 
     function switchMenu(newId: string) {
       activeId = newId
     }
 
-    switchMenu("trousers")
-    assert.equal(activeId, "trousers")
-    switchMenu("accessories")
-    assert.equal(activeId, "accessories")
+    switchMenu("hoodies")
+    assert.equal(activeId, "hoodies")
+    switchMenu("drop-shoulder-tees")
+    assert.equal(activeId, "drop-shoulder-tees")
   })
 
   test("6. Footer links with duplicate hrefs are deduplicated to avoid key collisions", () => {
@@ -143,18 +148,18 @@ describe("Shared Mega Navigation IA & Interaction Suite", () => {
 
   test("7. isNavItemActive accurately detects active state with or without country code", () => {
     const nav = createStoreNavigation(mockRoutes)
-    const shirtsItem = nav.find((i) => i.id === "shirts")!
-    const accessoriesItem = nav.find((i) => i.id === "accessories")!
+    const teesItem = nav.find((i) => i.id === "drop-shoulder-tees")!
+    const hoodiesItem = nav.find((i) => i.id === "hoodies")!
 
     // Direct match with country code prefix
-    assert.equal(isNavItemActive(shirtsItem, "/bd/category?handle=shirts"), true)
+    assert.equal(isNavItemActive(teesItem, "/bd/collection?handle=drop-shoulder-tees"), true)
     // Direct match without prefix
-    assert.equal(isNavItemActive(shirtsItem, "/category?handle=shirts"), true)
+    assert.equal(isNavItemActive(teesItem, "/collection?handle=drop-shoulder-tees"), true)
     // Non-match
-    assert.equal(isNavItemActive(accessoriesItem, "/bd/category?handle=shirts"), false)
-    // Homepage does not falsely match categories
-    assert.equal(isNavItemActive(shirtsItem, "/bd"), false)
-    assert.equal(isNavItemActive(shirtsItem, "/"), false)
+    assert.equal(isNavItemActive(hoodiesItem, "/bd/collection?handle=drop-shoulder-tees"), false)
+    // Homepage does not falsely match collections
+    assert.equal(isNavItemActive(teesItem, "/bd"), false)
+    assert.equal(isNavItemActive(teesItem, "/"), false)
   })
 
   test("8. Hover-intent timing parameters adhere to usability guidelines", () => {

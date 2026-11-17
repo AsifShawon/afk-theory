@@ -115,7 +115,7 @@ export function SizeGuideModal({
               type="button"
               onClick={() => setUnit("in")}
               className={`px-2.5 py-1 font-semibold transition-colors ${
-                unit === "in" ? "bg-white text-brand-primary shadow-xs" : "text-brand-muted"
+                unit === "in" ? "bg-surface text-brand-primary shadow-xs" : "text-brand-muted"
               }`}
             >
               Inches (in)
@@ -124,7 +124,7 @@ export function SizeGuideModal({
               type="button"
               onClick={() => setUnit("cm")}
               className={`px-2.5 py-1 font-semibold transition-colors ${
-                unit === "cm" ? "bg-white text-brand-primary shadow-xs" : "text-brand-muted"
+                unit === "cm" ? "bg-surface text-brand-primary shadow-xs" : "text-brand-muted"
               }`}
             >
               Centimeters (cm)
@@ -146,10 +146,10 @@ export function SizeGuideModal({
             </thead>
             <tbody className="divide-y divide-brand-border">
               {currentTable.rows.map((row) => (
-                <tr key={row.size} className="hover:bg-brand-secondary/30 transition-colors">
+                <tr key={row.size} className="hover:bg-raised transition-colors">
                   <td className="p-3 font-bold">{row.size}</td>
                   {(unit === "in" ? row.inValues : row.cmValues).map((v, i) => (
-                    <td key={i} className="p-3 font-mono text-grey-70">
+                    <td key={i} className="p-3 font-mono text-muted">
                       {v}
                     </td>
                   ))}

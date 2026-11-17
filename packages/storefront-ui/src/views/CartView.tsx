@@ -44,7 +44,7 @@ export function CartView({
 
   if (!hasItems) {
     return (
-      <div className="bg-white min-h-[60vh] flex items-center justify-center py-16">
+      <div className="bg-surface min-h-[60vh] flex items-center justify-center py-16">
         <div className="content-container text-center max-w-lg mx-auto space-y-5">
           <div className="w-16 h-16 bg-brand-surface rounded-full flex items-center justify-center mx-auto text-brand-muted border border-brand-border">
             <ShoppingBagIcon className="w-8 h-8" />
@@ -60,7 +60,7 @@ export function CartView({
           <div className="pt-2">
             <LinkComp
               href={routes.catalog()}
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-brand-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-brand-accent transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-accent text-on-accent text-xs font-bold uppercase tracking-wider hover:bg-accent-hover transition-colors shadow-sm"
             >
               <span>Explore Catalog</span>
               <ArrowRightIcon className="w-4 h-4" />
@@ -72,7 +72,7 @@ export function CartView({
   }
 
   return (
-    <div className="bg-white min-h-screen py-10 sm:py-16">
+    <div className="bg-surface min-h-screen py-10 sm:py-16">
       <div className="content-container space-y-10">
         {/* Page Title & Breadcrumb */}
         <div className="border-b border-brand-border pb-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
@@ -89,7 +89,7 @@ export function CartView({
             <button
               type="button"
               onClick={onClearCart}
-              className="text-xs text-brand-muted hover:text-rose-700 underline font-medium self-start sm:self-auto transition-colors"
+              className="text-xs text-brand-muted hover:text-err underline font-medium self-start sm:self-auto transition-colors"
             >
               Clear entire bag
             </button>
@@ -103,7 +103,7 @@ export function CartView({
             {quantityError && (
               <p
                 role="alert"
-                className="mb-4 text-xs font-heading font-semibold text-rose-800 bg-rose-50 border border-rose-200 px-3 py-2"
+                className="mb-4 text-xs font-heading font-semibold text-err bg-err/10 border border-err/30 px-3 py-2"
               >
                 {quantityError}
               </p>
@@ -131,7 +131,7 @@ export function CartView({
                 checkoutButtonSlot || (
                   <LinkComp
                     href={routes.checkout()}
-                    className="w-full h-12 bg-brand-primary hover:bg-brand-accent text-white text-xs font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm"
+                    className="w-full h-12 bg-accent hover:bg-accent-hover text-on-accent text-xs font-bold uppercase tracking-widest flex items-center justify-center transition-colors shadow-sm"
                   >
                     Proceed to Checkout
                   </LinkComp>

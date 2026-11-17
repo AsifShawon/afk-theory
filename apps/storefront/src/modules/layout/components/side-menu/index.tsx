@@ -52,7 +52,7 @@ const SideMenu = ({ regions }: SideMenuProps) => {
               leaveFrom="translate-x-0 opacity-100"
               leaveTo="-translate-x-full opacity-0"
             >
-              <PopoverPanel className="fixed top-0 left-0 bottom-0 w-full max-w-sm z-[70] bg-brand-primary text-brand-secondary shadow-2xl flex flex-col justify-between overflow-y-auto">
+              <PopoverPanel className="fixed top-0 left-0 bottom-0 w-full max-w-sm z-[70] bg-panel text-bone shadow-2xl flex flex-col justify-between overflow-y-auto">
                 {/* Header inside drawer */}
                 <div className="p-6 border-b border-white/10 flex items-center justify-between">
                   <div className="flex flex-col">
@@ -184,7 +184,7 @@ const SideMenu = ({ regions }: SideMenuProps) => {
                         Shipping Rates
                       </LocalizedClientLink>
                       <LocalizedClientLink href="/return-policy" onClick={close} className="hover:text-white transition-colors">
-                        24h Returns
+                        48h Exchanges
                       </LocalizedClientLink>
                     </div>
                   </div>

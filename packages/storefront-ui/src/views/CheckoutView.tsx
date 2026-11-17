@@ -90,7 +90,7 @@ export function CheckoutView({
 
 
   return (
-    <div className="bg-white min-h-screen py-8 sm:py-14">
+    <div className="bg-surface min-h-screen py-8 sm:py-14">
       <div className="content-container">
         {/* Checkout Header Navigation */}
         <div className="border-b border-brand-border pb-5 mb-8 sm:mb-12 flex items-center justify-between">
@@ -105,7 +105,7 @@ export function CheckoutView({
             Checkout
           </span>
 
-          <span className="text-[11px] font-heading font-semibold text-emerald-800 uppercase tracking-widest bg-emerald-50 border border-emerald-200 px-2.5 py-1">
+          <span className="text-[11px] font-heading font-semibold text-ok uppercase tracking-widest bg-ok/10 border border-ok/30 px-2.5 py-1">
             🔒 Secure Step
           </span>
         </div>
@@ -116,7 +116,7 @@ export function CheckoutView({
           <div className="lg:col-span-7 space-y-10">
             {checkoutError && (
               <div
-                className="p-4 bg-red-50 border border-rose-300 text-rose-800 text-xs font-medium flex items-start gap-2"
+                className="p-4 bg-err/10 border border-err/30 text-err text-xs font-medium flex items-start gap-2"
                 data-testid="checkout-error-banner"
               >
                 <span className="font-bold">⚠️</span>
@@ -127,7 +127,7 @@ export function CheckoutView({
             {/* Step 1: Customer Contact */}
             <section className="space-y-4">
               <div className="flex items-center gap-2 border-b border-brand-border pb-3">
-                <span className="w-5 h-5 rounded-full bg-brand-primary text-white text-xs font-heading font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-accent text-on-accent text-xs font-heading font-bold flex items-center justify-center">
                   1
                 </span>
                 <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-brand-primary">
@@ -148,7 +148,7 @@ export function CheckoutView({
             {/* Step 2: Delivery Address */}
             <section className="space-y-4">
               <div className="flex items-center gap-2 border-b border-brand-border pb-3">
-                <span className="w-5 h-5 rounded-full bg-brand-primary text-white text-xs font-heading font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-accent text-on-accent text-xs font-heading font-bold flex items-center justify-center">
                   2
                 </span>
                 <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-brand-primary">
@@ -180,7 +180,7 @@ export function CheckoutView({
             {/* Step 3: Delivery Options */}
             <section className="space-y-4">
               <div className="flex items-center gap-2 border-b border-brand-border pb-3">
-                <span className="w-5 h-5 rounded-full bg-brand-primary text-white text-xs font-heading font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-accent text-on-accent text-xs font-heading font-bold flex items-center justify-center">
                   3
                 </span>
                 <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-brand-primary">
@@ -204,7 +204,7 @@ export function CheckoutView({
             {/* Step 4: Payment Method (Provider-Specific Container Slot) */}
             <section className="space-y-4">
               <div className="flex items-center gap-2 border-b border-brand-border pb-3">
-                <span className="w-5 h-5 rounded-full bg-brand-primary text-white text-xs font-heading font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-accent text-on-accent text-xs font-heading font-bold flex items-center justify-center">
                   4
                 </span>
                 <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-brand-primary">

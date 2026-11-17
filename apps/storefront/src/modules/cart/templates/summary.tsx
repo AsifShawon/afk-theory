@@ -42,7 +42,7 @@ const Summary = ({ cart }: SummaryProps) => {
         >
           <button
             disabled={isCartEmpty}
-            className="w-full py-3.5 bg-brand-primary hover:bg-black text-white text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3.5 bg-accent hover:bg-accent-hover text-on-accent text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Proceed to Checkout →
           </button>
@@ -57,7 +57,7 @@ const Summary = ({ cart }: SummaryProps) => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-brand-accent font-bold">🛡️</span>
-          <span>24-Hour Return &amp; Exchange Guarantee</span>
+          <span>48-Hour Size Exchange</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-brand-accent font-bold">💳</span>

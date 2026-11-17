@@ -20,7 +20,7 @@ export function AccountOrders({
   getOrderDetailHref,
 }: AccountOrdersProps) {
   return (
-    <div className="bg-white border border-brand-border p-6 space-y-6">
+    <div className="bg-surface border border-brand-border p-6 space-y-6">
       <div className="border-b border-brand-border pb-4">
         <h2 className="font-heading font-bold text-base text-brand-primary uppercase tracking-wider">
           Order History
@@ -42,7 +42,7 @@ export function AccountOrders({
           <div className="pt-2">
             <LinkComp
               href={routes.catalog()}
-              className="inline-block px-5 py-2.5 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+              className="inline-block px-5 py-2.5 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
             >
               Start Shopping
             </LinkComp>
@@ -70,7 +70,7 @@ export function AccountOrders({
                     <span className="px-2 py-0.5 bg-brand-surface border border-brand-border text-[10px] font-heading font-bold uppercase tracking-wider text-brand-primary">
                       {order.status}
                     </span>
-                    <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-heading font-bold uppercase tracking-wider">
+                    <span className="px-2 py-0.5 bg-ok/10 border border-ok/30 text-ok text-[10px] font-heading font-bold uppercase tracking-wider">
                       {order.paymentStatus}
                     </span>
                   </div>
@@ -98,7 +98,7 @@ export function AccountOrders({
                   </span>
                   <LinkComp
                     href={detailHref}
-                    className="px-4 py-2 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+                    className="px-4 py-2 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
                   >
                     View Details
                   </LinkComp>

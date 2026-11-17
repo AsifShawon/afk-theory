@@ -50,7 +50,7 @@ export function Modal({
       />
       <div
         className={clsx(
-          "relative bg-white border border-brand-border p-6 shadow-2xl w-full max-h-[90vh] overflow-y-auto z-10 animate-enter",
+          "relative bg-surface border border-brand-border p-6 shadow-2xl w-full max-h-[90vh] overflow-y-auto z-10 animate-enter",
           maxWidth === "sm" && "max-w-sm",
           maxWidth === "md" && "max-w-md",
           maxWidth === "lg" && "max-w-lg",
@@ -72,7 +72,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-grey-40 hover:text-brand-primary transition-colors"
+            className="p-1 text-muted hover:text-brand-primary transition-colors"
             aria-label="Close dialog"
           >
             <XMarkIcon className="w-5 h-5" />

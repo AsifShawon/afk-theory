@@ -53,8 +53,8 @@ export function CartDrawer({
           <div className="p-3.5 mb-3 bg-brand-secondary/70 border border-brand-border/80 rounded-xl space-y-2 flex-shrink-0">
             <div className="flex items-center justify-between text-xs">
               {isFreeShipping ? (
-                <span className="font-heading font-bold text-emerald-800 flex items-center gap-1.5">
-                  <CheckIcon className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" />
+                <span className="font-heading font-bold text-ok flex items-center gap-1.5">
+                  <CheckIcon className="w-3.5 h-3.5 text-ok flex-shrink-0" />
                   <span>Free Dhaka Express Delivery Unlocked!</span>
                 </span>
               ) : (
@@ -67,7 +67,7 @@ export function CartDrawer({
             <div className="w-full h-1.5 bg-brand-border/60 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-500 rounded-full ${
-                  isFreeShipping ? "bg-emerald-700" : "bg-brand-primary"
+                  isFreeShipping ? "bg-ok" : "bg-accent"
                 }`}
                 style={{ width: `${progress}%` }}
               />
@@ -90,7 +90,7 @@ export function CartDrawer({
                 <LinkComp
                   href={routes.catalog()}
                   onClick={onClose}
-                  className="inline-block px-6 py-3 bg-brand-primary text-white text-xs font-heading font-bold uppercase tracking-widest hover:bg-black transition-colors shadow-xs"
+                  className="inline-block px-6 py-3 bg-accent text-on-accent text-xs font-heading font-bold uppercase tracking-widest hover:bg-accent-hover transition-colors shadow-xs"
                 >
                   Start Shopping
                 </LinkComp>
@@ -112,7 +112,7 @@ export function CartDrawer({
 
         {/* Pinned Footer Subtotal & Actions */}
         {items.length > 0 && cart && (
-          <div className="border-t border-brand-border/80 pt-4 space-y-3 bg-[#FAFAF7] mt-auto flex-shrink-0">
+          <div className="border-t border-brand-border/80 pt-4 space-y-3 bg-surface mt-auto flex-shrink-0">
             <div className="flex justify-between items-baseline text-xs px-1">
               <span className="font-heading font-semibold uppercase tracking-wider text-brand-muted">
                 Subtotal
@@ -133,7 +133,7 @@ export function CartDrawer({
                     onClose()
                     onProceedToCheckout()
                   }}
-                  className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                  className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-on-accent text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                 >
                   Proceed to Checkout →
                 </button>
@@ -141,7 +141,7 @@ export function CartDrawer({
                 <LinkComp
                   href={routes.checkout()}
                   onClick={onClose}
-                  className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                  className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-on-accent text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                 >
                   Proceed to Checkout →
                 </LinkComp>
@@ -150,7 +150,7 @@ export function CartDrawer({
               <LinkComp
                 href={routes.cart()}
                 onClick={onClose}
-                className="w-full h-11 border border-brand-border hover:border-brand-primary bg-white text-brand-primary text-xs font-heading font-bold uppercase tracking-wider flex items-center justify-center transition-colors"
+                className="w-full h-11 border border-brand-border hover:border-brand-primary bg-surface text-brand-primary text-xs font-heading font-bold uppercase tracking-wider flex items-center justify-center transition-colors"
               >
                 View Full Bag
               </LinkComp>

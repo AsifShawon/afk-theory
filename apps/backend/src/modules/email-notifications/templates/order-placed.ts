@@ -172,7 +172,7 @@ export function generateOrderPlacedEmail(data: OrderPlacedTemplateData): {
                       &bull; Inside Dhaka: 24–48 hours<br/>
                       &bull; Dhaka Suburban: 2–3 business days<br/>
                       &bull; Outside Dhaka: 3–5 business days<br/>
-                      &bull; Doorstep exchange guarantee
+                      &bull; 48-hour size exchange
                     </div>
                   </td>
                 </tr>

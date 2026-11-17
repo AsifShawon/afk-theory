@@ -38,7 +38,7 @@ const CATEGORIES = [
 
 export default function FeaturedCategories() {
   return (
-    <section className="py-16 sm:py-20 bg-white border-b border-brand-border">
+    <section className="py-16 sm:py-20 bg-surface border-b border-brand-border">
       <div className="content-container space-y-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -74,12 +74,12 @@ export default function FeaturedCategories() {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute top-3 left-3 bg-brand-primary/90 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 z-10">
+                <div className="absolute top-3 left-3 bg-accent/90 text-on-accent text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 z-10">
                   {cat.badge}
                 </div>
               </div>
 
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-2 bg-white">
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-2 bg-surface">
                 <div>
                   <h3 className="font-heading font-bold text-sm text-brand-primary group-hover:text-brand-accent transition-colors">
                     {cat.title}

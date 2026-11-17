@@ -208,8 +208,8 @@ export function DesktopNav({
                   className={clsx(
                     "flex items-center px-3.5 py-1.5 rounded-lg text-xs font-heading font-medium tracking-wider transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2",
                     isMenuOpen
-                      ? "bg-brand-primary text-brand-secondary shadow-sm"
-                      : "text-brand-primary bg-transparent hover:bg-brand-primary hover:text-brand-secondary"
+                      ? "bg-raised text-accent shadow-sm"
+                      : "text-brand-primary bg-transparent hover:bg-raised hover:text-accent"
                   )}
                 >
                   <span>{item.label}</span>
@@ -228,7 +228,7 @@ export function DesktopNav({
         {/* Backdrop for open panel - starts below header to never overlap navbar links */}
         {activeId && (
           <div
-            className="fixed inset-x-0 bottom-0 bg-black/40 backdrop-blur-2xs z-30 transition-opacity duration-200"
+            className="fixed inset-x-0 bottom-0 bg-black/60 backdrop-blur-2xs z-30 transition-opacity duration-200"
             style={{ top: backdropTop ? `${backdropTop}px` : "160px" }}
             onClick={() => handleClosePanel()}
             aria-hidden="true"
@@ -262,8 +262,8 @@ export function DesktopNav({
           className={clsx(
             "flex items-center px-3.5 py-1.5 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary",
             link.isActive
-              ? "bg-brand-primary text-brand-secondary font-semibold"
-              : "text-brand-primary bg-transparent hover:bg-brand-primary hover:text-brand-secondary"
+              ? "bg-raised text-accent font-semibold"
+              : "text-brand-primary bg-transparent hover:bg-raised hover:text-accent"
           )}
         >
           <span>{link.label}</span>

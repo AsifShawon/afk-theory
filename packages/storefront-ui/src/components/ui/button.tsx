@@ -25,13 +25,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={clsx(
-          "inline-flex items-center justify-center font-heading font-semibold uppercase tracking-wider transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-          variant === "primary" && "bg-brand-primary text-white hover:bg-black border border-brand-primary",
-          variant === "secondary" && "bg-brand-secondary text-brand-primary hover:bg-brand-muted/40 border border-brand-border",
-          variant === "contrast" && "bg-brand-primary text-white hover:bg-brand-primary/90 border border-brand-primary",
-          variant === "outline" && "bg-transparent text-brand-primary hover:bg-brand-secondary border border-brand-border hover:border-brand-primary",
-          variant === "ghost" && "bg-transparent text-brand-primary hover:bg-brand-secondary/70 border-transparent",
-          variant === "danger" && "bg-rose-700 text-white hover:bg-rose-800 border border-rose-700",
+          "inline-flex items-center justify-center font-heading font-semibold uppercase tracking-wider transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:pointer-events-none disabled:opacity-50",
+          variant === "primary" && "bg-accent text-on-accent hover:bg-accent-hover border border-accent",
+          variant === "secondary" && "bg-raised text-ink hover:bg-line border border-control",
+          variant === "contrast" && "bg-ink text-canvas hover:bg-ink/90 border border-ink",
+          variant === "outline" && "bg-transparent text-ink hover:bg-raised border border-control hover:border-accent hover:text-accent",
+          variant === "ghost" && "bg-transparent text-ink hover:bg-raised border-transparent",
+          variant === "danger" && "bg-err text-canvas hover:bg-err/85 border border-err",
           size === "small" && "h-8 px-3 text-[11px]",
           size === "medium" && "h-10 px-5 text-xs",
           size === "large" && "h-12 px-8 text-xs sm:text-sm",

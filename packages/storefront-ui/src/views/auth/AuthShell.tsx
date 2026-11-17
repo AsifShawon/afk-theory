@@ -16,7 +16,7 @@ export function AuthShell({
   children,
 }: AuthShellProps) {
   return (
-    <div className="w-full flex justify-center px-4 sm:px-8 py-12 sm:py-16 bg-white min-h-[60vh]">
+    <div className="w-full flex justify-center px-4 sm:px-8 py-12 sm:py-16 bg-surface min-h-[60vh]">
       <div className="max-w-md w-full flex flex-col items-center">
         <div className="text-center mb-8 space-y-2">
           <span className="text-[11px] font-heading font-semibold uppercase tracking-widest text-brand-muted">

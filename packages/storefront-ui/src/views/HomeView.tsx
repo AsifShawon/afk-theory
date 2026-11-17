@@ -8,13 +8,16 @@ import {
   QuickAddResult,
   StoreCapabilities,
   StoreRoutes,
+  HOODIES_LINE,
+  TEES_LINE,
+  groupProductsByLine,
+  lineHref,
 } from "@dtc/commerce-contracts"
 import { HeroSection } from "../components/home/HeroSection"
 import { FeaturedCategories } from "../components/home/FeaturedCategories"
 import { ProductRails } from "../components/home/ProductRails"
 import { CraftsmanshipSection } from "../components/home/CraftsmanshipSection"
 import { BrandStorySection } from "../components/home/BrandStorySection"
-import { SplitPromoSection } from "../components/home/SplitPromoSection"
 import { BrandValuesGrid } from "../components/home/BrandValuesGrid"
 import { DeliveryGuaranteesSection } from "../components/home/DeliveryGuaranteesSection"
 import { NewsletterSection } from "../components/home/NewsletterSection"
@@ -48,9 +51,7 @@ export function HomeView({
   newsletterSlot,
   linkComponent,
 }: HomeViewProps) {
-  const newArrivals = featuredProducts.filter((p) => p.isNewArrival)
-  const bestSellers = featuredProducts.filter((p) => p.isBestSeller)
-  const displayRailProducts = newArrivals.length > 0 ? newArrivals : featuredProducts
+  const { tees: teeProducts, hoodies: hoodieProducts } = groupProductsByLine(featuredProducts)
 
   return (
     <div className="flex flex-col w-full">
@@ -66,25 +67,31 @@ export function HomeView({
         linkComponent={linkComponent}
       />
 
-      {/* 2. Featured Drop Shoulder Rail */}
-      <Reveal>
-        <ProductRails
-          title="DROP 01 // OVERSIZED DROP SHOULDER"
-          subtitle="Calibrated shoulder seams, wide boxy circumference, and dense pre-shrunk cotton."
-          viewAllHref={routes.collection("drop-01-offline-by-choice")}
-          viewAllLabel="Shop Drop 01"
-          products={displayRailProducts}
-          routes={routes}
-          capabilities={capabilities}
-          onQuickAdd={onQuickAdd}
-          linkComponent={linkComponent}
-        />
-      </Reveal>
+      {/* 2. Drop Shoulder Tees Rail */}
+      {teeProducts.length > 0 && (
+        <Reveal>
+          <ProductRails
+            title={TEES_LINE.title.toUpperCase()}
+            subtitle={TEES_LINE.summary}
+            viewAllHref={lineHref(routes, TEES_LINE)}
+            viewAllLabel="Shop Tees"
+            products={teeProducts}
+            routes={routes}
+            capabilities={capabilities}
+            onQuickAdd={onQuickAdd}
+            linkComponent={linkComponent}
+          />
+        </Reveal>
+      )}
 
       {/* 3. Category Mosaic / Department Grid */}
       <Reveal>
         <FeaturedCategories
           categories={categories}
+          lineImages={{
+            [TEES_LINE.handle]: teeProducts[0]?.thumbnail?.url || teeProducts[0]?.images[0]?.url,
+            [HOODIES_LINE.handle]: hoodieProducts[0]?.thumbnail?.url || hoodieProducts[0]?.images[0]?.url,
+          }}
           routes={routes}
           linkComponent={linkComponent}
         />
@@ -100,39 +107,34 @@ export function HomeView({
         <BrandStorySection routes={routes} linkComponent={linkComponent} />
       </Reveal>
 
-      {/* 6. Essentials Rail */}
-      <Reveal>
-        {bestSellers.length > 0 && (
+      {/* 6. Hoodies Rail (shown once hoodies are listed) */}
+      {hoodieProducts.length > 0 && (
+        <Reveal>
           <ProductRails
-            title="FOUNDATIONAL STREETWEAR"
-            subtitle="Boxy silhouettes and minimal street staples designed for everyday rotation."
-            viewAllHref={routes.collection("essentials")}
-            viewAllLabel="Shop Essentials"
-            products={bestSellers}
+            title={HOODIES_LINE.title.toUpperCase()}
+            subtitle={HOODIES_LINE.summary}
+            viewAllHref={lineHref(routes, HOODIES_LINE)}
+            viewAllLabel="Shop Hoodies"
+            products={hoodieProducts}
             routes={routes}
             capabilities={capabilities}
             onQuickAdd={onQuickAdd}
             linkComponent={linkComponent}
           />
-        )}
-      </Reveal>
+        </Reveal>
+      )}
 
-      {/* 7. New Drop & Future Collection Preview */}
-      <Reveal>
-        <SplitPromoSection routes={routes} linkComponent={linkComponent} />
-      </Reveal>
-
-      {/* 8. Brand Code / Values Grid */}
+      {/* 7. Brand Code / Values Grid */}
       <Reveal>
         <BrandValuesGrid />
       </Reveal>
 
-      {/* 9. Delivery & COD Service Reassurance Strip */}
+      {/* 8. Delivery & COD Service Reassurance Strip */}
       <Reveal>
         <DeliveryGuaranteesSection />
       </Reveal>
 
-      {/* 10. Drop Registry / Subscription */}
+      {/* 9. Drop Registry / Subscription */}
       <Reveal>
         {newsletterSlot || <NewsletterSection />}
       </Reveal>

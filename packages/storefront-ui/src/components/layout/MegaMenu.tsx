@@ -54,7 +54,7 @@ export function MegaMenu({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={clsx(
-        "absolute top-[calc(100%+8px)] left-0 right-0 z-40 bg-[#F5F3ED] rounded-2xl border border-brand-border/80 shadow-[0_20px_50px_rgba(32,36,31,0.12),0_6px_16px_rgba(32,36,31,0.06)] animate-mega-enter before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] overflow-hidden max-h-[calc(100vh-140px)] overflow-y-auto",
+        "absolute top-[calc(100%+8px)] left-0 right-0 z-40 bg-surface rounded-2xl border border-brand-border/80 shadow-[0_24px_60px_rgba(0,0,0,0.6),0_6px_16px_rgba(0,0,0,0.4)] animate-mega-enter before:absolute before:-top-3 before:inset-x-0 before:h-3 before:content-[''] overflow-hidden max-h-[calc(100vh-140px)] overflow-y-auto",
         className
       )}
     >
@@ -88,10 +88,10 @@ export function MegaMenu({
               <LinkComp
                 href={item.shopAllHref}
                 onClick={() => onClose()}
-                className="group inline-flex items-center gap-2 text-xs font-heading font-bold text-brand-primary hover:text-black uppercase tracking-wider"
+                className="group inline-flex items-center gap-2 text-xs font-heading font-bold text-brand-primary hover:text-accent uppercase tracking-wider"
               >
                 <span>{item.shopAllLabel || `Shop All ${item.label}`}</span>
-                <span className="w-5 h-5 rounded-full bg-brand-primary text-brand-secondary group-hover:bg-brand-accent group-hover:text-brand-primary flex items-center justify-center transition-colors">
+                <span className="w-5 h-5 rounded-full bg-raised text-ink group-hover:bg-accent group-hover:text-on-accent flex items-center justify-center transition-colors">
                   <ArrowRightIcon className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </LinkComp>
@@ -152,7 +152,7 @@ export function MegaMenu({
                     <LinkComp
                       href={card.href}
                       onClick={() => onClose()}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-brand-primary text-xs font-heading font-bold uppercase tracking-wider hover:bg-brand-accent hover:text-brand-primary transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bone text-canvas text-xs font-heading font-bold uppercase tracking-wider hover:bg-accent hover:text-on-accent transition-colors"
                     >
                       <span>{card.ctaText}</span>
                       <ArrowRightIcon className="w-3 h-3" />

@@ -166,7 +166,7 @@ export function LoginPrompt({
             autoComplete="current-password"
           />
           {errorMessage && (
-            <p className="text-xs text-rose-700 font-medium">{errorMessage}</p>
+            <p className="text-xs text-err font-medium">{errorMessage}</p>
           )}
           <Button
             type="submit"
@@ -216,7 +216,7 @@ export function LoginPrompt({
             autoComplete="new-password"
           />
           {errorMessage && (
-            <p className="text-xs text-rose-700 font-medium">{errorMessage}</p>
+            <p className="text-xs text-err font-medium">{errorMessage}</p>
           )}
           <Button
             type="submit"

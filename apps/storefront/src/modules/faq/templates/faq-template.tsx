@@ -124,7 +124,7 @@ export default function FAQTemplate() {
   }).filter(Boolean) as typeof FAQ_DATA
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
       <div className="bg-brand-secondary border-b border-brand-border py-12 sm:py-16">
         <div className="content-container max-w-4xl text-center space-y-4">
@@ -146,7 +146,7 @@ export default function FAQTemplate() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search questions (e.g., shipping, returns, 240 GSM)..."
-                className="w-full px-4 py-3 bg-white border border-brand-border text-xs text-brand-primary placeholder:text-brand-muted/80 focus:outline-none focus:border-brand-primary shadow-sm"
+                className="w-full px-4 py-3 bg-surface border border-brand-border text-xs text-brand-primary placeholder:text-brand-muted/80 focus:outline-none focus:border-brand-primary shadow-sm"
                 aria-label="Search frequently asked questions"
               />
               {searchQuery && (
@@ -173,8 +173,8 @@ export default function FAQTemplate() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3.5 py-1.5 text-xs font-heading uppercase tracking-wider transition-colors border ${
                 selectedCategory === cat
-                  ? "bg-brand-primary text-white border-brand-primary"
-                  : "bg-brand-secondary text-brand-primary border-brand-border hover:bg-white"
+                  ? "bg-ink text-canvas border-ink"
+                  : "bg-brand-secondary text-brand-primary border-brand-border hover:bg-surface"
               }`}
             >
               {cat}
@@ -187,7 +187,7 @@ export default function FAQTemplate() {
           <span className="font-bold text-brand-primary uppercase block">
             ⚠️ Policy Callout Notice
           </span>
-          [REVIEW REQUIRED: Business-owner / Legal Counsel confirmation needed for exact delivery rates (৳60/৳100/৳130) and 24h return window policy specifics.]
+          [REVIEW REQUIRED: Business-owner / Legal Counsel confirmation needed for exact delivery rates (৳60/৳100/৳130) and the 48-hour exchange window.]
         </div>
 
         {/* FAQ Accordion */}
@@ -214,7 +214,7 @@ export default function FAQTemplate() {
                             <ChevronDown className="w-4 h-4 text-brand-primary/60 transition-transform duration-200 group-data-[state=open]:rotate-180 flex-shrink-0 ml-2" />
                           </Accordion.Trigger>
                         </Accordion.Header>
-                        <Accordion.Content className="p-4 pt-0 text-xs sm:text-sm text-brand-primary/80 leading-relaxed border-t border-brand-border/40 mt-1 bg-white">
+                        <Accordion.Content className="p-4 pt-0 text-xs sm:text-sm text-brand-primary/80 leading-relaxed border-t border-brand-border/40 mt-1 bg-surface">
                           <p>{item.answer}</p>
                         </Accordion.Content>
                       </Accordion.Item>
@@ -251,7 +251,7 @@ export default function FAQTemplate() {
           </div>
           <LocalizedClientLink
             href="/contact"
-            className="px-6 py-2.5 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black whitespace-nowrap"
+            className="px-6 py-2.5 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover whitespace-nowrap"
           >
             Contact Customer Care →
           </LocalizedClientLink>

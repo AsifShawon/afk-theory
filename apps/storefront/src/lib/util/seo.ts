@@ -11,7 +11,7 @@ import {
 export const DEFAULT_STORE_NAME = "AFK THEORY"
 export const DEFAULT_STORE_TAGLINE = "PAUSE THE GAME. KEEP YOUR STYLE."
 export const DEFAULT_STORE_DESCRIPTION =
-  "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Explore oversized drop shoulder t-shirts and contemporary street essentials."
+  "Modern, independent, premium-accessible streetwear engineered for Bangladesh. Offline by choice. Shop oversized drop shoulder tees and hoodies."
 
 /**
  * Ensures absolute canonical URL with correct base domain

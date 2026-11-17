@@ -142,7 +142,7 @@ export function OrderReview({
                 Garments in Order ({items.reduce((sum, i) => sum + i.quantity, 0)})
               </span>
             </div>
-            <div className="divide-y divide-brand-border/60 border border-brand-border/60 bg-white">
+            <div className="divide-y divide-brand-border/60 border border-brand-border/60 bg-surface">
               {items.map((item) => (
                 <ReviewItemRow key={item.id} item={item} />
               ))}

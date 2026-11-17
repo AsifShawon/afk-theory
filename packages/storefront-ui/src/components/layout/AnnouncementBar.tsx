@@ -36,15 +36,15 @@ export function AnnouncementBar({
   return (
     <aside
       aria-label="Store Announcement"
-      className="bg-brand-primary text-brand-secondary border-b border-white/10 text-xs py-2 px-4 transition-all duration-300"
+      className="bg-panel text-bone border-b border-white/10 text-xs py-2 px-4 transition-all duration-300"
     >
       <div className="content-container flex items-center justify-between">
         {/* Left Highlights */}
-        <div className="hidden md:flex items-center gap-x-4 text-[11px] font-heading font-semibold tracking-wider uppercase text-brand-secondary/90">
+        <div className="hidden md:flex items-center gap-x-4 text-[11px] font-heading font-semibold tracking-wider uppercase text-bone/90">
           {leftHighlights || (
             <>
               <span className="text-brand-accent">AWAY FROM KEYBOARD</span>
-              <span className="text-white/30">•</span>
+              <span className="text-white/50">•</span>
               <span>OFFLINE BY CHOICE</span>
             </>
           )}
@@ -70,7 +70,7 @@ export function AnnouncementBar({
           {rightLinkText && rightLinkHref && (
             <LinkComp
               href={rightLinkHref}
-              className="text-brand-secondary/80 hover:text-white transition-colors"
+              className="text-bone/80 hover:text-white transition-colors"
             >
               {rightLinkText}
             </LinkComp>
@@ -78,7 +78,7 @@ export function AnnouncementBar({
           {showDismiss && (
             <button
               onClick={handleDismiss}
-              className="text-brand-secondary/60 hover:text-white text-xs px-1"
+              className="text-bone/60 hover:text-white text-xs px-1"
               aria-label="Close announcement bar"
             >
               ✕

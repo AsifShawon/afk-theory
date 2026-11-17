@@ -1,21 +1,25 @@
+import { PRODUCT_LINES } from "@dtc/commerce-contracts"
+
 export interface FooterLinkItem {
   label: string
   href: string
 }
 
-export const DEFAULT_CATEGORIES: FooterLinkItem[] = [
-  { label: "Drop Shoulder T-Shirts", href: "/categories/drop-shoulder-t-shirts" },
-  { label: "Regular T-Shirts", href: "/categories/regular-t-shirts" },
-  { label: "Streetwear Shirts", href: "/categories/shirts" },
-  { label: "Trousers & Pants", href: "/categories/trousers-&-pants" },
-  { label: "Accessories", href: "/categories/accessories" },
-]
+/** Hoodie styles (Medusa categories). */
+export const DEFAULT_CATEGORIES: FooterLinkItem[] = PRODUCT_LINES.flatMap((line) =>
+  line.styles.map((style) => ({
+    label: style.title,
+    href: `/categories/${style.handle}`,
+  }))
+)
 
+/** Product lines (Medusa collections) plus a link to everything. */
 export const DEFAULT_COLLECTIONS: FooterLinkItem[] = [
-  { label: "Drop 01: Offline by Choice", href: "/collections/drop-01-offline-by-choice" },
-  { label: "Essentials", href: "/collections/essentials" },
-  { label: "Archive Releases", href: "/collections/archive" },
-  { label: "All Streetwear", href: "/store" },
+  ...PRODUCT_LINES.map((line) => ({
+    label: line.title,
+    href: `/collections/${line.handle}`,
+  })),
+  { label: "All Pieces", href: "/store" },
 ]
 
 export const DEFAULT_CUSTOMER_CARE: FooterLinkItem[] = [

@@ -23,7 +23,7 @@ export function DeliveryGuaranteesSection() {
     },
     {
       icon: ShieldCheckIcon,
-      title: "7-Day Size Exchange",
+      title: "48-Hour Size Exchange",
       subtitle: "Hassle-Free Swaps",
       description: "Need a different fit? Fast, frictionless size replacements at your door.",
     },
@@ -38,9 +38,9 @@ export function DeliveryGuaranteesSection() {
             return (
               <div
                 key={item.title}
-                className="flex items-start gap-4 p-5 bg-white border border-brand-border/80 hover:border-brand-primary/40 transition-colors shadow-xs"
+                className="flex items-start gap-4 p-5 bg-surface border border-brand-border/80 hover:border-brand-primary/40 transition-colors shadow-xs"
               >
-                <div className="w-10 h-10 bg-brand-primary text-brand-accent flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-panel text-brand-accent flex items-center justify-center flex-shrink-0">
                   <Icon className="w-5 h-5 text-brand-accent" />
                 </div>
                 <div className="space-y-1 min-w-0">

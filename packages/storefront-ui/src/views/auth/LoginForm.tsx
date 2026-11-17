@@ -87,7 +87,7 @@ export function LoginForm({
 
         {errorMessage && (
           <div
-            className="p-3 bg-red-50 border border-rose-300 text-rose-800 text-xs font-medium"
+            className="p-3 bg-err/10 border border-err/30 text-err text-xs font-medium"
             data-testid="login-error-message"
           >
             {errorMessage}

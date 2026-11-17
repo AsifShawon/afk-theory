@@ -22,7 +22,7 @@ const Help = () => {
           href="/return-policy"
           className="text-xs font-semibold text-brand-primary hover:underline flex items-center gap-1"
         >
-          <span>🛡️ 24-Hour Return Policy</span>
+          <span>🛡️ 48-Hour Exchange Policy</span>
         </LocalizedClientLink>
         <span className="text-brand-muted">•</span>
         <LocalizedClientLink

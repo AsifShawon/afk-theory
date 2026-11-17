@@ -40,11 +40,11 @@ export function PaymentSection({
       {/* Security Guarantees */}
       <div className="flex items-center gap-4 text-[11px] text-brand-muted pt-1">
         <div className="flex items-center gap-1.5">
-          <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-700" />
+          <ShieldCheckIcon className="w-3.5 h-3.5 text-ok" />
           <span>256-Bit SSL Encryption</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <BadgeCheckIcon className="w-3.5 h-3.5 text-emerald-700" />
+          <BadgeCheckIcon className="w-3.5 h-3.5 text-ok" />
           <span>Verified Merchant</span>
         </div>
       </div>

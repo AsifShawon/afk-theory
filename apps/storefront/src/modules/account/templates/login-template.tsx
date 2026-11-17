@@ -57,7 +57,7 @@ const LoginTemplate = () => {
             submitButtonSlot={
               <SubmitButton
                 data-testid="sign-in-button"
-                className="w-full h-12 text-xs font-bold uppercase tracking-widest bg-brand-primary text-white hover:bg-brand-accent transition-colors"
+                className="w-full h-12 text-xs font-bold uppercase tracking-widest bg-accent text-on-accent hover:bg-accent-hover transition-colors"
               >
                 Sign In &rarr;
               </SubmitButton>
@@ -83,7 +83,7 @@ const LoginTemplate = () => {
             submitButtonSlot={
               <SubmitButton
                 data-testid="register-button"
-                className="w-full h-12 text-xs font-bold uppercase tracking-widest bg-brand-primary text-white hover:bg-brand-accent transition-colors"
+                className="w-full h-12 text-xs font-bold uppercase tracking-widest bg-accent text-on-accent hover:bg-accent-hover transition-colors"
               >
                 Create Account &rarr;
               </SubmitButton>

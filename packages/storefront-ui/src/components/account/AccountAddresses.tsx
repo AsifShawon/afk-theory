@@ -57,7 +57,7 @@ export function AccountAddresses({
   }
 
   return (
-    <div className="bg-white border border-brand-border p-6 space-y-6">
+    <div className="bg-surface border border-brand-border p-6 space-y-6">
       <div className="border-b border-brand-border pb-4 flex items-center justify-between">
         <div>
           <h2 className="font-heading font-bold text-base text-brand-primary uppercase tracking-wider">
@@ -176,7 +176,7 @@ export function AccountAddresses({
                   <button
                     type="button"
                     onClick={() => onDeleteAddress(addr.id)}
-                    className="text-brand-muted hover:text-rose-700 flex items-center gap-1 text-[11px] transition-colors"
+                    className="text-brand-muted hover:text-err flex items-center gap-1 text-[11px] transition-colors"
                   >
                     <TrashIcon className="w-3.5 h-3.5" />
                     <span>Delete</span>

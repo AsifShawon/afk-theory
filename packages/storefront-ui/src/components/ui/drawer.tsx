@@ -174,7 +174,7 @@ export function Drawer({
         <div
           ref={drawerPanelRef}
           className={clsx(
-            "w-screen bg-[#FAFAF7] shadow-2xl flex flex-col h-full border-brand-border duration-300 ease-out",
+            "w-screen bg-surface shadow-2xl flex flex-col h-full border-brand-border duration-300 ease-out",
             position === "right"
               ? isClosing
                 ? "animate-drawer-exit border-l"
@@ -189,7 +189,7 @@ export function Drawer({
           )}
         >
           {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-brand-border/80 flex items-center justify-between bg-white flex-shrink-0">
+          <div className="p-4 sm:p-5 border-b border-brand-border/80 flex items-center justify-between bg-surface flex-shrink-0">
             {typeof title === "string" ? (
               <h2 className="font-heading font-bold text-sm text-brand-primary uppercase tracking-wider">
                 {title}

@@ -54,7 +54,7 @@ const SHIPPING_SECTIONS = [
     title: "3. Cash on Delivery (COD) Guidelines",
     content: (
       <p>
-        Cash on Delivery is available across all 64 districts of Bangladesh. Customers may inspect the outer parcel before payment handover. Any size exchanges or returns are covered under our 24-Hour Door-to-Door Exchange Guarantee.
+        Cash on Delivery is available across all 64 districts of Bangladesh. Customers may inspect the outer parcel before payment handover. Any size exchanges or returns are covered under our 48-Hour Door-to-Door Size Exchange.
       </p>
     ),
   },

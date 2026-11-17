@@ -64,7 +64,7 @@ export function SearchModal({
             <button
               type="button"
               onClick={() => onQueryChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-grey-40 hover:text-brand-primary"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-brand-primary"
               aria-label="Clear search input"
             >
               <XMarkIcon className="w-4 h-4" />
@@ -87,7 +87,7 @@ export function SearchModal({
                     onQueryChange(s)
                     if (onSelectSuggestion) onSelectSuggestion(s)
                   }}
-                  className="px-3 py-1.5 bg-brand-secondary/80 hover:bg-brand-primary hover:text-white border border-brand-border/60 text-xs text-brand-primary font-medium transition-colors"
+                  className="px-3 py-1.5 bg-brand-secondary/80 hover:bg-accent hover:text-on-accent border border-brand-border/60 text-xs text-brand-primary font-medium transition-colors"
                 >
                   {s}
                 </button>

@@ -18,7 +18,7 @@ export function StoreShell({
   children,
 }: StoreShellProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-white text-brand-primary font-sans antialiased selection:bg-brand-accent selection:text-brand-primary">
+    <div className="min-h-screen flex flex-col bg-surface text-brand-primary font-sans antialiased selection:bg-brand-accent selection:text-brand-primary">
       {topBannerSlot}
       {announcementBarSlot}
       {headerSlot}

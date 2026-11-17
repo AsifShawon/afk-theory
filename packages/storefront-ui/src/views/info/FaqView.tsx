@@ -46,7 +46,7 @@ export function FaqView({
     .filter((cat) => cat.questions.length > 0)
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
       <div className="bg-brand-secondary border-b border-brand-border py-12 sm:py-16">
         <div className="content-container max-w-3xl text-center space-y-4">
@@ -67,7 +67,7 @@ export function FaqView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search answers (e.g. shipping, return, 240 GSM)..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-brand-border text-xs text-brand-primary focus:outline-none focus:border-brand-primary"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-brand-border text-xs text-brand-primary focus:outline-none focus:border-brand-primary"
             />
           </div>
         </div>
@@ -86,7 +86,7 @@ export function FaqView({
                 {cat.category}
               </h2>
 
-              <div className="divide-y divide-brand-border border border-brand-border bg-white">
+              <div className="divide-y divide-brand-border border border-brand-border bg-surface">
                 {cat.questions.map((item, qIdx) => {
                   const key = `${catIdx}-${qIdx}`
                   const isOpen = !!openItems[key]
@@ -132,7 +132,7 @@ export function FaqView({
           </div>
           <LinkComp
             href={contactHref || (routes ? routes.contact() : "/contact")}
-            className="px-5 py-2.5 bg-brand-primary text-white font-heading font-semibold uppercase tracking-wider text-xs hover:bg-black transition-colors"
+            className="px-5 py-2.5 bg-accent text-on-accent font-heading font-semibold uppercase tracking-wider text-xs hover:bg-accent-hover transition-colors"
           >
             Contact Customer Support
           </LinkComp>

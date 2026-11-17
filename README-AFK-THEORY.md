@@ -91,6 +91,29 @@ Cash on Delivery is the sole customer-facing payment option at launch:
 
 ---
 
+## 5a. Catalog Structure (two product lines)
+
+The store sells two product lines. They are described once, in `packages/commerce-contracts/src/catalog-structure.ts`, and the menu, home page, footer, search suggestions and size guide all read from it.
+
+| Product line (Medusa **collection**) | Handle | Colors |
+| :--- | :--- | :--- |
+| Drop Shoulder Tees (multiple designs) | `drop-shoulder-tees` | 3 |
+| Hoodies | `hoodies` | per style |
+
+Hoodie styles are Medusa **categories**: `basic-hoodie` (2 colors) and `drop-shoulder-hoodie` (3 colors).
+
+In Medusa Admin: add each product to its collection (and hoodies to their style category). Each tee design is its own product with 3 color variants. To set up the collections and categories on an existing database (additive, never deletes):
+
+```bash
+cd apps/backend
+pnpm exec medusa exec ./src/scripts/restructure-catalog.ts            # create what is missing
+pnpm exec medusa exec ./src/scripts/restructure-catalog.ts assign-tees # also move existing tees into the Drop Shoulder Tees collection
+```
+
+Size exchange: **48 hours from delivery** (policy, FAQ, size guide, cart, announcement bar and emails all use this).
+
+---
+
 ## 5. Product Catalog & Draft Sample Fixture
 
 The inaugural launch is architected around oversized Drop Shoulder T-shirts:

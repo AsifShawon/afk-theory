@@ -28,7 +28,7 @@ export function PolicyView({
   linkComponent: LinkComp = Link,
 }: PolicyViewProps) {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
       <div className="bg-brand-secondary border-b border-brand-border py-12 sm:py-16">
         <div className="content-container max-w-3xl text-center space-y-3">
@@ -53,7 +53,7 @@ export function PolicyView({
 
       {/* Main Content */}
       <div className="content-container max-w-3xl py-12 sm:py-16 space-y-10">
-        <div className="divide-y divide-brand-border border border-brand-border bg-white">
+        <div className="divide-y divide-brand-border border border-brand-border bg-surface">
           {sections.map((section, idx) => (
             <div key={idx} className="p-6 sm:p-8 space-y-3">
               <h2 className="font-display text-xl sm:text-2xl text-brand-primary">
@@ -78,7 +78,7 @@ export function PolicyView({
           </div>
           <LinkComp
             href={routes.contact()}
-            className="px-5 py-2.5 bg-brand-primary text-white font-heading font-semibold uppercase tracking-wider text-xs hover:bg-black transition-colors flex-shrink-0"
+            className="px-5 py-2.5 bg-accent text-on-accent font-heading font-semibold uppercase tracking-wider text-xs hover:bg-accent-hover transition-colors flex-shrink-0"
           >
             Contact Client Care
           </LinkComp>

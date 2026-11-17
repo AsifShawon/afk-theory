@@ -8,7 +8,7 @@ export default function SizeGuideTemplate() {
   const [unit, setUnit] = useState<"in" | "cm">("in")
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
       <div className="bg-brand-secondary border-b border-brand-border py-12 sm:py-16">
         <div className="content-container max-w-4xl text-center space-y-3">
@@ -36,7 +36,7 @@ export default function SizeGuideTemplate() {
               [REVIEW REQUIRED: Business-owner / Technical Designer verification needed for factory measurement tolerances (±0.5 inch).]
             </p>
           </div>
-          <span className="text-[10px] font-heading font-semibold uppercase tracking-wider px-2 py-1 bg-white border border-brand-border text-brand-accent">
+          <span className="text-[10px] font-heading font-semibold uppercase tracking-wider px-2 py-1 bg-surface border border-brand-border text-brand-accent">
             Fabric Standard: 240 GSM
           </span>
         </div>
@@ -87,7 +87,7 @@ export default function SizeGuideTemplate() {
               type="button"
               onClick={() => setUnit("in")}
               className={`px-3 py-1 font-semibold transition-colors ${
-                unit === "in" ? "bg-white text-brand-primary shadow-sm" : "text-brand-primary/60"
+                unit === "in" ? "bg-surface text-brand-primary shadow-sm" : "text-brand-primary/60"
               }`}
             >
               Inches (in)
@@ -96,7 +96,7 @@ export default function SizeGuideTemplate() {
               type="button"
               onClick={() => setUnit("cm")}
               className={`px-3 py-1 font-semibold transition-colors ${
-                unit === "cm" ? "bg-white text-brand-primary shadow-sm" : "text-brand-primary/60"
+                unit === "cm" ? "bg-surface text-brand-primary shadow-sm" : "text-brand-primary/60"
               }`}
             >
               Centimeters (cm)
@@ -304,13 +304,13 @@ export default function SizeGuideTemplate() {
           <div className="flex gap-3">
             <LocalizedClientLink
               href="/contact"
-              className="px-6 py-2.5 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black"
+              className="px-6 py-2.5 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover"
             >
               Ask Our Stylist →
             </LocalizedClientLink>
             <LocalizedClientLink
               href="/store"
-              className="px-6 py-2.5 bg-brand-secondary border border-brand-border text-brand-primary text-xs font-heading font-semibold uppercase tracking-wider hover:bg-white"
+              className="px-6 py-2.5 bg-brand-secondary border border-brand-border text-brand-primary text-xs font-heading font-semibold uppercase tracking-wider hover:bg-surface"
             >
               Shop Catalog
             </LocalizedClientLink>

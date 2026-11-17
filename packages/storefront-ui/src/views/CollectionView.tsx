@@ -10,6 +10,7 @@ import {
   QuickAddResult,
   StoreCapabilities,
   StoreRoutes,
+  getProductLine,
 } from "@dtc/commerce-contracts"
 import { CatalogView } from "./CatalogView"
 import { LinkComponent } from "../types"
@@ -50,7 +51,11 @@ export function CollectionView({
   return (
     <CatalogView
       title={collection.title}
-      description={collection.description || `Explore our seasonal capsule of ${collection.title.toLowerCase()}.`}
+      description={
+        collection.description ||
+        getProductLine(collection.handle)?.summary ||
+        `Explore ${collection.title}.`
+      }
       products={products}
       totalCount={totalCount}
       filters={filters}

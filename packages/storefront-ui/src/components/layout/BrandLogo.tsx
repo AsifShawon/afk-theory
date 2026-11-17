@@ -13,6 +13,7 @@ export interface BrandLogoProps {
   /**
    * Visual variant:
    * - "responsive": Desktop (>=1024px) renders horizontal wordmark, Mobile (<1024px) renders compact AFK mark
+   *   (light artwork: the store theme is dark)
    * - "horizontal-dark": Matte graphite wordmark on light surfaces
    * - "horizontal-light": Light/chartreuse wordmark on dark/graphite surfaces
    * - "compact": Compact angular AFK + pause mark (graphite + chartreuse for light surfaces)
@@ -36,10 +37,10 @@ export function BrandLogo({
       <div className={clsx("flex items-center", className)}>
         {/* Desktop Wordmark (>= 1024px) */}
         <img
-          src="/brand/afk-logo-horizontal-dark.png"
+          src="/brand/afk-logo-horizontal-light.png"
           alt={alt}
-          width={2006}
-          height={254}
+          width={2018}
+          height={263}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           className="hidden lg:block h-7 xl:h-8 w-auto object-contain select-none"
@@ -47,7 +48,7 @@ export function BrandLogo({
 
         {/* Mobile Compact Mark (< 1024px) */}
         <img
-          src="/brand/afk-logo-compact-dark.png"
+          src="/brand/afk-logo-compact.png"
           alt={alt}
           width={1065}
           height={304}

@@ -19,7 +19,7 @@ export default function AnnouncementBar({ announcement }: AnnouncementBarProps) 
       centerText={announcement?.text || "PAUSE THE GAME. KEEP YOUR STYLE. • CASH ON DELIVERY AVAILABLE ACROSS BANGLADESH"}
       centerHref={announcement?.linkUrl || "/store"}
       rightLinkHref="/return-policy"
-      rightLinkText="7-Day Exchange"
+      rightLinkText="48-Hour Exchange"
     />
   )
 }

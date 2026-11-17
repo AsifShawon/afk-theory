@@ -91,7 +91,7 @@ export default async function PaginatedProducts({
         <div className="pt-2">
           <LocalizedClientLink
             href="/store"
-            className="inline-block px-6 py-2.5 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+            className="inline-block px-6 py-2.5 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
           >
             Clear All Filters &amp; View All
           </LocalizedClientLink>

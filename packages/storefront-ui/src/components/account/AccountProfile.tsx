@@ -49,7 +49,7 @@ export function AccountProfile({
   }
 
   return (
-    <div className="bg-white border border-brand-border p-6 space-y-6">
+    <div className="bg-surface border border-brand-border p-6 space-y-6">
       <div className="border-b border-brand-border pb-4">
         <h2 className="font-heading font-bold text-base text-brand-primary uppercase tracking-wider">
           Profile Information
@@ -100,10 +100,10 @@ export function AccountProfile({
         />
 
         {successMessage && (
-          <p className="text-xs text-emerald-700 font-medium">{successMessage}</p>
+          <p className="text-xs text-ok font-medium">{successMessage}</p>
         )}
         {errorMessage && (
-          <p className="text-xs text-rose-700 font-medium">{errorMessage}</p>
+          <p className="text-xs text-err font-medium">{errorMessage}</p>
         )}
 
         <div className="pt-2">

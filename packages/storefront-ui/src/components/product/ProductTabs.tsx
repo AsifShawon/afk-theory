@@ -87,8 +87,8 @@ export function ProductTabs({
           <strong>Payment:</strong> Cash on Delivery across Bangladesh.
         </p>
         <p>
-          <strong>Size Exchange:</strong> Not the right fit? See our Return &amp;
-          Exchange policy for the current exchange terms.
+          <strong>Size Exchange:</strong> Not the right fit? Request a size exchange within
+          48 hours of delivery. See our Return &amp; Exchange policy for how it works.
         </p>
       </div>
     ),

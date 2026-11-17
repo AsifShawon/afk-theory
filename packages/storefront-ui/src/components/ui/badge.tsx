@@ -15,8 +15,8 @@ export function Badge({
     <span
       className={clsx(
         "inline-flex items-center px-2 py-0.5 text-[10px] font-heading font-semibold uppercase tracking-wider",
-        variant === "brand" && "bg-brand-primary text-white",
-        variant === "accent" && "bg-brand-accent text-white",
+        variant === "brand" && "bg-ink text-canvas",
+        variant === "accent" && "bg-brand-accent text-on-accent",
         variant === "secondary" && "bg-brand-secondary text-brand-accent border border-brand-muted/40",
         variant === "danger" && "bg-rose-900 text-white",
         variant === "warning" && "bg-amber-800 text-white",

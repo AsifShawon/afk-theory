@@ -85,8 +85,8 @@ export function VariantSelector({
                     className={clsx(
                       "min-w-[44px] h-10 px-3.5 flex items-center justify-center text-xs font-semibold uppercase tracking-wider transition-all duration-150 border",
                       isSelected
-                        ? "border-brand-primary bg-brand-primary text-white shadow-sm ring-1 ring-brand-primary"
-                        : "border-brand-border bg-white text-brand-primary hover:border-brand-primary/60",
+                        ? "border-ink bg-ink text-canvas shadow-sm ring-1 ring-ink"
+                        : "border-brand-border bg-surface text-brand-primary hover:border-brand-primary/60",
                       isSoldOut && !isSelected && "text-brand-muted/60 line-through decoration-brand-muted/60 bg-brand-surface",
                       disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
                     )}

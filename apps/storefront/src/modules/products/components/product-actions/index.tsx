@@ -204,7 +204,7 @@ export default function ProductActions({
                 type="button"
                 disabled={quantity <= 1 || isAdding}
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-10 h-full flex items-center justify-center text-sm font-bold hover:bg-brand-secondary disabled:opacity-30"
+                className="w-10 h-full flex items-center justify-center text-sm font-bold hover:bg-raised disabled:opacity-30"
                 aria-label="Decrease quantity"
               >
                 −
@@ -216,7 +216,7 @@ export default function ProductActions({
                 type="button"
                 disabled={quantity >= stockQuantity || isAdding}
                 onClick={() => setQuantity((q) => q + 1)}
-                className="w-10 h-full flex items-center justify-center text-sm font-bold hover:bg-brand-secondary disabled:opacity-30"
+                className="w-10 h-full flex items-center justify-center text-sm font-bold hover:bg-raised disabled:opacity-30"
                 aria-label="Increase quantity"
               >
                 +
@@ -234,12 +234,12 @@ export default function ProductActions({
               }
               className={`flex-1 h-12 px-6 flex items-center justify-center text-xs font-heading font-semibold uppercase tracking-widest transition-all duration-200 ${
                 addedSuccess
-                  ? "bg-brand-accent text-white"
+                  ? "bg-brand-accent text-on-accent"
                   : !selectedVariant
-                  ? "bg-brand-primary/40 text-white cursor-not-allowed"
+                  ? "bg-accent/40 text-on-accent cursor-not-allowed"
                   : !inStock || !isValidVariant
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : "bg-brand-primary text-white hover:bg-black shadow-md hover:shadow-lg"
+                  ? "bg-gray-300 text-muted cursor-not-allowed"
+                  : "bg-accent text-on-accent hover:bg-accent-hover shadow-md hover:shadow-lg"
               }`}
               data-testid="add-product-button"
             >

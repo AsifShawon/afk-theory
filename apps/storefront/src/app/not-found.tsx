@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="bg-white min-h-screen flex items-center justify-center py-20 px-4">
+    <div className="bg-surface min-h-screen flex items-center justify-center py-20 px-4">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="inline-block px-3 py-1 bg-brand-secondary border border-brand-border text-[10px] font-heading font-semibold uppercase tracking-widest text-brand-accent">
           Error 404
@@ -25,7 +25,7 @@ export default function NotFound() {
         <div className="pt-2">
           <Link
             href="/"
-            className="inline-block px-6 py-3 bg-brand-primary text-white text-xs font-heading font-semibold uppercase tracking-widest hover:bg-black transition-colors"
+            className="inline-block px-6 py-3 bg-accent text-on-accent text-xs font-heading font-semibold uppercase tracking-widest hover:bg-accent-hover transition-colors"
           >
             Return to Frontpage →
           </Link>

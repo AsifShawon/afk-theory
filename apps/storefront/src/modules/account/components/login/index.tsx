@@ -71,7 +71,7 @@ const Login = ({ setCurrentView }: Props) => {
           data-testid="login-error-message"
         />
 
-        <SubmitButton data-testid="sign-in-button" className="w-full mt-4 py-3.5 bg-brand-primary hover:bg-black text-white text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-sm">
+        <SubmitButton data-testid="sign-in-button" className="w-full mt-4 py-3.5 bg-accent hover:bg-accent-hover text-on-accent text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-sm">
           Sign In &rarr;
         </SubmitButton>
       </form>

@@ -132,8 +132,8 @@ export function OrderSummary({
       <div className="p-3.5 bg-brand-secondary/70 border border-brand-border/80 rounded-xl space-y-2">
         <div className="flex items-center justify-between text-xs">
           {isFreeShipping ? (
-            <span className="font-heading font-bold text-emerald-800 flex items-center gap-1.5">
-              <CheckIcon className="w-3.5 h-3.5 text-emerald-700" />
+            <span className="font-heading font-bold text-ok flex items-center gap-1.5">
+              <CheckIcon className="w-3.5 h-3.5 text-ok" />
               <span>Complimentary Express Delivery Unlocked!</span>
             </span>
           ) : (
@@ -146,7 +146,7 @@ export function OrderSummary({
         <div className="w-full h-1.5 bg-brand-border/60 rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-500 rounded-full ${
-              isFreeShipping ? "bg-emerald-700" : "bg-brand-primary"
+              isFreeShipping ? "bg-ok" : "bg-accent"
             }`}
             style={{ width: `${progress}%` }}
           />
@@ -161,7 +161,7 @@ export function OrderSummary({
         </div>
 
         {totals.discount && (
-          <div className="flex justify-between text-emerald-700">
+          <div className="flex justify-between text-ok">
             <span>Promotion Discount</span>
             <span className="font-heading font-bold">-{totals.discount.formatted}</span>
           </div>
@@ -205,12 +205,12 @@ export function OrderSummary({
               value={inputCode}
               onChange={(e) => setInputCode(e.target.value.toUpperCase())}
               placeholder="Promo code (e.g. AFK10)"
-              className="flex-1 px-3.5 py-2.5 bg-white border border-brand-border rounded-lg text-xs font-mono uppercase text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary"
+              className="flex-1 px-3.5 py-2.5 bg-surface border border-brand-border rounded-lg text-xs font-mono uppercase text-brand-primary placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-primary"
             />
             <button
               type="submit"
               disabled={isLoadingPromo || !inputCode.trim()}
-              className="px-4 py-2.5 rounded-lg bg-brand-primary text-white text-xs font-heading font-bold uppercase tracking-wider hover:bg-black transition-colors disabled:opacity-40"
+              className="px-4 py-2.5 rounded-lg bg-accent text-on-accent text-xs font-heading font-bold uppercase tracking-wider hover:bg-accent-hover transition-colors disabled:opacity-40"
             >
               {isLoadingPromo ? "..." : "Apply"}
             </button>
@@ -236,7 +236,7 @@ export function OrderSummary({
           </div>
 
           {activeError && (
-            <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 p-2 rounded-lg font-medium">
+            <p className="text-xs text-err bg-err/10 border border-err/30 p-2 rounded-lg font-medium">
               {activeError}
             </p>
           )}
@@ -247,13 +247,13 @@ export function OrderSummary({
               {promotions.map((promo) => (
                 <div
                   key={promo.code}
-                  className="flex items-center justify-between p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900"
+                  className="flex items-center justify-between p-2 rounded-lg bg-ok/10 border border-ok/30 text-xs text-ok"
                 >
                   <div className="flex items-center gap-1.5 font-mono font-bold">
-                    <TagIcon className="w-3.5 h-3.5 text-emerald-700" />
+                    <TagIcon className="w-3.5 h-3.5 text-ok" />
                     <span>{promo.code}</span>
                     {promo.description && (
-                      <span className="text-[11px] font-sans font-normal text-emerald-800">
+                      <span className="text-[11px] font-sans font-normal text-ok">
                         • {promo.description}
                       </span>
                     )}
@@ -262,7 +262,7 @@ export function OrderSummary({
                     <button
                       type="button"
                       onClick={() => onRemovePromoCode(promo.code)}
-                      className="text-emerald-800 hover:text-rose-700 transition-colors p-1"
+                      className="text-ok hover:text-err transition-colors p-1"
                       title="Remove promo code"
                     >
                       <TrashIcon className="w-3.5 h-3.5" />
@@ -282,7 +282,7 @@ export function OrderSummary({
             type="button"
             onClick={onProceedToCheckout}
             disabled={isSubmitting}
-            className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            className="w-full h-12 bg-brand-accent hover:bg-brand-accent-hover text-on-accent text-xs font-heading font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors shadow-xs cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? "Processing..." : "Proceed to Checkout →"}
           </button>
@@ -301,7 +301,7 @@ export function OrderSummary({
         </div>
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="w-4 h-4 text-brand-primary flex-shrink-0" />
-          <span>7-Day doorstep size exchange guarantee</span>
+          <span>48-hour doorstep size exchange</span>
         </div>
       </div>
     </div>

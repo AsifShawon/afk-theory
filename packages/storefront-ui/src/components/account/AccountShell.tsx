@@ -57,7 +57,7 @@ export function AccountShell({
   ]
 
   return (
-    <div className="bg-white min-h-[80vh] py-10 sm:py-16">
+    <div className="bg-surface min-h-[80vh] py-10 sm:py-16">
       <div className="content-container max-w-6xl mx-auto space-y-10">
         {/* Header greeting banner */}
         <div className="border-b border-brand-border pb-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
@@ -79,7 +79,7 @@ export function AccountShell({
             <button
               type="button"
               onClick={onLogout}
-              className="text-xs text-brand-muted hover:text-rose-700 flex items-center gap-1.5 transition-colors self-start sm:self-auto"
+              className="text-xs text-brand-muted hover:text-err flex items-center gap-1.5 transition-colors self-start sm:self-auto"
             >
               <SignOutIcon className="w-3.5 h-3.5" />
               <span>Log out</span>
@@ -100,8 +100,8 @@ export function AccountShell({
                   className={clsx(
                     "flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-heading font-semibold transition-colors",
                     item.isActive
-                      ? "bg-brand-primary text-white"
-                      : "text-brand-primary hover:bg-brand-secondary"
+                      ? "bg-ink text-canvas"
+                      : "text-brand-primary hover:bg-raised"
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -114,7 +114,7 @@ export function AccountShell({
               <button
                 type="button"
                 onClick={onLogout}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-heading font-semibold text-rose-700 hover:bg-rose-50 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-heading font-semibold text-err hover:bg-err/10 transition-colors"
               >
                 <SignOutIcon className="w-4 h-4" />
                 <span>Log out</span>

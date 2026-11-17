@@ -27,11 +27,11 @@ export function OrderConfirmationView({
   const total = order.total || order.totals?.total
 
   return (
-    <div className="bg-white min-h-screen py-12 sm:py-20">
+    <div className="bg-surface min-h-screen py-12 sm:py-20">
       <div className="content-container max-w-3xl mx-auto space-y-10">
         {/* Celebration Header */}
         <div className="text-center space-y-4 pb-8 border-b border-brand-border">
-          <div className="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-14 h-14 bg-emerald-100 text-ok rounded-full flex items-center justify-center mx-auto shadow-sm">
             <CheckIcon className="w-7 h-7" />
           </div>
           <span className="text-[11px] font-heading font-bold uppercase tracking-widest text-brand-accent block">
@@ -63,7 +63,7 @@ export function OrderConfirmationView({
           </div>
           <div>
             <span className="text-[10px] font-heading uppercase text-brand-muted block">Payment</span>
-            <span className="font-heading font-semibold text-emerald-800 capitalize">
+            <span className="font-heading font-semibold text-ok capitalize">
               {order.paymentStatus}
             </span>
           </div>
@@ -80,7 +80,7 @@ export function OrderConfirmationView({
           <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-brand-primary">
             Purchased Garments ({order.items.length})
           </h3>
-          <div className="border border-brand-border bg-white px-4">
+          <div className="border border-brand-border bg-surface px-4">
             <CartItemList items={order.items} linkComponent={LinkComp} />
           </div>
         </div>
@@ -124,7 +124,7 @@ export function OrderConfirmationView({
               </div>
             )}
             {discount && (
-              <div className="flex justify-between text-emerald-700">
+              <div className="flex justify-between text-ok">
                 <span>Discount</span>
                 <span className="font-bold">-{discount.formatted}</span>
               </div>
@@ -154,7 +154,7 @@ export function OrderConfirmationView({
         <div className="pt-4 text-center">
           <LinkComp
             href={routes.catalog()}
-            className="inline-block px-8 py-3.5 bg-brand-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-brand-accent transition-colors shadow-sm"
+            className="inline-block px-8 py-3.5 bg-accent text-on-accent text-xs font-bold uppercase tracking-wider hover:bg-accent-hover transition-colors shadow-sm"
           >
             Continue Shopping
           </LinkComp>

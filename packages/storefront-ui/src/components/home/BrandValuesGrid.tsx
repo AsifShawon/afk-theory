@@ -38,7 +38,7 @@ export function BrandValuesGrid() {
     <section className="py-14 sm:py-20 bg-brand-surface border-b border-brand-border/80">
       <div className="editorial-container space-y-10">
         <div className="text-center space-y-2 max-w-xl mx-auto">
-          <span className="text-[11px] font-heading font-extrabold uppercase tracking-widest text-brand-primary bg-brand-accent px-2.5 py-0.5 inline-block">
+          <span className="text-[11px] font-heading font-extrabold uppercase tracking-widest text-on-accent bg-brand-accent px-2.5 py-0.5 inline-block">
             BRAND CODE
           </span>
           <h2 className="font-heading font-black text-2xl sm:text-4xl text-brand-primary uppercase tracking-tight">
@@ -53,9 +53,9 @@ export function BrandValuesGrid() {
           {pillars.map((pillar) => (
             <div
               key={pillar.number}
-              className="bg-white p-6 sm:p-7 border border-brand-border/80 shadow-xs space-y-3 flex flex-col justify-between hover:border-brand-primary/40 transition-colors"
+              className="bg-surface p-6 sm:p-7 border border-brand-border/80 shadow-xs space-y-3 flex flex-col justify-between hover:border-brand-primary/40 transition-colors"
             >
-              <span className="font-heading font-black text-2xl text-brand-primary/20 block">
+              <span className="font-heading font-black text-2xl text-faint block">
                 {pillar.number}
               </span>
               <div className="space-y-2">

@@ -133,7 +133,7 @@ export function Header({
       {announcementText && (
         <aside
           aria-label="Editorial Announcement"
-          className="bg-brand-primary text-brand-secondary text-[11px] font-heading font-medium tracking-wide py-1.5 px-4 text-center border-b border-brand-primary/20 w-full"
+          className="bg-panel text-bone text-[11px] font-heading font-medium tracking-wide py-1.5 px-4 text-center border-b border-white/10 w-full"
         >
           <div className="content-container flex items-center justify-center gap-2">
             <span>{announcementText}</span>
@@ -163,7 +163,7 @@ export function Header({
             className={clsx(
               "relative transition-all duration-300 ease-out pointer-events-auto",
               isScrolled
-                ? "rounded-2xl border border-brand-border/80 bg-brand-secondary/95 backdrop-blur-md shadow-[0_12px_36px_-6px_rgba(32,36,31,0.08),0_4px_12px_-2px_rgba(32,36,31,0.04)]"
+                ? "rounded-2xl border border-brand-border/80 bg-brand-secondary/95 backdrop-blur-md shadow-[0_12px_36px_-6px_rgba(0,0,0,0.55),0_4px_12px_-2px_rgba(0,0,0,0.35)]"
                 : "rounded-none border-x-0 border-t-0 border-b border-brand-border/60 bg-brand-secondary shadow-none"
             )}
           >
@@ -191,7 +191,7 @@ export function Header({
                       <button
                         type="button"
                         onClick={handleOpenMobileMenu}
-                        className="p-2 -ml-2 text-brand-primary hover:bg-brand-primary hover:text-brand-secondary transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary cursor-pointer"
+                        className="p-2 -ml-2 text-brand-primary hover:bg-raised hover:text-accent transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
                         aria-label="Open navigation menu"
                       >
                         <BarsThreeIcon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -217,7 +217,7 @@ export function Header({
                 <div className="flex flex-col items-center justify-center px-2">
                   <LinkComp
                     href={homeHref}
-                    className="flex items-center group py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 rounded-lg"
+                    className="flex items-center group py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-lg"
                     data-testid="nav-store-link"
                     aria-label="AFK THEORY Home"
                   >
@@ -232,7 +232,7 @@ export function Header({
                     <button
                       type="button"
                       onClick={handleSearchClick}
-                      className="flex items-center gap-1.5 text-xs font-heading font-medium text-brand-primary hover:bg-brand-primary hover:text-brand-secondary px-2.5 py-1.5 transition-all duration-200 rounded-lg min-h-[44px] min-w-[44px] sm:min-w-0 justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                      className="flex items-center gap-1.5 text-xs font-heading font-medium text-brand-primary hover:bg-raised hover:text-accent px-2.5 py-1.5 transition-all duration-200 rounded-lg min-h-[44px] min-w-[44px] sm:min-w-0 justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       aria-label="Search catalog"
                     >
                       <MagnifyingGlassIcon className="w-4 h-4 flex-shrink-0" />
@@ -246,7 +246,7 @@ export function Header({
                   {/* Account Link */}
                   <LinkComp
                     href={accountHref}
-                    className="hidden sm:flex items-center gap-1.5 text-xs font-heading font-medium uppercase tracking-wider text-brand-primary hover:bg-brand-primary hover:text-brand-secondary px-2.5 py-1.5 transition-all duration-200 rounded-lg min-h-[44px] justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                    className="hidden sm:flex items-center gap-1.5 text-xs font-heading font-medium uppercase tracking-wider text-brand-primary hover:bg-raised hover:text-accent px-2.5 py-1.5 transition-all duration-200 rounded-lg min-h-[44px] justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     data-testid="nav-account-link"
                     aria-label="Customer Account"
                   >
@@ -261,13 +261,13 @@ export function Header({
                     <button
                       type="button"
                       onClick={onCartClick}
-                      className="relative px-2.5 py-1.5 text-brand-primary hover:bg-brand-primary hover:text-brand-secondary transition-all duration-200 flex items-center gap-1.5 min-h-[44px] min-w-[44px] justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                      className="relative px-2.5 py-1.5 text-brand-primary hover:bg-raised hover:text-accent transition-all duration-200 flex items-center gap-1.5 min-h-[44px] min-w-[44px] justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       aria-label={`Shopping bag with ${cartCount} items`}
                       data-testid="nav-cart-link"
                     >
                       <ShoppingBagIcon className="w-5 h-5 flex-shrink-0" />
                       {cartCount > 0 && (
-                        <span className="sm:hidden absolute top-1 right-1 w-4 h-4 bg-brand-accent text-brand-primary text-[10px] font-heading font-bold rounded-full flex items-center justify-center tabular-nums leading-none">
+                        <span className="sm:hidden absolute top-1 right-1 w-4 h-4 bg-brand-accent text-on-accent text-[10px] font-heading font-bold rounded-full flex items-center justify-center tabular-nums leading-none">
                           {cartCount}
                         </span>
                       )}
@@ -278,13 +278,13 @@ export function Header({
                   ) : (
                     <LinkComp
                       href={cartHref}
-                      className="relative px-2.5 py-1.5 text-brand-primary hover:bg-brand-primary hover:text-brand-secondary transition-all duration-200 flex items-center gap-1.5 min-h-[44px] min-w-[44px] justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                      className="relative px-2.5 py-1.5 text-brand-primary hover:bg-raised hover:text-accent transition-all duration-200 flex items-center gap-1.5 min-h-[44px] min-w-[44px] justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       aria-label={`Shopping bag with ${cartCount} items`}
                       data-testid="nav-cart-link"
                     >
                       <ShoppingBagIcon className="w-5 h-5 flex-shrink-0" />
                       {cartCount > 0 && (
-                        <span className="sm:hidden absolute top-1 right-1 w-4 h-4 bg-brand-accent text-brand-primary text-[10px] font-heading font-bold rounded-full flex items-center justify-center tabular-nums leading-none">
+                        <span className="sm:hidden absolute top-1 right-1 w-4 h-4 bg-brand-accent text-on-accent text-[10px] font-heading font-bold rounded-full flex items-center justify-center tabular-nums leading-none">
                           {cartCount}
                         </span>
                       )}

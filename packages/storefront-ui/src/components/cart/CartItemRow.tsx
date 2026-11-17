@@ -111,12 +111,12 @@ export function CartItemRow({
         {/* Quantity Controls & Remove */}
         <div className="flex items-center justify-between pt-2">
           {onUpdateQuantity ? (
-            <div className="flex items-center border border-brand-border bg-white h-8 text-xs">
+            <div className="flex items-center border border-brand-border bg-surface h-8 text-xs">
               <button
                 type="button"
                 onClick={() => onUpdateQuantity(Math.max(1, item.quantity - 1))}
                 disabled={disabled || item.quantity <= 1}
-                className="w-7 h-full flex items-center justify-center text-brand-primary hover:bg-brand-secondary disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                className="w-7 h-full flex items-center justify-center text-brand-primary hover:bg-raised disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 aria-label="Decrease quantity"
               >
                 -
@@ -128,7 +128,7 @@ export function CartItemRow({
                 type="button"
                 onClick={() => onUpdateQuantity(item.quantity + 1)}
                 disabled={disabled}
-                className="w-7 h-full flex items-center justify-center text-brand-primary hover:bg-brand-secondary disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                className="w-7 h-full flex items-center justify-center text-brand-primary hover:bg-raised disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 aria-label="Increase quantity"
               >
                 +
@@ -143,7 +143,7 @@ export function CartItemRow({
               type="button"
               onClick={onRemove}
               disabled={disabled}
-              className="text-xs text-brand-muted hover:text-rose-700 flex items-center gap-1 transition-colors p-1"
+              className="text-xs text-brand-muted hover:text-err flex items-center gap-1 transition-colors p-1"
               aria-label={`Remove ${title}`}
             >
               <TrashIcon className="w-3.5 h-3.5" />

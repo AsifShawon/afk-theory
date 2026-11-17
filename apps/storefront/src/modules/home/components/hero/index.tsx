@@ -10,7 +10,7 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left: Editorial Headline & Copy */}
           <div className="lg:col-span-7 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-primary text-white text-[11px] font-heading font-semibold uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent text-on-accent text-[11px] font-heading font-semibold uppercase tracking-widest">
               <span>DROP 01 // OVERSIZED DROP SHOULDER</span>
               <span className="text-brand-accent">•</span>
               <span>DENSE COMPACT COTTON</span>
@@ -28,13 +28,13 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <LocalizedClientLink
                 href="/store"
-                className="px-8 py-3.5 bg-brand-accent text-brand-primary hover:bg-black hover:text-brand-accent text-xs font-heading font-semibold uppercase tracking-widest text-center transition-all duration-200 shadow-md hover:shadow-lg"
+                className="px-8 py-3.5 bg-brand-accent text-on-accent hover:bg-accent-hover hover:text-on-accent text-xs font-heading font-semibold uppercase tracking-widest text-center transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Shop The Drop
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/about"
-                className="px-8 py-3.5 bg-white text-brand-primary border border-brand-primary/30 hover:border-brand-primary hover:bg-brand-secondary text-xs font-heading font-semibold uppercase tracking-widest text-center transition-all duration-200"
+                className="px-8 py-3.5 bg-surface text-brand-primary border border-brand-primary/30 hover:border-brand-primary hover:bg-raised text-xs font-heading font-semibold uppercase tracking-widest text-center transition-all duration-200"
               >
                 About The Theory
               </LocalizedClientLink>
@@ -59,13 +59,13 @@ const Hero = () => {
 
           {/* Right: Curated Hero Showcase Card */}
           <div className="lg:col-span-5 relative">
-            <div className="bg-white border border-brand-border p-5 sm:p-6 shadow-xl relative overflow-hidden group">
-              <div className="relative aspect-[4/5] w-full bg-brand-primary overflow-hidden mb-4 flex items-center justify-center">
+            <div className="bg-surface border border-brand-border p-5 sm:p-6 shadow-xl relative overflow-hidden group">
+              <div className="relative aspect-[4/5] w-full bg-panel overflow-hidden mb-4 flex items-center justify-center">
                 <div className="text-center p-6 space-y-2">
                   <span className="font-display text-4xl text-brand-accent font-bold tracking-tight">DROP 01</span>
-                  <p className="text-xs font-mono text-brand-secondary uppercase tracking-widest">Oversized Drop Shoulder Tee</p>
+                  <p className="text-xs font-mono text-bone uppercase tracking-widest">Oversized Drop Shoulder Tee</p>
                 </div>
-                <div className="absolute top-3 left-3 bg-brand-accent text-brand-primary text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 z-10">
+                <div className="absolute top-3 left-3 bg-brand-accent text-on-accent text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 z-10">
                   Concept Drop
                 </div>
               </div>
@@ -83,7 +83,7 @@ const Hero = () => {
                 <div className="pt-2">
                   <LocalizedClientLink
                     href="/store"
-                    className="block w-full py-2.5 bg-brand-accent text-brand-primary hover:bg-black hover:text-white border border-brand-border text-center text-xs font-semibold uppercase tracking-wider transition-colors"
+                    className="block w-full py-2.5 bg-brand-accent text-on-accent hover:bg-accent-hover hover:text-on-accent border border-brand-border text-center text-xs font-semibold uppercase tracking-wider transition-colors"
                   >
                     View Collection Details →
                   </LocalizedClientLink>

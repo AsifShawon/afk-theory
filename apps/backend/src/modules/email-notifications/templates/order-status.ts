@@ -118,14 +118,14 @@ export function generateOrderDeliveredEmail({
     title: `Your order #${displayId} was delivered - AFK THEORY`,
     badge: "Delivered",
     heading: `Delivered. Enjoy, ${firstNameOf(order)}`,
-    bodyHtml: `<p style="margin: 0;">Order <strong>#${escapeHtml(displayId)}</strong> has been delivered. Thank you for choosing AFK THEORY.</p><p style="margin: 12px 0 0;">If the fit isn't right or anything is wrong with your order, just reply to this email with your order number and we will help.</p>`,
+    bodyHtml: `<p style="margin: 0;">Order <strong>#${escapeHtml(displayId)}</strong> has been delivered. Thank you for choosing AFK THEORY.</p><p style="margin: 12px 0 0;">If the fit isn't right, you can request a size exchange within 48 hours of delivery. Just reply to this email with your order number and we will help.</p>`,
     extraHtml: renderItemsTable(order),
   })
 
   const text = `AFK THEORY - ORDER #${displayId} DELIVERED
 
 Hi ${firstNameOf(order)}, your order has been delivered. Thank you for choosing AFK THEORY.
-If the fit isn't right or anything is wrong, reply to this email with your order number.
+If the fit isn't right, you can request a size exchange within 48 hours of delivery. Reply to this email with your order number.
 
 ${itemsText(order)}
 `

@@ -11,9 +11,9 @@ export interface AboutViewProps {
 
 export function AboutView({ routes, linkComponent: LinkComp = Link }: AboutViewProps) {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-surface min-h-screen">
       {/* Header Banner */}
-      <div className="bg-brand-primary border-b border-brand-border py-14 sm:py-20 text-white">
+      <div className="bg-panel border-b border-brand-border py-14 sm:py-20 text-white">
         <div className="content-container max-w-4xl text-center space-y-4">
           <span className="text-xs font-heading font-semibold uppercase tracking-widest text-brand-accent">
             THE PHILOSOPHY // AWAY FROM KEYBOARD
@@ -21,7 +21,7 @@ export function AboutView({ routes, linkComponent: LinkComp = Link }: AboutViewP
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-white">
             PAUSE THE GAME. KEEP YOUR STYLE.
           </h1>
-          <p className="text-sm sm:text-base text-brand-secondary/80 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-bone/80 max-w-2xl mx-auto leading-relaxed">
             Offline by choice. Independent streetwear engineered with high-density compact cotton, intentional boxy silhouettes, and distinct drop shoulder architecture.
           </p>
         </div>
@@ -45,10 +45,10 @@ export function AboutView({ routes, linkComponent: LinkComp = Link }: AboutViewP
               We design apparel for the off-screen state—bold, minimal, confident, and unapologetic. Starting with engineered Drop Shoulder T-shirts, our garments are built to hold form, drape heavily, and outlast trends.
             </p>
           </div>
-          <div className="relative aspect-[4/3] bg-brand-primary border border-brand-border overflow-hidden shadow-lg flex items-center justify-center p-8">
+          <div className="relative aspect-[4/3] bg-panel border border-brand-border overflow-hidden shadow-lg flex items-center justify-center p-8">
             <div className="text-center space-y-3">
               <span className="font-display text-6xl text-brand-accent tracking-tighter">// AFK</span>
-              <p className="text-xs font-mono uppercase tracking-widest text-brand-secondary">SAME ENERGY. DIFFERENT REALITY.</p>
+              <p className="text-xs font-mono uppercase tracking-widest text-bone">SAME ENERGY. DIFFERENT REALITY.</p>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@ export function AboutView({ routes, linkComponent: LinkComp = Link }: AboutViewP
           </p>
           <LinkComp
             href={routes.catalog()}
-            className="inline-block px-8 py-3.5 bg-brand-accent text-brand-primary hover:bg-black hover:text-brand-accent text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-md"
+            className="inline-block px-8 py-3.5 bg-brand-accent text-on-accent hover:bg-accent-hover hover:text-on-accent text-xs font-heading font-semibold uppercase tracking-widest transition-colors shadow-md"
           >
             Shop The Drop →
           </LinkComp>

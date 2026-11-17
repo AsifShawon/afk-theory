@@ -147,12 +147,12 @@ export function HeroSection({
       case "none":
         return "bg-transparent"
       case "subtle":
-        return "bg-gradient-to-t from-[#161815]/50 via-transparent to-black/10"
+        return "bg-gradient-to-t from-panel/50 via-transparent to-black/10"
       case "strong":
-        return "bg-gradient-to-t from-[#161815]/95 via-[#20241F]/80 to-[#161815]/40"
+        return "bg-gradient-to-t from-panel/95 via-panel/80 to-panel/40"
       case "medium":
       default:
-        return "bg-gradient-to-t from-[#161815]/95 via-[#20241F]/65 to-transparent"
+        return "bg-gradient-to-t from-panel/95 via-panel/65 to-transparent"
     }
   }, [activeSlide.overlayStrength])
 
@@ -169,7 +169,7 @@ export function HeroSection({
       <div className="editorial-container">
         {/* Large Photographic Campaign Canvas */}
         <div
-          className="relative w-full aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9] overflow-hidden border border-brand-border bg-brand-primary shadow-editorial flex flex-col justify-end p-6 sm:p-12 lg:p-16 select-none"
+          className="relative w-full aspect-[4/5] sm:aspect-[16/9] lg:aspect-[21/9] overflow-hidden border border-brand-border bg-panel shadow-editorial flex flex-col justify-end p-6 sm:p-12 lg:p-16 select-none"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -219,7 +219,7 @@ export function HeroSection({
           >
             {activeSlide.eyebrow && (
               <div className="inline-flex items-center gap-2">
-                <span className="px-3 py-1 bg-brand-accent text-brand-primary text-[10px] sm:text-[11px] font-heading font-extrabold uppercase tracking-widest shadow-xs">
+                <span className="px-3 py-1 bg-brand-accent text-on-accent text-[10px] sm:text-[11px] font-heading font-extrabold uppercase tracking-widest shadow-xs">
                   {activeSlide.eyebrow}
                 </span>
               </div>
@@ -257,10 +257,10 @@ export function HeroSection({
               {activeSlide.primaryCtaLabel && (
                 <LinkComp
                   href={activeSlide.primaryCtaUrl || defaultCatalogHref}
-                  className="inline-flex items-center gap-3 px-6 py-3.5 bg-brand-accent hover:bg-brand-accent-hover text-brand-primary text-xs font-heading font-extrabold uppercase tracking-widest transition-all duration-200 shadow-sm group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="inline-flex items-center gap-3 px-6 py-3.5 bg-brand-accent hover:bg-brand-accent-hover text-on-accent text-xs font-heading font-extrabold uppercase tracking-widest transition-all duration-200 shadow-sm group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
                   <span>{activeSlide.primaryCtaLabel}</span>
-                  <span className="w-6 h-6 rounded-xs bg-brand-primary text-brand-accent flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                  <span className="w-6 h-6 rounded-xs bg-panel text-brand-accent flex items-center justify-center group-hover:translate-x-1 transition-transform">
                     <ArrowRightIcon className="w-3.5 h-3.5" />
                   </span>
                 </LinkComp>

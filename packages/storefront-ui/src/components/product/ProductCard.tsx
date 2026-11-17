@@ -196,7 +196,7 @@ export function ProductCard({
     <>
       <article
         data-testid="product-wrapper"
-        className="product-card group relative flex flex-col bg-white border border-brand-border hover:border-brand-primary overflow-hidden transition-all duration-300 shadow-xs"
+        className="product-card group relative flex flex-col bg-surface border border-brand-border hover:border-brand-primary overflow-hidden transition-all duration-300 shadow-xs"
       >
         {/* 1. Image Canvas & Badges */}
         <div
@@ -243,17 +243,17 @@ export function ProductCard({
           {/* Status Badges */}
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 pointer-events-none">
             {product.isNewArrival && (
-              <span className="bg-brand-accent text-brand-primary text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+              <span className="bg-brand-accent text-on-accent text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
                 DROP 01
               </span>
             )}
             {product.isBestSeller && !product.isNewArrival && (
-              <span className="bg-brand-primary text-brand-accent text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+              <span className="bg-panel text-brand-accent text-[9px] font-heading font-extrabold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
                 BESTSELLER
               </span>
             )}
             {isLowStock && (
-              <span className="bg-brand-primary text-amber-300 border border-amber-400/40 text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
+              <span className="bg-panel text-amber-300 border border-amber-400/40 text-[9px] font-heading font-bold uppercase tracking-widest px-2.5 py-0.5 shadow-xs">
                 LOW STOCK ({product.totalStock})
               </span>
             )}
@@ -266,15 +266,15 @@ export function ProductCard({
 
           {/* Desktop Quick Add Hover Tray */}
           {onQuickAdd && !isSoldOut && availableSizes.length > 0 && (
-            <div className="hidden lg:flex absolute inset-x-2 bottom-2 z-20 bg-white/95 backdrop-blur-sm border border-brand-border/90 rounded-lg p-2 flex-col gap-1.5 shadow-md transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-all duration-200">
+            <div className="hidden lg:flex absolute inset-x-2 bottom-2 z-20 bg-surface/95 backdrop-blur-sm border border-brand-border/90 rounded-lg p-2 flex-col gap-1.5 shadow-md transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-all duration-200">
               <div className="flex items-center justify-between px-1">
                 <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-brand-muted">
                   Quick Add
                 </span>
                 {errorMessage ? (
-                  <span role="alert" title={errorMessage} className="text-[10px] text-rose-700 font-bold truncate max-w-[70%]">{errorMessage}</span>
+                  <span role="alert" title={errorMessage} className="text-[10px] text-err font-bold truncate max-w-[70%]">{errorMessage}</span>
                 ) : successVariantId ? (
-                  <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                  <span className="text-[10px] text-ok font-bold flex items-center gap-1">
                     <CheckIcon className="w-3 h-3" /> Added ✓
                   </span>
                 ) : null}
@@ -296,10 +296,10 @@ export function ProductCard({
                         !inStock
                           ? "opacity-30 line-through cursor-not-allowed bg-brand-surface text-brand-muted"
                           : isSuccess
-                            ? "bg-emerald-700 text-white"
+                            ? "bg-ok text-white"
                             : isPending
                               ? "bg-brand-secondary text-brand-primary animate-pulse"
-                              : "bg-white hover:bg-brand-primary hover:text-white border border-brand-border text-brand-primary"
+                              : "bg-surface hover:bg-accent hover:text-on-accent border border-brand-border text-brand-primary"
                       }`}
                     >
                       {isPending ? (
@@ -322,7 +322,7 @@ export function ProductCard({
             <button
               type="button"
               onClick={() => setIsMobileSheetOpen(true)}
-              className="lg:hidden absolute bottom-2 right-2 z-20 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-brand-primary border border-brand-border text-[10px] font-heading font-bold uppercase tracking-wider shadow-sm flex items-center gap-1"
+              className="lg:hidden absolute bottom-2 right-2 z-20 px-3 py-1.5 rounded-full bg-surface/95 backdrop-blur-sm text-brand-primary border border-brand-border text-[10px] font-heading font-bold uppercase tracking-wider shadow-sm flex items-center gap-1"
               aria-label={`Quick Add ${product.title}`}
             >
               <span>+ Quick Add</span>
@@ -331,7 +331,7 @@ export function ProductCard({
         </div>
 
         {/* 2. Product Details & Swatches */}
-        <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-white">
+        <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-surface">
           <div className="space-y-1">
             <LinkComp href={href} className="block group-hover:text-brand-accent transition-colors">
               <h3

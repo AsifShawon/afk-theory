@@ -95,7 +95,7 @@ const CartDropdown = ({
                 />
               </svg>
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-brand-accent text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-brand-accent text-on-accent text-[9px] font-bold rounded-full flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
@@ -118,7 +118,7 @@ const CartDropdown = ({
         >
           <PopoverPanel
             static
-            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border border-brand-border w-[400px] text-brand-primary shadow-2xl rounded-none z-50"
+            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-surface border border-brand-border w-[400px] text-brand-primary shadow-2xl rounded-none z-50"
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 border-b border-brand-border/60 flex items-center justify-between">
@@ -217,7 +217,7 @@ const CartDropdown = ({
                   <LocalizedClientLink
                     href="/cart"
                     onClick={close}
-                    className="block w-full py-3 bg-brand-primary hover:bg-black text-white text-center text-xs font-semibold tracking-wider uppercase transition-colors"
+                    className="block w-full py-3 bg-accent hover:bg-accent-hover text-on-accent text-center text-xs font-semibold tracking-wider uppercase transition-colors"
                     data-testid="go-to-cart-button"
                   >
                     Proceed to Bag &amp; Checkout
@@ -233,7 +233,7 @@ const CartDropdown = ({
                 <LocalizedClientLink
                   href="/store"
                   onClick={close}
-                  className="inline-block px-5 py-2.5 bg-brand-primary text-white text-xs font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+                  className="inline-block px-5 py-2.5 bg-accent text-on-accent text-xs font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
                 >
                   Explore Collection
                 </LocalizedClientLink>
