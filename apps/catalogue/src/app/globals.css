@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  AFK THEORY showcase tokens
+  graphite  #20241F  base surface (dark sections)
+  void      #161815  deepest surface (preloader, footer)
+  bone      #F5F3ED  light surface and text on dark
+  stone     #E4E1D8  card backgrounds on bone
+  olive     #687065  secondary text
+  signal    #D8F452  chartreuse, only for selection, order actions and the marquee
+*/
+:root {
+  --graphite: #20241f;
+  --void: #161815;
+  --bone: #f5f3ed;
+  --stone: #e4e1d8;
+  --olive: #687065;
+  --signal: #d8f452;
+  --header-h: 64px;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-brand-graphite text-brand-bone font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--signal);
+    color: var(--graphite);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* Lenis smooth scroll */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  .font-hud {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .display {
+    font-family: var(--font-chakra-petch), system-ui, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.88;
+  }
+
+  /* Corner brackets, like a game targeting reticle. */
+  .hud-frame {
+    position: relative;
+  }
+  .hud-frame::before,
+  .hud-frame::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    z-index: 2;
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms;
+  }
+  .hud-frame::before {
+    top: 10px;
+    left: 10px;
+    border-top: 2px solid currentColor;
+    border-left: 2px solid currentColor;
+  }
+  .hud-frame::after {
+    right: 10px;
+    bottom: 10px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+  }
+
+  /* Subtle film grain over dark sections. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .btn-signal {
+    @apply inline-flex items-center justify-center gap-3 h-14 px-7 bg-brand-accent text-brand-graphite font-bold uppercase tracking-wider text-sm transition-colors;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .btn-signal:hover {
+    @apply bg-brand-accent-hover;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-3 h-14 px-7 border border-current font-bold uppercase tracking-wider text-sm transition-colors;
+  }
+  .btn-outline:hover {
+    @apply bg-brand-bone text-brand-graphite border-brand-bone;
+  }
+}
+
+@layer utilities {
+  .marquee-track {
+    animation: marquee 28s linear infinite;
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes scroll-hint {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(200%);
+    }
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+/* The loading screen never shows on repeat visits, without JS, or for reduced motion. */
+html[data-seen] [data-preloader] {
+  display: none;
+}
+
+/* Hold intro elements until the intro plays, so they do not flash. Only with JS. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js:not([data-ready]) [data-intro],
+  html.js:not([data-ready]) [data-char] {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-preloader] {
+    display: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Page transitions: the outgoing page fades, the incoming page rises. */
+::view-transition-old(root) {
+  animation: 260ms cubic-bezier(0.76, 0, 0.24, 1) both vt-fade-out;
+}
+::view-transition-new(root) {
+  animation: 520ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both vt-rise;
+}
+::view-transition-group(*) {
+  animation-duration: 620ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}

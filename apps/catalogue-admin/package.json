@@ -1,0 +1,38 @@
+{
+  "name": "@dtc/catalogue-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LOCAL-ONLY admin for the AFK THEORY showcase catalogue. Never deploy this app.",
+  "scripts": {
+    "dev": "next dev -p 8200 -H 127.0.0.1",
+    "build": "next build",
+    "start": "next start -p 8200 -H 127.0.0.1",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@dtc/catalogue-core": "workspace:*",
+    "@supabase/supabase-js": "^2.49.0",
+    "clsx": "^2.1.1",
+    "next": "15.5.21",
+    "react": "19.0.5",
+    "react-dom": "19.0.5",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@dtc/storefront-ui": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.0.5",
+    "@types/react-dom": "19.0.5",
+    "autoprefixer": "^10.4.2",
+    "eslint": "^9.13.0",
+    "eslint-config-next": "15.5.21",
+    "postcss": "^8.4.8",
+    "tailwindcss": "^3.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.3.2"
+  }
+}
