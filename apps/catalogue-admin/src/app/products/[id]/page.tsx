@@ -3,14 +3,21 @@ import { notFound } from "next/navigation"
 import { DbError } from "@/components/db-error"
 import { ImageManager } from "@/components/image-manager"
 import { ProductForm } from "@/components/product-form"
-import { Badge } from "@/components/ui"
+import { Badge, Notice } from "@/components/ui"
 import { descriptionToHtml } from "@dtc/catalogue-core"
 import { loadCategories, loadProduct, loadSizeGuides } from "@/lib/data"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditProductPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ created?: string }>
+}) {
   const { id } = await params
+  const { created } = await searchParams
   if (!UUID.test(id)) notFound()
 
   let data
@@ -34,6 +41,13 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         <h1 className="font-display text-3xl font-bold uppercase tracking-tight">{product.name}</h1>
         <Badge tone={product.status === "published" ? "live" : "neutral"}>{product.status}</Badge>
       </div>
+
+      {created && images.length === 0 && (
+        <Notice tone="success">
+          <strong>{product.name} is created as a draft.</strong> Next, drop its photos below. Then set Status to Published, save, and press Publish at the top.
+          {created === "publish" && " It was saved as a draft because a product needs photos before it can go live."}
+        </Notice>
+      )}
 
       <ImageManager productId={product.id} images={images} colors={colors} />
 
