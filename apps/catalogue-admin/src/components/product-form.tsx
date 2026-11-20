@@ -13,6 +13,8 @@ import {
   type SizeGuideRow,
 } from "@dtc/catalogue-core"
 import { deleteProduct, saveProduct } from "@/app/actions/products"
+import type { ColorPreset } from "@/lib/data"
+import { ColorsCard } from "./colors-card"
 import { RichTextEditor } from "./rich-text-editor"
 import { SeoCard } from "./seo-card"
 import { SizeGuidePicker } from "./size-guide-picker"
@@ -37,9 +39,11 @@ export interface ProductFormProps {
   sizeGuides: SizeGuideRow[]
   /** False until the size guides migration has been run. */
   guidesAvailable: boolean
+  /** Colors already used on other products, for quick add. */
+  colorPresets: ColorPreset[]
 }
 
-export function ProductForm({ id, initial, initialColors, categories, imageCount, sizeGuides, guidesAvailable }: ProductFormProps) {
+export function ProductForm({ id, initial, initialColors, categories, imageCount, sizeGuides, guidesAvailable, colorPresets }: ProductFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ProductInput>(initial)
   const [colors, setColors] = useState<ColorInput[]>(initialColors)
@@ -222,62 +226,7 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
         )}
       </Card>
 
-      <Card
-        title="Colors"
-        actions={
-          <Button type="button" variant="secondary" onClick={() => setColors([...colors, { name: "", hex: "#20241F", inStock: true }])}>
-            Add color
-          </Button>
-        }
-      >
-        {colors.length === 0 && <p className="text-sm text-brand-muted">No colors. Add one so customers can choose it, or leave empty for a single-color product.</p>}
-        <div className="space-y-3">
-          {colors.map((color, index) => (
-            <div key={color.id ?? `new-${index}`} className="flex flex-wrap items-center gap-3">
-              <input
-                type="color"
-                value={color.hex}
-                onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, hex: e.target.value.toUpperCase() } : c)))}
-                className="h-10 w-12 cursor-pointer rounded-base border border-brand-border bg-white"
-                aria-label="Color swatch"
-              />
-              <TextInput
-                value={color.name}
-                onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, name: e.target.value } : c)))}
-                placeholder="Graphite Black"
-                className="max-w-xs"
-              />
-              <TextInput
-                value={color.hex}
-                onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, hex: e.target.value } : c)))}
-                className="w-28 font-mono"
-              />
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={color.inStock}
-                  onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, inStock: e.target.checked } : c)))}
-                  className="h-4 w-4 accent-brand-graphite"
-                />
-                In stock
-              </label>
-              <Button type="button" variant="ghost" disabled={index === 0} onClick={() => setColors(swap(colors, index, index - 1))} aria-label="Move up">
-                Up
-              </Button>
-              <Button type="button" variant="ghost" onClick={() => setColors(colors.filter((_, i) => i !== index))}>
-                Remove
-              </Button>
-            </div>
-          ))}
-        </div>
-        {Object.entries(errors)
-          .filter(([key]) => /^\d+\./.test(key))
-          .map(([key, message]) => (
-            <p key={key} className="mt-2 text-xs text-red-700">
-              Color {Number(key.split(".")[0]) + 1}: {message}
-            </p>
-          ))}
-      </Card>
+      <ColorsCard colors={colors} presets={colorPresets} errors={errors} onChange={setColors} />
 
       <Card title="Details">
         <div className="grid gap-5 md:grid-cols-2">
@@ -384,8 +333,3 @@ function orderSizes(sizes: string[]): string[] {
   return [...sizes].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, undefined, { numeric: true }))
 }
 
-function swap<T>(list: T[], a: number, b: number): T[] {
-  const next = [...list]
-  ;[next[a], next[b]] = [next[b], next[a]]
-  return next
-}

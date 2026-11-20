@@ -5,7 +5,7 @@ import { ImageManager } from "@/components/image-manager"
 import { ProductForm } from "@/components/product-form"
 import { Badge, Notice } from "@/components/ui"
 import { descriptionToHtml } from "@dtc/catalogue-core"
-import { loadCategories, loadProduct, loadSizeGuides } from "@/lib/data"
+import { loadCategories, loadProduct, loadSizeGuides, loadColorPresets } from "@/lib/data"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -23,8 +23,9 @@ export default async function EditProductPage({
   let data
   let categories
   let sizeGuides
+  let colorPresets
   try {
-    ;[data, categories, sizeGuides] = await Promise.all([loadProduct(id), loadCategories(), loadSizeGuides()])
+    ;[data, categories, sizeGuides, colorPresets] = await Promise.all([loadProduct(id), loadCategories(), loadSizeGuides(), loadColorPresets()])
   } catch (err) {
     return <DbError error={err} />
   }
@@ -58,6 +59,7 @@ export default async function EditProductPage({
         categories={categories}
         sizeGuides={sizeGuides.guides}
         guidesAvailable={!sizeGuides.migrationMissing}
+        colorPresets={colorPresets}
         initial={{
           name: product.name,
           slug: product.slug,
