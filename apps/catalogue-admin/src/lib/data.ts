@@ -1,6 +1,8 @@
 import "server-only"
 import {
+  isMissingTable,
   settingsFromRow,
+  type SizeGuideRow,
   TABLES,
   type CategoryRow,
   type ProductColorRow,
@@ -82,6 +84,31 @@ export async function loadProduct(id: string) {
     colors: check(colors) as ProductColorRow[],
     images: (check(images) as ProductImageRow[]).map((img) => ({ ...img, thumbUrl: thumbFor(img) })),
   }
+}
+
+export interface SizeGuidesState {
+  guides: SizeGuideRow[]
+  /** Product count per guide id. */
+  usage: Record<string, number>
+  /** True until migration 20261121000000 has been run. */
+  migrationMissing: boolean
+}
+
+export async function loadSizeGuides(): Promise<SizeGuidesState> {
+  const { client } = getAdmin()
+  const guides = await client.from(TABLES.sizeGuides).select("*").order("sort_order")
+  if (guides.error) {
+    if (isMissingTable(guides.error)) {
+      return { guides: [], usage: {}, migrationMissing: true }
+    }
+    throw new Error(guides.error.message)
+  }
+  const products = await client.from(TABLES.products).select("size_guide_id")
+  const usage: Record<string, number> = {}
+  for (const p of (products.data ?? []) as { size_guide_id: string | null }[]) {
+    if (p.size_guide_id) usage[p.size_guide_id] = (usage[p.size_guide_id] ?? 0) + 1
+  }
+  return { guides: guides.data as SizeGuideRow[], usage, migrationMissing: false }
 }
 
 export async function loadCategories(): Promise<CategoryRow[]> {

@@ -10,9 +10,13 @@ import {
   type ColorInput,
   type ProductDetails,
   type ProductInput,
+  type SizeGuideRow,
 } from "@dtc/catalogue-core"
 import { deleteProduct, saveProduct } from "@/app/actions/products"
-import { Button, Card, Field, Notice, Select, TextArea, TextInput } from "./ui"
+import { RichTextEditor } from "./rich-text-editor"
+import { SeoCard } from "./seo-card"
+import { SizeGuidePicker } from "./size-guide-picker"
+import { Button, Card, Field, Notice, Select, TextInput } from "./ui"
 
 const SIZE_PRESETS = ["XS", ...DEFAULT_SIZES, "XXXL"]
 
@@ -30,9 +34,12 @@ export interface ProductFormProps {
   initialColors: ColorInput[]
   categories: CategoryRow[]
   imageCount: number
+  sizeGuides: SizeGuideRow[]
+  /** False until the size guides migration has been run. */
+  guidesAvailable: boolean
 }
 
-export function ProductForm({ id, initial, initialColors, categories, imageCount }: ProductFormProps) {
+export function ProductForm({ id, initial, initialColors, categories, imageCount, sizeGuides, guidesAvailable }: ProductFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ProductInput>(initial)
   const [colors, setColors] = useState<ColorInput[]>(initialColors)
@@ -116,9 +123,15 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
           <Field label="Tagline" error={errors.tagline} hint="One short line under the name" className="md:col-span-2">
             <TextInput value={form.tagline} onChange={(e) => set("tagline", e.target.value)} />
           </Field>
-          <Field label="Description" error={errors.description} className="md:col-span-2">
-            <TextArea value={form.description} onChange={(e) => set("description", e.target.value)} rows={5} />
-          </Field>
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-brand-muted">Description</span>
+            <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
+            {errors.description ? (
+              <span className="text-xs text-red-700">{errors.description}</span>
+            ) : (
+              <span className="text-xs text-brand-muted">The product name is the page&apos;s main title, so start sections with Heading.</span>
+            )}
+          </div>
           <Field label="Price (BDT)" error={errors.priceBdt}>
             <TextInput type="number" min={0} value={form.priceBdt} onChange={(e) => set("priceBdt", Number(e.target.value))} />
           </Field>
@@ -272,7 +285,26 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
         </div>
       </Card>
 
-      <SizeChartEditor form={form} onChange={(sizeChart) => set("sizeChart", sizeChart)} />
+      <SizeGuidePicker
+        guides={sizeGuides}
+        guidesAvailable={guidesAvailable}
+        sizes={form.sizes}
+        guideId={form.sizeGuideId}
+        chart={form.sizeChart}
+        onGuideChange={(sizeGuideId) => set("sizeGuideId", sizeGuideId)}
+        onChartChange={(sizeChart) => set("sizeChart", sizeChart)}
+      />
+
+      <SeoCard
+        name={form.name}
+        slug={form.slug}
+        tagline={form.tagline}
+        description={form.description}
+        seoTitle={form.seoTitle}
+        seoDescription={form.seoDescription}
+        errors={errors}
+        onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+      />
 
       <div className="sticky bottom-0 -mx-6 flex items-center justify-between gap-4 border-t border-brand-border bg-brand-bone/95 px-6 py-4 backdrop-blur">
         <div>{id && <Button type="button" variant="danger" onClick={remove} disabled={pending}>Delete product</Button>}</div>
@@ -281,90 +313,6 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
         </Button>
       </div>
     </div>
-  )
-}
-
-function SizeChartEditor({ form, onChange }: { form: ProductInput; onChange: (chart: ProductInput["sizeChart"]) => void }) {
-  const chart = form.sizeChart
-  const valueFor = (size: string, col: number) => chart.rows.find((r) => r.size === size)?.values[col] ?? ""
-
-  const setValue = (size: string, col: number, value: string) => {
-    const rows = form.sizes.map((s) => {
-      const existing = chart.rows.find((r) => r.size === s)
-      const values = chart.columns.map((_, i) => existing?.values[i] ?? "")
-      if (s === size) values[col] = value
-      return { size: s, values }
-    })
-    onChange({ ...chart, rows })
-  }
-
-  const setColumns = (columns: string[]) => {
-    onChange({
-      ...chart,
-      columns,
-      rows: form.sizes.map((s) => ({ size: s, values: columns.map((_, i) => chart.rows.find((r) => r.size === s)?.values[i] ?? "") })),
-    })
-  }
-
-  return (
-    <Card
-      title="Size chart"
-      actions={
-        <div className="flex gap-2">
-          {chart.columns.length === 0 && (
-            <Button type="button" variant="secondary" onClick={() => setColumns(["Chest", "Length", "Sleeve"])}>
-              Start with chest, length, sleeve
-            </Button>
-          )}
-          <Button type="button" variant="secondary" onClick={() => setColumns([...chart.columns, `Measure ${chart.columns.length + 1}`])}>
-            Add column
-          </Button>
-        </div>
-      }
-    >
-      {chart.columns.length === 0 ? (
-        <p className="text-sm text-brand-muted">Optional. Without a chart, the size guide button is hidden on the site.</p>
-      ) : (
-        <div className="space-y-3 overflow-x-auto">
-          <table className="text-sm">
-            <thead>
-              <tr>
-                <th className="pr-3 text-left text-xs uppercase text-brand-muted">Size</th>
-                {chart.columns.map((col, i) => (
-                  <th key={i} className="pr-3">
-                    <div className="flex items-center gap-1">
-                      <TextInput
-                        value={col}
-                        onChange={(e) => setColumns(chart.columns.map((c, j) => (j === i ? e.target.value : c)))}
-                        className="w-28"
-                      />
-                      <button type="button" className="text-xs text-red-700" onClick={() => setColumns(chart.columns.filter((_, j) => j !== i))} aria-label={`Remove ${col}`}>
-                        x
-                      </button>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {form.sizes.map((size) => (
-                <tr key={size}>
-                  <td className="pr-3 font-bold">{size}</td>
-                  {chart.columns.map((_, col) => (
-                    <td key={col} className="pr-3 pt-2">
-                      <TextInput value={valueFor(size, col)} onChange={(e) => setValue(size, col, e.target.value)} className="w-28" />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Field label="Unit" className="max-w-[200px]">
-            <TextInput value={chart.unit ?? ""} onChange={(e) => onChange({ ...chart, unit: e.target.value })} placeholder="inches" />
-          </Field>
-        </div>
-      )}
-    </Card>
   )
 }
 

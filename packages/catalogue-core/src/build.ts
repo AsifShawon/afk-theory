@@ -9,7 +9,9 @@ import type {
   RawCatalogue,
   SiteSettings,
   SiteSettingsRow,
+  SizeChart,
 } from "./types"
+import { descriptionToHtml, descriptionToText } from "./rich-text"
 
 /** Turns one stored width of an image into a URL the site can load. */
 export type ImageSrcResolver = (image: ProductImageRow, width: number) => string
@@ -53,6 +55,7 @@ export function buildCatalogue(
     .sort(bySortOrder)
     .map((c) => ({ id: c.id, slug: c.slug, name: c.name }))
   const categoryById = new Map(categories.map((c) => [c.id, c]))
+  const guideById = new Map((raw.sizeGuides ?? []).map((g) => [g.id, g]))
   const skipped: string[] = []
 
   const products: CatalogueProduct[] = []
@@ -86,6 +89,11 @@ export function buildCatalogue(
       continue
     }
 
+    const guide = row.size_guide_id ? guideById.get(row.size_guide_id) : undefined
+    const sizeChart: SizeChart = guide
+      ? { columns: guide.columns, rows: guide.rows, unit: guide.unit || undefined, note: guide.note || undefined }
+      : row.size_chart ?? { columns: [], rows: [] }
+
     const sizes = row.sizes ?? []
     const soldOutSizes = (row.sold_out_sizes ?? []).filter((s) => sizes.includes(s))
     const anyColorInStock = colors.length === 0 || colors.some((c) => c.inStock)
@@ -96,7 +104,10 @@ export function buildCatalogue(
       slug: row.slug,
       name: row.name,
       tagline: row.tagline,
-      description: row.description,
+      description: descriptionToText(row.description),
+      descriptionHtml: descriptionToHtml(row.description),
+      seoTitle: (row.seo_title ?? "").trim(),
+      seoDescription: (row.seo_description ?? "").trim(),
       priceBdt: row.price_bdt,
       compareAtBdt: row.compare_at_bdt,
       category: row.category_id ? categoryById.get(row.category_id) ?? null : null,
@@ -104,7 +115,7 @@ export function buildCatalogue(
       sizes,
       soldOutSizes,
       details: row.details ?? {},
-      sizeChart: row.size_chart ?? { columns: [], rows: [] },
+      sizeChart,
       colors,
       images,
       soldOut: !anyColorInStock || !anySizeInStock,

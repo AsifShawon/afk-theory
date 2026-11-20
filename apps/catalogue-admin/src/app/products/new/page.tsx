@@ -2,13 +2,16 @@ import Link from "next/link"
 import { DEFAULT_SIZES, type ProductInput } from "@dtc/catalogue-core"
 import { DbError } from "@/components/db-error"
 import { ProductForm } from "@/components/product-form"
-import { loadCategories } from "@/lib/data"
+import { loadCategories, loadSizeGuides } from "@/lib/data"
 
 const EMPTY: ProductInput = {
   name: "",
   slug: "",
   tagline: "",
   description: "",
+  seoTitle: "",
+  seoDescription: "",
+  sizeGuideId: null,
   priceBdt: 0,
   compareAtBdt: null,
   categoryId: null,
@@ -22,8 +25,9 @@ const EMPTY: ProductInput = {
 
 export default async function NewProductPage() {
   let categories
+  let sizeGuides
   try {
-    categories = await loadCategories()
+    ;[categories, sizeGuides] = await Promise.all([loadCategories(), loadSizeGuides()])
   } catch (err) {
     return <DbError error={err} />
   }
@@ -41,6 +45,8 @@ export default async function NewProductPage() {
         initialColors={[{ name: "Graphite Black", hex: "#20241F", inStock: true }]}
         categories={categories}
         imageCount={0}
+        sizeGuides={sizeGuides.guides}
+        guidesAvailable={!sizeGuides.migrationMissing}
       />
     </div>
   )

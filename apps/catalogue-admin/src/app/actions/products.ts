@@ -28,7 +28,11 @@ function toRow(input: ProductInput) {
     sizes: input.sizes,
     sold_out_sizes: input.soldOutSizes.filter((s) => input.sizes.includes(s)),
     details: Object.fromEntries(Object.entries(input.details).filter(([, v]) => v && v.trim())),
-    size_chart: input.sizeChart,
+    // A shared guide replaces the product's own chart, so clear it to avoid stale data.
+    size_chart: input.sizeGuideId ? { columns: [], rows: [] } : input.sizeChart,
+    size_guide_id: input.sizeGuideId,
+    seo_title: input.seoTitle,
+    seo_description: input.seoDescription,
   }
 }
 
@@ -108,6 +112,9 @@ async function syncColors(productId: string, colors: ColorInput[]) {
 function friendlyDbError(message: string): string {
   if (message.includes("products_slug_key")) {
     return "Another product already uses this slug"
+  }
+  if (/size_guide_id|seo_title|seo_description/.test(message)) {
+    return "The database needs one more step for size guides and SEO. In Supabase open the SQL editor and run apps/catalogue-admin/supabase/migrations/20261121000000_size_guides_seo.sql, then save again."
   }
   return message
 }

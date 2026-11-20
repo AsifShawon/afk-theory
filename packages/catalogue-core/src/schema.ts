@@ -2,7 +2,7 @@ import { z } from "zod"
 import { IMAGE_ROLES, PRODUCT_STATUSES } from "./types"
 import { SLUG_PATTERN } from "./format"
 
-const shortText = (max: number) => z.string().trim().max(max)
+const shortText = (max: number, message?: string) => z.string().trim().max(max, message)
 
 export const productDetailsSchema = z.object({
   fabric: shortText(200).optional(),
@@ -23,7 +23,26 @@ export const sizeChartSchema = z.object({
     )
     .max(12),
   unit: shortText(20).optional(),
+  note: shortText(200).optional(),
 })
+
+export const sizeGuideInputSchema = z.object({
+  name: shortText(60).min(1, "Give the guide a name, e.g. Oversized tee"),
+  unit: shortText(20),
+  columns: z.array(shortText(40).min(1, "Column names cannot be empty")).min(1, "Add at least one measurement").max(8),
+  rows: z
+    .array(
+      z.object({
+        size: shortText(12).min(1, "Every row needs a size"),
+        values: z.array(shortText(20)).max(8),
+      })
+    )
+    .min(1, "Add at least one size")
+    .max(12),
+  note: shortText(200),
+})
+
+export type SizeGuideInput = z.infer<typeof sizeGuideInputSchema>
 
 export const productInputSchema = z
   .object({
@@ -35,7 +54,11 @@ export const productInputSchema = z
       .max(80)
       .regex(SLUG_PATTERN, "Use lowercase letters, numbers and dashes"),
     tagline: shortText(160),
-    description: shortText(4000),
+    // Formatted HTML from the editor. Sanitized again when the site is built.
+    description: shortText(20000),
+    seoTitle: shortText(70, "Keep the search title under 70 characters"),
+    seoDescription: shortText(200, "Keep the search description under 200 characters"),
+    sizeGuideId: z.string().uuid().nullable(),
     priceBdt: z.coerce.number().int().min(0).max(1_000_000),
     compareAtBdt: z.coerce.number().int().min(0).max(1_000_000).nullable(),
     categoryId: z.string().uuid().nullable(),

@@ -40,7 +40,10 @@ export function SizeGuide({ chart, open, onClose }: { chart: SizeChart; open: bo
             <CloseIcon />
           </button>
         </div>
-        <p className="mt-2 text-sm text-brand-olive">Measured flat across the garment{chart.unit ? `, in ${chart.unit}` : ""}. Oversized fits run roomy by design.</p>
+        <p className="mt-2 text-sm text-brand-olive">
+          {chart.note || "Measured flat across the garment."}
+          {chart.unit ? ` All measurements in ${chart.unit}.` : ""}
+        </p>
         <div className="mt-6 overflow-x-auto" data-lenis-prevent>
           <table className="w-full text-left text-sm">
             <thead>

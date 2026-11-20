@@ -4,7 +4,8 @@ import { DbError } from "@/components/db-error"
 import { ImageManager } from "@/components/image-manager"
 import { ProductForm } from "@/components/product-form"
 import { Badge } from "@/components/ui"
-import { loadCategories, loadProduct } from "@/lib/data"
+import { descriptionToHtml } from "@dtc/catalogue-core"
+import { loadCategories, loadProduct, loadSizeGuides } from "@/lib/data"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -14,8 +15,9 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   let data
   let categories
+  let sizeGuides
   try {
-    ;[data, categories] = await Promise.all([loadProduct(id), loadCategories()])
+    ;[data, categories, sizeGuides] = await Promise.all([loadProduct(id), loadCategories(), loadSizeGuides()])
   } catch (err) {
     return <DbError error={err} />
   }
@@ -40,11 +42,17 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         id={product.id}
         imageCount={images.length}
         categories={categories}
+        sizeGuides={sizeGuides.guides}
+        guidesAvailable={!sizeGuides.migrationMissing}
         initial={{
           name: product.name,
           slug: product.slug,
           tagline: product.tagline,
-          description: product.description,
+          // Older plain-text descriptions open in the editor as paragraphs.
+          description: descriptionToHtml(product.description),
+          seoTitle: product.seo_title ?? "",
+          seoDescription: product.seo_description ?? "",
+          sizeGuideId: product.size_guide_id ?? null,
           priceBdt: product.price_bdt,
           compareAtBdt: product.compare_at_bdt,
           categoryId: product.category_id,

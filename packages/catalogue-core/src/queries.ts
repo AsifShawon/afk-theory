@@ -6,6 +6,7 @@ import type {
   ProductRow,
   RawCatalogue,
   SiteSettingsRow,
+  SizeGuideRow,
 } from "./types"
 
 export const TABLES = {
@@ -14,6 +15,7 @@ export const TABLES = {
   colors: "product_colors",
   images: "product_images",
   settings: "site_settings",
+  sizeGuides: "size_guides",
 } as const
 
 function unwrap<T>(result: { data: T | null; error: { message: string } | null }, what: string): T {
@@ -37,12 +39,13 @@ export async function fetchRawCatalogue(
     productQuery = productQuery.eq("status", "published")
   }
 
-  const [categories, products, colors, images, settings] = await Promise.all([
+  const [categories, products, colors, images, settings, sizeGuides] = await Promise.all([
     client.from(TABLES.categories).select("*"),
     productQuery,
     client.from(TABLES.colors).select("*"),
     client.from(TABLES.images).select("*"),
     client.from(TABLES.settings).select("*").eq("id", 1).maybeSingle(),
+    client.from(TABLES.sizeGuides).select("*").order("sort_order"),
   ])
 
   const productRows = unwrap<ProductRow[]>(products, "products")
@@ -57,6 +60,26 @@ export async function fetchRawCatalogue(
     images: unwrap<ProductImageRow[]>(images, "product images").filter((i) =>
       productIds.has(i.product_id)
     ),
+    sizeGuides: sizeGuideRows(sizeGuides),
     settings: unwrap<SiteSettingsRow | null>(settings, "site settings"),
   }
+}
+
+/**
+ * Size guides arrived in a later migration. Until it is run, products fall
+ * back to their own charts instead of the whole catalogue failing to load.
+ */
+function sizeGuideRows(result: { data: unknown; error: { message: string; code?: string } | null }): SizeGuideRow[] {
+  if (result.error) {
+    if (isMissingTable(result.error)) {
+      console.warn("[catalogue] size_guides table not found. Run migration 20261121000000_size_guides_seo.sql.")
+      return []
+    }
+    throw new Error(`Could not load size guides: ${result.error.message}`)
+  }
+  return (result.data as SizeGuideRow[]) ?? []
+}
+
+export function isMissingTable(error: { message: string; code?: string }): boolean {
+  return error.code === "42P01" || error.code === "PGRST205" || /does not exist|Could not find the table/i.test(error.message)
 }

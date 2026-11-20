@@ -192,6 +192,7 @@ export function seedToRawCatalogue(): RawCatalogue {
     products,
     colors,
     images,
+    sizeGuides: [],
     settings: {
       id: 1,
       whatsapp_number: SEED_SETTINGS.whatsappNumber,
