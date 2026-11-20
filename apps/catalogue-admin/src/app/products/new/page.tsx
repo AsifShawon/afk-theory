@@ -2,7 +2,7 @@ import Link from "next/link"
 import { DEFAULT_SIZES, type ProductInput } from "@dtc/catalogue-core"
 import { DbError } from "@/components/db-error"
 import { ProductForm } from "@/components/product-form"
-import { loadCategories, loadSizeGuides } from "@/lib/data"
+import { loadCategories, loadSizeGuides, loadColorPresets } from "@/lib/data"
 
 const EMPTY: ProductInput = {
   name: "",
@@ -26,8 +26,9 @@ const EMPTY: ProductInput = {
 export default async function NewProductPage() {
   let categories
   let sizeGuides
+  let colorPresets
   try {
-    ;[categories, sizeGuides] = await Promise.all([loadCategories(), loadSizeGuides()])
+    ;[categories, sizeGuides, colorPresets] = await Promise.all([loadCategories(), loadSizeGuides(), loadColorPresets()])
   } catch (err) {
     return <DbError error={err} />
   }
@@ -47,6 +48,7 @@ export default async function NewProductPage() {
         imageCount={0}
         sizeGuides={sizeGuides.guides}
         guidesAvailable={!sizeGuides.migrationMissing}
+        colorPresets={colorPresets}
       />
     </div>
   )

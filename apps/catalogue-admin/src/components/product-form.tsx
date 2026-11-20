@@ -13,6 +13,8 @@ import {
   type SizeGuideRow,
 } from "@dtc/catalogue-core"
 import { deleteProduct, saveProduct } from "@/app/actions/products"
+import type { ColorPreset } from "@/lib/data"
+import { ColorsCard } from "./colors-card"
 import { RichTextEditor } from "./rich-text-editor"
 import { SeoCard } from "./seo-card"
 import { SizeGuidePicker } from "./size-guide-picker"
@@ -37,16 +39,18 @@ export interface ProductFormProps {
   sizeGuides: SizeGuideRow[]
   /** False until the size guides migration has been run. */
   guidesAvailable: boolean
+  /** Colors already used on other products, for quick add. */
+  colorPresets: ColorPreset[]
 }
 
-export function ProductForm({ id, initial, initialColors, categories, imageCount, sizeGuides, guidesAvailable }: ProductFormProps) {
+export function ProductForm({ id, initial, initialColors, categories, imageCount, sizeGuides, guidesAvailable, colorPresets }: ProductFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ProductInput>(initial)
   const [colors, setColors] = useState<ColorInput[]>(initialColors)
   const [slugTouched, setSlugTouched] = useState(Boolean(id))
   const [customSize, setCustomSize] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [notice, setNotice] = useState<{ tone: "error" | "success"; text: string } | null>(null)
+  const [notice, setNotice] = useState<{ tone: "error" | "success"; text: string; lines?: string[] } | null>(null)
   const [pending, startTransition] = useTransition()
 
   const set = <K extends keyof ProductInput>(key: K, value: ProductInput[K]) => setForm((f) => ({ ...f, [key]: value }))
@@ -63,23 +67,28 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
   const submit = () => {
     setNotice(null)
     setErrors({})
-    if (form.status === "published" && imageCount === 0) {
-      setNotice({ tone: "error", text: "Add at least one image before publishing. Save as draft first, then upload images." })
+    // Photos can only be added once the product exists, so a new product is
+    // always created as a draft. Its page then asks for photos.
+    const publishLater = !id && form.status === "published"
+    if (id && form.status === "published" && imageCount === 0) {
+      setNotice({ tone: "error", text: "Add at least one photo before publishing, or set Status to Draft to save without photos." })
       return
     }
     startTransition(async () => {
-      const result = await saveProduct(id, form, colors)
+      const result = await saveProduct(id, publishLater ? { ...form, status: "draft" } : form, colors)
       if (!result.ok) {
-        setErrors(result.fieldErrors ?? {})
-        setNotice({ tone: "error", text: result.error })
+        const fieldErrors = result.fieldErrors ?? {}
+        setErrors(fieldErrors)
+        const lines = describeErrors(fieldErrors)
+        setNotice({ tone: "error", text: lines.length ? "Not saved. Fix these first:" : result.error, lines })
         return
       }
-      setNotice({ tone: "success", text: id ? "Saved. Publish when you are ready to update the site." : "Product created. Now add images." })
       if (!id) {
-        router.push(`/products/${result.data.id}`)
-      } else {
-        router.refresh()
+        router.push(`/products/${result.data.id}?created=${publishLater ? "publish" : "draft"}`)
+        return
       }
+      setNotice({ tone: "success", text: "Saved. Press Publish at the top when you are ready to update the site." })
+      router.refresh()
     })
   }
 
@@ -97,7 +106,6 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
 
   return (
     <div className="space-y-6">
-      {notice && <Notice tone={notice.tone}>{notice.text}</Notice>}
 
       <Card title="Basics">
         <div className="grid gap-5 md:grid-cols-2">
@@ -218,62 +226,7 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
         )}
       </Card>
 
-      <Card
-        title="Colors"
-        actions={
-          <Button type="button" variant="secondary" onClick={() => setColors([...colors, { name: "", hex: "#20241F", inStock: true }])}>
-            Add color
-          </Button>
-        }
-      >
-        {colors.length === 0 && <p className="text-sm text-brand-muted">No colors. Add one so customers can choose it, or leave empty for a single-color product.</p>}
-        <div className="space-y-3">
-          {colors.map((color, index) => (
-            <div key={color.id ?? `new-${index}`} className="flex flex-wrap items-center gap-3">
-              <input
-                type="color"
-                value={color.hex}
-                onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, hex: e.target.value.toUpperCase() } : c)))}
-                className="h-10 w-12 cursor-pointer rounded-base border border-brand-border bg-white"
-                aria-label="Color swatch"
-              />
-              <TextInput
-                value={color.name}
-                onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, name: e.target.value } : c)))}
-                placeholder="Graphite Black"
-                className="max-w-xs"
-              />
-              <TextInput
-                value={color.hex}
-                onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, hex: e.target.value } : c)))}
-                className="w-28 font-mono"
-              />
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={color.inStock}
-                  onChange={(e) => setColors(colors.map((c, i) => (i === index ? { ...c, inStock: e.target.checked } : c)))}
-                  className="h-4 w-4 accent-brand-graphite"
-                />
-                In stock
-              </label>
-              <Button type="button" variant="ghost" disabled={index === 0} onClick={() => setColors(swap(colors, index, index - 1))} aria-label="Move up">
-                Up
-              </Button>
-              <Button type="button" variant="ghost" onClick={() => setColors(colors.filter((_, i) => i !== index))}>
-                Remove
-              </Button>
-            </div>
-          ))}
-        </div>
-        {Object.entries(errors)
-          .filter(([key]) => /^\d+\./.test(key))
-          .map(([key, message]) => (
-            <p key={key} className="mt-2 text-xs text-red-700">
-              Color {Number(key.split(".")[0]) + 1}: {message}
-            </p>
-          ))}
-      </Card>
+      <ColorsCard colors={colors} presets={colorPresets} errors={errors} onChange={setColors} />
 
       <Card title="Details">
         <div className="grid gap-5 md:grid-cols-2">
@@ -306,14 +259,68 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
         onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
       />
 
-      <div className="sticky bottom-0 -mx-6 flex items-center justify-between gap-4 border-t border-brand-border bg-brand-bone/95 px-6 py-4 backdrop-blur">
-        <div>{id && <Button type="button" variant="danger" onClick={remove} disabled={pending}>Delete product</Button>}</div>
-        <Button type="button" onClick={submit} disabled={pending}>
-          {pending ? "Saving" : id ? "Save changes" : "Create product"}
-        </Button>
+      <div className="sticky bottom-0 -mx-6 space-y-3 border-t border-brand-border bg-brand-bone/95 px-6 py-4 backdrop-blur">
+        {/* Messages sit next to the button, where the click happened. */}
+        {notice && (
+          <Notice tone={notice.tone}>
+            <p className="font-semibold">{notice.text}</p>
+            {notice.lines && notice.lines.length > 0 && (
+              <ul className="mt-1 list-disc pl-5">
+                {notice.lines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            )}
+          </Notice>
+        )}
+        <div className="flex items-center justify-between gap-4">
+          <div>{id && <Button type="button" variant="danger" onClick={remove} disabled={pending}>Delete product</Button>}</div>
+          <div className="flex items-center gap-3">
+            {!id && form.status === "published" && (
+              <span className="text-xs text-brand-muted">Saved as a draft first so you can add photos.</span>
+            )}
+            <Button type="button" onClick={submit} disabled={pending}>
+              {pending ? "Saving" : id ? "Save changes" : "Create product"}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  slug: "URL slug",
+  tagline: "Tagline",
+  description: "Description",
+  seoTitle: "Search title",
+  seoDescription: "Search description",
+  sizeGuideId: "Size guide",
+  priceBdt: "Price",
+  compareAtBdt: "Compare-at price",
+  categoryId: "Category",
+  status: "Status",
+  sizes: "Sizes",
+  soldOutSizes: "Sold out sizes",
+}
+
+/** Turns validation keys such as "sizeChart.columns.2" or "0.name" into readable lines. */
+function describeErrors(fieldErrors: Record<string, string>): string[] {
+  return Object.entries(fieldErrors).map(([key, raw]) => {
+    const message = /at least 1 character/i.test(raw) ? "cannot be empty" : raw
+    const [head, ...rest] = key.split(".")
+    if (/^\d+$/.test(head)) return `Color ${Number(head) + 1}: ${message}`
+    if (head === "sizeChart") {
+      const part = rest[0] === "columns" ? `measurement ${Number(rest[1]) + 1} name` : rest[0] === "rows" ? "a measurement value" : rest[0] ?? ""
+      return `Size chart, ${part}: ${message}`
+    }
+    if (head === "details") {
+      const label = DETAIL_FIELDS.find((f) => f.key === rest[0])?.label ?? rest[0]
+      return `${label}: ${message}`
+    }
+    return `${FIELD_LABELS[head] ?? head}: ${message}`
+  })
 }
 
 const SIZE_RANK = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"]
@@ -326,8 +333,3 @@ function orderSizes(sizes: string[]): string[] {
   return [...sizes].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, undefined, { numeric: true }))
 }
 
-function swap<T>(list: T[], a: number, b: number): T[] {
-  const next = [...list]
-  ;[next[a], next[b]] = [next[b], next[a]]
-  return next
-}

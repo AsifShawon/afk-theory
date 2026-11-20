@@ -111,6 +111,36 @@ export async function loadSizeGuides(): Promise<SizeGuidesState> {
   return { guides: guides.data as SizeGuideRow[], usage, migrationMissing: false }
 }
 
+export interface ColorPreset {
+  name: string
+  hex: string
+  /** How many products use this color, for ordering. */
+  uses: number
+}
+
+/**
+ * Every color already saved on any product, one entry per name (the most
+ * used hex wins), most used first. Powers quick-add on the product form.
+ */
+export async function loadColorPresets(): Promise<ColorPreset[]> {
+  const { client } = getAdmin()
+  const rows = check(await client.from(TABLES.colors).select("name, hex")) as { name: string; hex: string }[]
+  const byName = new Map<string, { name: string; hexes: Map<string, number>; uses: number }>()
+  for (const row of rows) {
+    const name = row.name.trim()
+    if (!name) continue
+    const key = name.toLowerCase()
+    const entry = byName.get(key) ?? { name, hexes: new Map(), uses: 0 }
+    const hex = row.hex.toUpperCase()
+    entry.hexes.set(hex, (entry.hexes.get(hex) ?? 0) + 1)
+    entry.uses++
+    byName.set(key, entry)
+  }
+  return [...byName.values()]
+    .map((e) => ({ name: e.name, uses: e.uses, hex: [...e.hexes.entries()].sort((a, b) => b[1] - a[1])[0][0] }))
+    .sort((a, b) => b.uses - a.uses || a.name.localeCompare(b.name))
+}
+
 export async function loadCategories(): Promise<CategoryRow[]> {
   const { client } = getAdmin()
   return check(await client.from(TABLES.categories).select("*").order("sort_order")) as CategoryRow[]
