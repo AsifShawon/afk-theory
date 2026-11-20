@@ -125,6 +125,58 @@
   }
 }
 
+@layer components {
+  /* Product descriptions written in the admin's editor. */
+  .rich-text {
+    @apply leading-relaxed text-brand-bone/75;
+  }
+  .rich-text > * + * {
+    @apply mt-4;
+  }
+  .rich-text h2 {
+    @apply mt-8 text-2xl text-brand-bone;
+    font-family: var(--font-chakra-petch), system-ui, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .rich-text h3 {
+    @apply mt-6 text-base font-bold text-brand-bone;
+  }
+  .rich-text strong {
+    @apply font-bold text-brand-bone;
+  }
+  .rich-text ul {
+    @apply list-none pl-0;
+  }
+  .rich-text ul > li {
+    @apply relative pl-5;
+  }
+  .rich-text ul > li::before {
+    content: "";
+    @apply absolute left-0 top-[0.7em] h-1.5 w-1.5 bg-brand-accent;
+  }
+  .rich-text ol {
+    @apply list-decimal pl-5 marker:text-brand-accent;
+  }
+  .rich-text li + li {
+    @apply mt-1.5;
+  }
+  .rich-text li > p {
+    @apply m-0;
+  }
+  .rich-text blockquote {
+    @apply border-l-2 border-brand-accent pl-4 text-lg italic text-brand-bone;
+  }
+  .rich-text a {
+    @apply text-brand-accent underline underline-offset-4 hover:text-brand-bone;
+  }
+  .rich-text hr {
+    @apply my-8 border-white/10;
+  }
+}
+
 @layer utilities {
   .marquee-track {
     animation: marquee 28s linear infinite;

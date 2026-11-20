@@ -14,6 +14,9 @@
   "dependencies": {
     "@dtc/catalogue-core": "workspace:*",
     "@supabase/supabase-js": "^2.49.0",
+    "@tiptap/pm": "^3.35.0",
+    "@tiptap/react": "^3.35.0",
+    "@tiptap/starter-kit": "^3.35.0",
     "clsx": "^2.1.1",
     "next": "15.5.21",
     "react": "19.0.5",

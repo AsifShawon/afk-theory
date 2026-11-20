@@ -224,10 +224,9 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
             )}
           </div>
 
-          {product.description && (
-            <p data-pdp className="mt-10 whitespace-pre-line leading-relaxed text-brand-bone/75">
-              {product.description}
-            </p>
+          {product.descriptionHtml && (
+            // Sanitized at build time by descriptionToHtml in @dtc/catalogue-core.
+            <div data-pdp className="rich-text mt-10" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
           )}
 
           {details.length > 0 && (

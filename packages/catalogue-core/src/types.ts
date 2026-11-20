@@ -27,6 +27,8 @@ export interface SizeChart {
   rows: { size: string; values: string[] }[]
   /** Unit shown under the table, for example "inches". */
   unit?: string
+  /** Shown under the table, for example "Measured flat across the chest". */
+  note?: string
 }
 
 export interface DeliveryZone {
@@ -65,9 +67,24 @@ export interface ProductRow {
   sizes: string[]
   sold_out_sizes: string[]
   details: ProductDetails
+  /** Used when no shared size guide is linked. */
   size_chart: SizeChart
+  /** Shared size guide. Columns arrive with migration 20261121000000. */
+  size_guide_id?: string | null
+  seo_title?: string
+  seo_description?: string
   created_at: string
   updated_at: string
+}
+
+export interface SizeGuideRow {
+  id: string
+  name: string
+  unit: string
+  columns: string[]
+  rows: { size: string; values: string[] }[]
+  note: string
+  sort_order: number
 }
 
 export interface ProductColorRow {
@@ -113,6 +130,7 @@ export interface RawCatalogue {
   products: ProductRow[]
   colors: ProductColorRow[]
   images: ProductImageRow[]
+  sizeGuides: SizeGuideRow[]
   settings: SiteSettingsRow | null
 }
 
@@ -152,7 +170,13 @@ export interface CatalogueProduct {
   slug: string
   name: string
   tagline: string
+  /** Plain text of the description, for meta tags and structured data. */
   description: string
+  /** Sanitized HTML of the description, safe to render. */
+  descriptionHtml: string
+  /** Search result title and description. Fall back to name and tagline when empty. */
+  seoTitle: string
+  seoDescription: string
   priceBdt: number
   compareAtBdt: number | null
   category: CatalogueCategory | null
@@ -160,6 +184,7 @@ export interface CatalogueProduct {
   sizes: string[]
   soldOutSizes: string[]
   details: ProductDetails
+  /** The linked shared size guide, or the product's own chart. */
   sizeChart: SizeChart
   colors: CatalogueColor[]
   images: CatalogueImage[]

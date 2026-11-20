@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { SEO_LIMITS, truncateText } from "@dtc/catalogue-core"
 import { notFound } from "next/navigation"
 import { ProductCard } from "@/components/product/product-card"
 import { ProductView } from "@/components/product/product-view"
@@ -17,18 +18,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!product) return {}
   const image = product.images[0]
   const largest = image.sources[image.sources.length - 1]
-  const description = product.tagline || product.description.slice(0, 160) || `${product.name} by AFK THEORY.`
+  // Search title and description from the admin win; otherwise name and tagline.
+  const fullTitle = product.seoTitle || `${product.name} | AFK THEORY`
+  const description =
+    product.seoDescription || product.tagline || truncateText(product.description, SEO_LIMITS.description) || `${product.name} by AFK THEORY.`
   return {
-    title: product.name,
+    title: product.seoTitle ? { absolute: product.seoTitle } : product.name,
     description,
     alternates: { canonical: `/products/${product.slug}/` },
     openGraph: {
-      title: `${product.name} | AFK THEORY`,
+      title: fullTitle,
       description,
       url: `/products/${product.slug}/`,
       images: [{ url: absoluteUrl(largest.src), width: largest.width, height: Math.round((largest.width * image.height) / image.width), alt: image.alt }],
     },
-    twitter: { card: "summary_large_image", title: product.name, description, images: [absoluteUrl(largest.src)] },
+    twitter: { card: "summary_large_image", title: fullTitle, description, images: [absoluteUrl(largest.src)] },
   }
 }
 

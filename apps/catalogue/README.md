@@ -24,7 +24,9 @@ Why it is built this way:
 ## 1. Create the Supabase project (once)
 
 1. Sign up at supabase.com and create a new project (free plan). Pick the Singapore or Mumbai region, closest to Bangladesh.
-2. Open **SQL Editor**, paste the whole file `apps/catalogue-admin/supabase/migrations/20261120000000_catalogue.sql`, and click **Run**. It creates the tables, the security rules and the `catalogue` storage bucket. Running it twice is safe.
+2. Open **SQL Editor** and run each file in `apps/catalogue-admin/supabase/migrations/`, oldest first: paste the whole file and click **Run**. Running a file twice is safe.
+   - `20261120000000_catalogue.sql` creates the tables, the security rules and the `catalogue` storage bucket.
+   - `20261121000000_size_guides_seo.sql` adds shared size guides and the search title and description fields. Until it runs, the admin shows a reminder and the site falls back to each product's own chart.
 3. Open **Project Settings > API Keys** and note three values:
    - the **Project URL** (`https://xxxx.supabase.co`)
    - the **publishable** key (or the legacy **anon** key)
@@ -63,6 +65,9 @@ Then manage products:
 - **New product**: fill in the basics and create it as a draft, then upload photos on the next screen. Photos are converted to webp at 640, 1080 and 1600 px wide. A 4:5 portrait crop looks best.
 - Set each photo's **role** (front, back, on model, detail) and **color**. The first photo is the product card; an "on model" photo makes the card swap on hover; picking a color on the site shows only that color's photos.
 - Switch the product to **Published** when it is ready. Drag rows on the product list to change the order on the site. **Featured** products lead the home page.
+- **Description**: use the toolbar for headings, bold, italic, quotes, lists and links. The product name is already the page's main title (H1), so sections inside the description start at **H2** (Heading) and **H3** (Subheading). Anything pasted from elsewhere is cleaned up when the site is built.
+- **Size guides**: write each measurement chart once in **Settings > Size guides** (for example "Oversized tee"), then pick it under **Size guide** on every product that uses it. Changing a guide updates all of those products at the next Publish. Choose **Custom chart for this product only** for a one-off.
+- **Search and sharing**: the search title (about 60 characters) and search description (about 160) control how the product appears in Google and in WhatsApp or Facebook link previews. Leave them empty to use the name and tagline. The preview shows what people will see.
 
 **Before launch, replace the starter values:** the starter price of ৳1,450 comes from the old draft fixture. Size charts and fabric weight (GSM) are empty until you add them.
 
