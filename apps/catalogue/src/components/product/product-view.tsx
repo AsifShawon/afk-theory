@@ -1,0 +1,271 @@
+"use client"
+
+import { Link } from "next-view-transitions"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { clsx } from "clsx"
+import { formatBdt, type CatalogueProduct, type SiteSettings } from "@dtc/catalogue-core"
+import { QuantityStepper } from "@/components/order/order-drawer"
+import { useOrder } from "@/components/order/order-provider"
+import { useSendOrder } from "@/components/order/use-send-order"
+import { MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
+import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap"
+import type { OrderLine } from "@/lib/order-message"
+import { ProductGallery } from "./product-gallery"
+import { SizeGuide } from "./size-guide"
+
+const DETAIL_LABEL: Record<string, string> = {
+  fabric: "Fabric",
+  gsm: "Weight",
+  fit: "Fit",
+  origin: "Origin",
+  care: "Care",
+}
+
+export function ProductView({ product, settings }: { product: CatalogueProduct; settings: SiteSettings }) {
+  const root = useRef<HTMLDivElement>(null)
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const sizesRef = useRef<HTMLFieldSetElement>(null)
+  const { add, setDrawerOpen, showToast } = useOrder()
+  const { send, channels, hasChannel } = useSendOrder(settings)
+
+  const firstAvailable = product.colors.find((c) => c.inStock) ?? product.colors[0] ?? null
+  const [colorId, setColorId] = useState<string | null>(firstAvailable?.id ?? null)
+  const [size, setSize] = useState<string | null>(product.sizes.length === 1 && !product.soldOutSizes.includes(product.sizes[0]) ? product.sizes[0] : null)
+  const [quantity, setQuantity] = useState(1)
+  const [needSize, setNeedSize] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
+  const [actionsVisible, setActionsVisible] = useState(true)
+
+  const color = product.colors.find((c) => c.id === colorId) ?? null
+  const colorAvailable = !color || color.inStock
+  const needsSize = product.sizes.length > 0
+  const canOrder = !product.soldOut && colorAvailable
+
+  const images = useMemo(() => {
+    const forColor = product.images.filter((img) => !img.colorId || img.colorId === colorId)
+    return forColor.length > 0 ? forColor : product.images
+  }, [product.images, colorId])
+
+  const details = Object.entries(product.details).filter(([key, value]) => DETAIL_LABEL[key] && value)
+  const hasChart = product.sizeChart.columns.length > 0 && product.sizeChart.rows.length > 0
+
+  useEffect(() => {
+    const el = actionsRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => setActionsVisible(entry.isIntersecting))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add(MOTION_OK, () => {
+        gsap.from("[data-pdp]", { y: 40, opacity: 0, duration: 1, stagger: 0.06, ease: "expo.out", delay: 0.15 })
+      })
+      return () => mm.revert()
+    },
+    { scope: root }
+  )
+
+  /** Returns the order line, or null after asking for a size. */
+  const currentLine = (): OrderLine | null => {
+    if (needsSize && !size) {
+      setNeedSize(true)
+      sizesRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      return null
+    }
+    return {
+      slug: product.slug,
+      productName: product.name,
+      colorName: color?.name ?? null,
+      size,
+      quantity,
+      unitPriceBdt: product.priceBdt,
+    }
+  }
+
+  const orderNow = (channel: "whatsapp" | "messenger") => {
+    const line = currentLine()
+    if (line) send(channel, [line])
+  }
+
+  const addToList = () => {
+    const line = currentLine()
+    if (!line) return
+    add(line)
+    showToast(`Added ${product.name}${size ? `, size ${size}` : ""} to your order list.`)
+    setDrawerOpen(true)
+  }
+
+  return (
+    <div ref={root} className="mx-auto grid max-w-editorial gap-8 px-0 pb-24 pt-16 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:gap-14 md:px-10 md:pt-24">
+      <ProductGallery images={images} slug={product.slug} name={product.name} />
+
+      <div className="px-5 md:px-0">
+        <div className="md:sticky md:top-24">
+          <p data-pdp className="font-hud text-[11px] text-brand-bone/50">
+            <Link href="/#collection" className="hover:text-brand-accent">Collection</Link>
+            {product.category && <> / {product.category.name}</>}
+          </p>
+          <h1 data-pdp className="display mt-3 text-5xl md:text-6xl lg:text-7xl">
+            {product.name}
+          </h1>
+          {product.tagline && (
+            <p data-pdp className="mt-4 text-lg text-brand-bone/75">
+              {product.tagline}
+            </p>
+          )}
+          <p data-pdp className="mt-6 flex items-baseline gap-3">
+            <span className="font-hud text-2xl tracking-normal">{formatBdt(product.priceBdt)}</span>
+            {product.compareAtBdt && <span className="font-hud text-sm tracking-normal text-brand-bone/40 line-through">{formatBdt(product.compareAtBdt)}</span>}
+          </p>
+
+          {product.colors.length > 0 && (
+            <fieldset data-pdp className="mt-8">
+              <legend className="font-hud text-[11px] text-brand-bone/60">
+                Color: <span className="text-brand-bone">{color?.name}</span>
+                {color && !color.inStock && <span className="text-brand-accent"> (coming soon)</span>}
+              </legend>
+              <div className="mt-3 flex flex-wrap gap-3">
+                {product.colors.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setColorId(c.id)}
+                    aria-pressed={c.id === colorId}
+                    aria-label={`${c.name}${c.inStock ? "" : ", coming soon"}`}
+                    title={c.name}
+                    className={clsx(
+                      "relative h-11 w-11 border-2 p-1 transition-colors",
+                      c.id === colorId ? "border-brand-accent" : "border-white/15 hover:border-white/40"
+                    )}
+                  >
+                    <span className="block h-full w-full border border-black/20" style={{ backgroundColor: c.hex }} />
+                    {!c.inStock && <span aria-hidden className="absolute left-1/2 top-1/2 h-0.5 w-12 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-brand-bone/70" />}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
+          {needsSize && (
+            <fieldset ref={sizesRef} data-pdp className="mt-8">
+              <div className="flex items-center justify-between">
+                <legend className={clsx("font-hud text-[11px]", needSize && !size ? "text-brand-accent" : "text-brand-bone/60")}>
+                  {needSize && !size ? "Choose a size to continue" : `Size${size ? `: ${size}` : ""}`}
+                </legend>
+                {hasChart && (
+                  <button type="button" onClick={() => setGuideOpen(true)} className="font-hud text-[11px] text-brand-bone/60 underline underline-offset-4 hover:text-brand-accent">
+                    Size guide
+                  </button>
+                )}
+              </div>
+              <div className="mt-3 grid grid-cols-5 gap-2">
+                {product.sizes.map((s) => {
+                  const soldOut = product.soldOutSizes.includes(s)
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      disabled={soldOut}
+                      aria-pressed={s === size}
+                      aria-label={soldOut ? `${s}, sold out` : s}
+                      onClick={() => {
+                        setSize(s)
+                        setNeedSize(false)
+                      }}
+                      className={clsx(
+                        "font-hud h-12 border text-sm tracking-normal transition-colors",
+                        s === size ? "border-brand-accent bg-brand-accent text-brand-graphite" : "border-white/15 hover:border-brand-bone",
+                        soldOut && "cursor-not-allowed border-white/5 text-brand-bone/25 line-through hover:border-white/5"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
+          )}
+
+          <div data-pdp ref={actionsRef} className="mt-8 space-y-3">
+            {canOrder ? (
+              <>
+                <div className="flex items-center gap-4">
+                  <QuantityStepper value={quantity} onChange={setQuantity} label={product.name} tone="dark" />
+                  <span className="font-hud text-[11px] text-brand-bone/50">Total {formatBdt(product.priceBdt * quantity)}</span>
+                </div>
+                {hasChannel ? (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {channels.whatsapp && (
+                      <button type="button" onClick={() => orderNow("whatsapp")} className={clsx("btn-signal", !channels.messenger && "sm:col-span-2")}>
+                        <WhatsAppIcon /> Order on WhatsApp
+                      </button>
+                    )}
+                    {channels.messenger && (
+                      <button type="button" onClick={() => orderNow("messenger")} className={clsx("btn-outline", !channels.whatsapp && "sm:col-span-2")}>
+                        <MessengerIcon /> Order on Messenger
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <p className="border border-white/15 p-4 text-sm text-brand-bone/70">Ordering opens soon.</p>
+                )}
+                <button type="button" onClick={addToList} className="h-12 w-full border border-white/15 font-hud text-[11px] transition-colors hover:border-brand-bone">
+                  Add to order list
+                </button>
+                <p className="text-xs text-brand-bone/50">Your order opens as a message you can check before sending. Pay cash on delivery.</p>
+              </>
+            ) : (
+              <p className="border border-white/15 p-4 text-sm">
+                {product.soldOut ? "Sold out. Message us to hear when it is back." : `${color?.name} is coming soon. Choose another color.`}
+              </p>
+            )}
+          </div>
+
+          {product.description && (
+            <p data-pdp className="mt-10 whitespace-pre-line leading-relaxed text-brand-bone/75">
+              {product.description}
+            </p>
+          )}
+
+          {details.length > 0 && (
+            <dl data-pdp className="mt-8 border-t border-white/10">
+              {details.map(([key, value]) => (
+                <div key={key} className="grid grid-cols-[110px_1fr] gap-4 border-b border-white/10 py-4 text-sm">
+                  <dt className="font-hud text-[10px] text-brand-bone/50">{DETAIL_LABEL[key]}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      </div>
+
+      {canOrder && hasChannel && (
+        <div
+          className={clsx(
+            "fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-white/10 bg-brand-graphite/95 px-4 py-3 backdrop-blur transition-transform duration-500 md:hidden",
+            actionsVisible ? "translate-y-full" : "translate-y-0"
+          )}
+          aria-hidden={actionsVisible}
+          inert={actionsVisible}
+        >
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{product.name}</p>
+            <p className="font-hud text-[11px] tracking-normal text-brand-bone/60">
+              {formatBdt(product.priceBdt)}
+              {size ? ` / ${size}` : ""}
+            </p>
+          </div>
+          <button type="button" onClick={() => orderNow(channels.whatsapp ? "whatsapp" : "messenger")} className="btn-signal h-12 px-5">
+            {size || !needsSize ? "Order now" : "Choose size"}
+          </button>
+        </div>
+      )}
+
+      {hasChart && <SizeGuide chart={product.sizeChart} open={guideOpen} onClose={() => setGuideOpen(false)} />}
+    </div>
+  )
+}

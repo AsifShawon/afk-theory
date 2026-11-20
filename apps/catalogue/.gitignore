@@ -1,0 +1,3 @@
+# Written by scripts/sync-catalogue.ts on every dev and build run.
+/src/generated/
+/public/media/

@@ -34,7 +34,10 @@ This project is strictly a **production-ready, single-brand direct-to-consumer c
 │   │       ├── modules/          # Custom modules (service + models + migrations)
 │   │       ├── subscribers/      # Event subscribers
 │   │       └── workflows/        # Workflows and workflow steps
-│   └── storefront/               # OPTIONAL storefront
+│   ├── storefront/               # OPTIONAL storefront
+│   ├── catalogue/                # Temporary static showcase (Supabase data, WhatsApp/Messenger orders). See its AGENTS.md
+│   └── catalogue-admin/          # LOCAL-ONLY admin for catalogue. Never deploy. See its AGENTS.md
+├── packages/catalogue-core/      # Types, schemas, queries and seed data shared by the two catalogue apps
 ├── eslint.config.ts              # Root ESLint: @medusajs/eslint-plugin recommended
 ├── turbo.json                    # Task graph: build, dev, start, lint, test, seed
 ```
