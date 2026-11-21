@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/components/seo/json-ld"
 import { ListingHero, ListingShell } from "@/components/shop/listing-hero"
 import { ProductListing } from "@/components/shop/product-listing"
 import { absoluteUrl, getCatalogue } from "@/lib/catalogue"
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ path: str
   const { path } = await params
   const catalogue = await getCatalogue()
   const node = findCategoryByPath(catalogue, path)
-  if (!node) return {}
+  if (!node) return { robots: { index: false } }
   const description = node.seoDescription || node.description || `Shop ${node.name} from AFK THEORY. Order on WhatsApp or Messenger, cash on delivery.`
   const image = coverImage(node.image, productsInCategory(catalogue, node.id))
   return {
@@ -48,6 +49,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ path:
 
   return (
     <ListingShell>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", href: "/" },
+          { name: "Shop", href: "/shop/" },
+          ...ancestors.map((a) => ({ name: a.name, href: a.href })),
+          { name: node.name, href: node.href },
+        ])}
+      />
+      <JsonLd data={itemListJsonLd(products)} />
       <ListingHero
         eyebrow={`${node.productCount} ${node.productCount === 1 ? "piece" : "pieces"}`}
         title={node.name}

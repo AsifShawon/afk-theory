@@ -3,6 +3,7 @@ import { SEO_LIMITS, truncateText } from "@dtc/catalogue-core"
 import { notFound } from "next/navigation"
 import { ProductCard } from "@/components/product/product-card"
 import { ProductView } from "@/components/product/product-view"
+import { breadcrumbJsonLd, JsonLd } from "@/components/seo/json-ld"
 import { absoluteUrl, getCatalogue, getProduct, getRelated } from "@/lib/catalogue"
 
 export const dynamicParams = false
@@ -61,6 +62,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", href: "/" },
+          ...(product.category ? [{ name: product.category.name, href: product.category.href }] : [{ name: "Shop", href: "/shop/" }]),
+          { name: product.name, href: `/products/${product.slug}/` },
+        ])}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <ProductView product={product} settings={catalogue.settings} />
       {related.length > 0 && (

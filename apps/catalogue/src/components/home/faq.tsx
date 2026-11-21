@@ -1,19 +1,28 @@
+import { Link } from "next-view-transitions"
 import type { FaqItem } from "@dtc/catalogue-core"
 import { Reveal } from "@/components/motion/reveal"
 
-export function Faq({ items }: { items: FaqItem[] }) {
+/** FAQ accordion. On the home page pass `limit` and `moreHref` to show a few with a link to the rest. */
+export function Faq({ items, limit, moreHref, headingLevel = 2 }: { items: FaqItem[]; limit?: number; moreHref?: string; headingLevel?: 1 | 2 }) {
   if (items.length === 0) return null
+  const shown = limit ? items.slice(0, limit) : items
+  const Heading = headingLevel === 1 ? "h1" : "h2"
   return (
     <section id="faq" aria-labelledby="faq-title" className="border-t border-brand-graphite/15 bg-brand-bone pb-28 pt-24 text-brand-graphite">
       <div className="mx-auto grid max-w-editorial gap-12 px-5 md:grid-cols-[1fr_1.6fr] md:px-10">
         <Reveal>
-          <h2 id="faq-title" className="display text-6xl md:text-7xl">
+          <Heading id="faq-title" className="display text-6xl md:text-7xl">
             FAQ
-          </h2>
+          </Heading>
           <p className="mt-4 max-w-xs text-brand-olive">Anything else? Ask in the same chat you order in.</p>
+          {moreHref && items.length > shown.length && (
+            <Link href={moreHref} className="font-hud mt-6 inline-block text-[11px] underline underline-offset-4">
+              All {items.length} questions
+            </Link>
+          )}
         </Reveal>
         <Reveal as="div" className="divide-y divide-brand-graphite/15 border-y border-brand-graphite/15">
-          {items.map((item) => (
+          {shown.map((item) => (
             <details key={item.question} className="group">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-lg font-semibold [&::-webkit-details-marker]:hidden">
                 {item.question}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/components/seo/json-ld"
 import { ListingHero, ListingShell } from "@/components/shop/listing-hero"
 import { ProductListing } from "@/components/shop/product-listing"
 import { absoluteUrl, getCatalogue } from "@/lib/catalogue"
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const catalogue = await getCatalogue()
   const collection = catalogue.collections.find((c) => c.slug === slug)
-  if (!collection) return {}
+  if (!collection) return { robots: { index: false } }
   const image = coverImage(collection.image, productsBySlugs(catalogue, collection.productSlugs))
   return {
     title: collection.seoTitle ? { absolute: collection.seoTitle } : collection.name,
@@ -39,6 +40,14 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
 
   return (
     <ListingShell>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", href: "/" },
+          { name: "Collections", href: "/collections/" },
+          { name: collection.name, href: collection.href },
+        ])}
+      />
+      <JsonLd data={itemListJsonLd(products)} />
       <ListingHero
         eyebrow="Collection"
         title={collection.name}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/components/seo/json-ld"
 import { ListingHero, ListingShell } from "@/components/shop/listing-hero"
 import { ProductListing } from "@/components/shop/product-listing"
 import { getCatalogue } from "@/lib/catalogue"
@@ -19,6 +20,8 @@ export default async function ShopPage() {
 
   return (
     <ListingShell>
+      <JsonLd data={breadcrumbJsonLd([{ name: "Home", href: "/" }, { name: "Shop all", href: "/shop/" }])} />
+      <JsonLd data={itemListJsonLd(catalogue.products)} />
       <ListingHero eyebrow={`${catalogue.products.length} pieces`} title="Shop all" crumbs={[{ name: "Home", href: "/" }]} tiles={tiles.length > 1 ? tiles : []} />
       <ProductListing
         products={catalogue.products}

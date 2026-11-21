@@ -157,10 +157,22 @@ export function MobileNav({ nav, settings }: { nav: NavData; settings: SiteSetti
               </Link>
             </li>
             <li>
-              <Link href="/#faq" onClick={close} className="flex min-h-[44px] items-center">
+              <Link href="/faq/" onClick={close} className="flex min-h-[44px] items-center">
                 FAQ
               </Link>
             </li>
+            <li>
+              <Link href="/lookbook/" onClick={close} className="flex min-h-[44px] items-center">
+                Lookbook
+              </Link>
+            </li>
+            {nav.pages.map((p) => (
+              <li key={p.slug}>
+                <Link href={`/${p.slug}/`} onClick={close} className="flex min-h-[44px] items-center">
+                  {p.title}
+                </Link>
+              </li>
+            ))}
           </ul>
 
           {(wa || messenger) && (
