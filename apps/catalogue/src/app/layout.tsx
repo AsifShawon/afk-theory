@@ -11,6 +11,7 @@ import { OrderDrawer } from "@/components/order/order-drawer"
 import { OrderProvider, type PriceBook } from "@/components/order/order-provider"
 import { OrderToast } from "@/components/order/order-toast"
 import { SearchOverlay } from "@/components/search/search-overlay"
+import { JsonLd, siteJsonLd } from "@/components/seo/json-ld"
 import { getCatalogue, siteUrl } from "@/lib/catalogue"
 import { buildNavData } from "@/lib/store"
 import "./globals.css"
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <html lang="en" className={`${chakra.variable} ${manrope.variable} ${mono.variable}`} suppressHydrationWarning>
         <head>
           <script dangerouslySetInnerHTML={{ __html: PRELOADER_HEAD_SCRIPT }} />
+          <JsonLd data={siteJsonLd(catalogue.settings)} />
         </head>
         <body>
           <a href="#main" className="sr-only z-[200] bg-brand-accent px-4 py-2 font-semibold text-brand-graphite focus:not-sr-only focus:fixed focus:left-4 focus:top-4">

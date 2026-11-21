@@ -33,3 +33,37 @@ export function itemListJsonLd(products: CatalogueProduct[]) {
     })),
   }
 }
+
+/**
+ * Site-wide entities: the brand (Organization) and the site (WebSite). Google
+ * uses these to understand the brand and its name in search results.
+ */
+export function siteJsonLd(settings: { instagramHandle: string; whatsappNumber: string }) {
+  const sameAs = [
+    settings.instagramHandle ? `https://instagram.com/${settings.instagramHandle}` : null,
+  ].filter((v): v is string => Boolean(v))
+  const phone = settings.whatsappNumber ? `+${settings.whatsappNumber.replace(/\D/g, "")}` : null
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "AFK THEORY",
+      url: absoluteUrl("/"),
+      logo: absoluteUrl("/brand/afk-theory-logo.webp"),
+      ...(sameAs.length ? { sameAs } : {}),
+      ...(phone ? { contactPoint: { "@type": "ContactPoint", telephone: phone, contactType: "customer service", areaServed: "BD" } } : {}),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "AFK THEORY",
+      url: absoluteUrl("/"),
+      inLanguage: "en",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: absoluteUrl("/search/?q={search_term_string}") },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ]
+}
