@@ -56,6 +56,15 @@ test("builds a multi-item message with a subtotal", () => {
   assert.equal(orderSubtotal([tee, cap]), 3550)
 })
 
+test("puts the design before the color when a product has designs", () => {
+  const message = buildOrderMessage({
+    code: "AFK-261120-K7Q",
+    lines: [{ ...tee, designName: "Back design", quantity: 1 }],
+    deliveryZones: [],
+  })
+  assert.ok(message.includes("1) Drop 01 Oversized Tee\n   Back design / Graphite Black / L x 1 = BDT 1,450"))
+})
+
 test("encodes the WhatsApp link so the decoded text matches exactly", () => {
   const message = buildOrderMessage({ code: "AFK-261120-K7Q", lines: [tee], deliveryZones: DEFAULT_DELIVERY_ZONES })
   const url = whatsappUrl("01712-345678", message)

@@ -32,8 +32,8 @@ interface OrderContextValue {
 
 const OrderContext = createContext<OrderContextValue | null>(null)
 
-export function itemKey(line: Pick<OrderLine, "slug" | "colorName" | "size">): string {
-  return [line.slug, line.colorName ?? "", line.size ?? ""].join("|")
+export function itemKey(line: Pick<OrderLine, "slug" | "designName" | "colorName" | "size">): string {
+  return [line.slug, line.designName ?? "", line.colorName ?? "", line.size ?? ""].join("|")
 }
 
 function clampQuantity(quantity: number): number {

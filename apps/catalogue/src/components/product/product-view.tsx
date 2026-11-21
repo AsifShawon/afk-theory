@@ -1,7 +1,7 @@
 "use client"
 
 import { Link } from "next-view-transitions"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { clsx } from "clsx"
 import { formatBdt, type CatalogueProduct, type SiteSettings } from "@dtc/catalogue-core"
 import { QuantityStepper } from "@/components/order/order-drawer"
@@ -9,8 +9,9 @@ import { useOrder } from "@/components/order/order-provider"
 import { useSendOrder } from "@/components/order/use-send-order"
 import { MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap"
+import { findByParam, optionParam } from "@/lib/gallery"
 import type { OrderLine } from "@/lib/order-message"
-import { ProductGallery } from "./product-gallery"
+import { ProductGallery, type GalleryJump } from "./product-gallery"
 import { SizeGuide } from "./size-guide"
 
 const DETAIL_LABEL: Record<string, string> = {
@@ -28,8 +29,19 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
   const { add, setDrawerOpen, showToast } = useOrder()
   const { send, channels, hasChannel } = useSendOrder(settings)
 
-  const firstAvailable = product.colors.find((c) => c.inStock) ?? product.colors[0] ?? null
-  const [colorId, setColorId] = useState<string | null>(firstAvailable?.id ?? null)
+  // Default: the first in-stock color that has photos.
+  const initialColor = useMemo(() => {
+    const withPhotos = new Set(product.images.map((img) => img.colorId).filter(Boolean))
+    return (
+      product.colors.find((c) => c.inStock && withPhotos.has(c.id)) ??
+      product.colors.find((c) => c.inStock) ??
+      product.colors[0] ??
+      null
+    )
+  }, [product.colors, product.images])
+  const [colorId, setColorId] = useState<string | null>(initialColor?.id ?? null)
+  const [jump, setJump] = useState<GalleryJump | null>(null)
+  const colorChanged = useRef(false)
   const [size, setSize] = useState<string | null>(product.sizes.length === 1 && !product.soldOutSizes.includes(product.sizes[0]) ? product.sizes[0] : null)
   const [quantity, setQuantity] = useState(1)
   const [needSize, setNeedSize] = useState(false)
@@ -41,13 +53,38 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
   const needsSize = product.sizes.length > 0
   const canOrder = !product.soldOut && colorAvailable
 
-  const images = useMemo(() => {
-    const forColor = product.images.filter((img) => !img.colorId || img.colorId === colorId)
-    return forColor.length > 0 ? forColor : product.images
-  }, [product.images, colorId])
-
-  const details = Object.entries(product.details).filter(([key, value]) => DETAIL_LABEL[key] && value)
+  const details = Object.entries(product.details).filter(([key, value]) => DETAIL_LABEL[key] && key !== "care" && value)
   const hasChart = product.sizeChart.columns.length > 0 && product.sizeChart.rows.length > 0
+
+  /** A swatch was tapped: select it and show its photos. */
+  const pickColor = (id: string) => {
+    colorChanged.current = true
+    setColorId(id)
+    setJump({ colorId: id, nonce: Date.now() })
+  }
+
+  /** Swiping reached another color's photos. */
+  const spyColor = useCallback((id: string) => {
+    colorChanged.current = true
+    setColorId(id)
+  }, [])
+
+  // A shared link such as ?color=maroon opens on that color.
+  useEffect(() => {
+    const match = findByParam(product.colors, new URLSearchParams(window.location.search).get("color"))
+    if (match) {
+      setColorId(match.id)
+      setJump({ colorId: match.id, nonce: Date.now(), instant: true })
+    }
+  }, [product.colors])
+
+  // Keep the address in step with the chosen color, so the link can be shared.
+  useEffect(() => {
+    if (!colorChanged.current || !color || product.colors.length < 2) return
+    const url = new URL(window.location.href)
+    url.searchParams.set("color", optionParam(color.name))
+    window.history.replaceState(window.history.state, "", url)
+  }, [color, product.colors.length])
 
   useEffect(() => {
     const el = actionsRef.current
@@ -100,14 +137,24 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
 
   return (
     <div ref={root} className="mx-auto grid max-w-editorial gap-8 px-0 pb-24 pt-16 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:gap-14 md:px-10 md:pt-24">
-      <ProductGallery images={images} slug={product.slug} name={product.name} />
+      <ProductGallery
+        images={product.images}
+        colors={product.colors}
+        selectedColorId={colorId}
+        jump={jump}
+        onSpyColor={spyColor}
+        onPickColor={pickColor}
+        slug={product.slug}
+        name={product.name}
+      />
 
       <div className="px-5 md:px-0">
         <div className="md:sticky md:top-24">
-          <p data-pdp className="font-hud text-[11px] text-brand-bone/50">
-            <Link href="/#collection" className="hover:text-brand-accent">Collection</Link>
-            {product.category && <> / {product.category.name}</>}
-          </p>
+          <nav data-pdp aria-label="Breadcrumb" className="font-hud text-[11px] text-brand-bone/50">
+            <Link href="/" className="hover:text-brand-accent">Home</Link>
+            <span aria-hidden> / </span>
+            <Link href="/#collection" className="hover:text-brand-accent">{product.category?.name ?? "Collection"}</Link>
+          </nav>
           <h1 data-pdp className="display mt-3 text-5xl md:text-6xl lg:text-7xl">
             {product.name}
           </h1>
@@ -119,6 +166,12 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
           <p data-pdp className="mt-6 flex items-baseline gap-3">
             <span className="font-hud text-2xl tracking-normal">{formatBdt(product.priceBdt)}</span>
             {product.compareAtBdt && <span className="font-hud text-sm tracking-normal text-brand-bone/40 line-through">{formatBdt(product.compareAtBdt)}</span>}
+            {product.compareAtBdt && !product.soldOut && (
+              <span className="font-hud self-center bg-brand-accent px-2 py-0.5 text-[10px] text-brand-graphite">
+                Save {formatBdt(product.compareAtBdt - product.priceBdt)}
+              </span>
+            )}
+            {product.soldOut && <span className="font-hud self-center bg-white/10 px-2 py-0.5 text-[10px]">Sold out</span>}
           </p>
 
           {product.colors.length > 0 && (
@@ -132,7 +185,7 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setColorId(c.id)}
+                    onClick={() => pickColor(c.id)}
                     aria-pressed={c.id === colorId}
                     aria-label={`${c.name}${c.inStock ? "" : ", coming soon"}`}
                     title={c.name}
@@ -229,16 +282,56 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
             <div data-pdp className="rich-text mt-10" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
           )}
 
-          {details.length > 0 && (
-            <dl data-pdp className="mt-8 border-t border-white/10">
-              {details.map(([key, value]) => (
-                <div key={key} className="grid grid-cols-[110px_1fr] gap-4 border-b border-white/10 py-4 text-sm">
-                  <dt className="font-hud text-[10px] text-brand-bone/50">{DETAIL_LABEL[key]}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          <div data-pdp className="mt-8 border-t border-white/10">
+            {details.length > 0 && (
+              <Accordion title="Details" defaultOpen>
+                <dl>
+                  {details.map(([key, value]) => (
+                    <div key={key} className="grid grid-cols-[96px_1fr] gap-4 py-2 text-sm">
+                      <dt className="font-hud text-[10px] text-brand-bone/50">{DETAIL_LABEL[key]}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Accordion>
+            )}
+            {product.details.care && (
+              <Accordion title="Care">
+                <p className="text-sm text-brand-bone/75">{product.details.care}</p>
+              </Accordion>
+            )}
+            {(hasChart || product.details.fit) && (
+              <Accordion title="Size and fit">
+                {product.details.fit && <p className="text-sm text-brand-bone/75">{product.details.fit}.</p>}
+                {hasChart && (
+                  <button type="button" onClick={() => setGuideOpen(true)} className="font-hud mt-3 text-[11px] text-brand-accent underline underline-offset-4">
+                    Open the size guide
+                  </button>
+                )}
+              </Accordion>
+            )}
+            <Accordion title="Delivery and payment">
+              {settings.deliveryZones.length > 0 && (
+                <ul className="space-y-1.5 text-sm">
+                  {settings.deliveryZones.map((zone) => (
+                    <li key={zone.name} className="flex justify-between gap-4">
+                      <span>
+                        {zone.name} <span className="text-brand-bone/50">· {zone.eta}</span>
+                      </span>
+                      <span className="font-hud tracking-normal">{formatBdt(zone.feeBdt)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-3 text-sm text-brand-bone/75">
+                Cash on delivery. Questions about sizes or exchanges?{" "}
+                <Link href="/#faq" className="text-brand-accent underline underline-offset-4">
+                  Read the FAQ
+                </Link>
+                .
+              </p>
+            </Accordion>
+          </div>
         </div>
       </div>
 
@@ -266,5 +359,20 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
 
       {hasChart && <SizeGuide chart={product.sizeChart} open={guideOpen} onClose={() => setGuideOpen(false)} />}
     </div>
+  )
+}
+
+function Accordion({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  return (
+    <details className="group border-b border-white/10" open={defaultOpen}>
+      <summary className="font-hud flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-4 py-4 text-[11px] text-brand-bone [&::-webkit-details-marker]:hidden">
+        {title}
+        <span aria-hidden className="relative h-3 w-3 shrink-0">
+          <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-current" />
+          <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-current transition-transform duration-300 group-open:scale-y-0" />
+        </span>
+      </summary>
+      <div className="pb-5">{children}</div>
+    </details>
   )
 }
