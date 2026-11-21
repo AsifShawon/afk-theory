@@ -4,6 +4,8 @@ export interface OrderLine {
   slug: string
   productName: string
   colorName: string | null
+  /** Design option, e.g. "Back design". Unset for products without designs. */
+  designName?: string | null
   size: string | null
   quantity: number
   unitPriceBdt: number
@@ -34,8 +36,8 @@ export function orderSubtotal(lines: OrderLine[]): number {
   return lines.reduce((sum, line) => sum + lineTotal(line), 0)
 }
 
-export function describeVariant(line: Pick<OrderLine, "colorName" | "size">): string {
-  return [line.colorName, line.size].filter(Boolean).join(" / ")
+export function describeVariant(line: Pick<OrderLine, "designName" | "colorName" | "size">): string {
+  return [line.designName, line.colorName, line.size].filter(Boolean).join(" / ")
 }
 
 /**
