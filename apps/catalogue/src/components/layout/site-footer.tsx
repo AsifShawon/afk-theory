@@ -3,15 +3,16 @@ import type { SiteSettings } from "@dtc/catalogue-core"
 import { MessengerIcon, PauseMark, WhatsAppIcon } from "@/components/ui/icons"
 import { messengerUrl } from "@/lib/order-message"
 import { normalizeWhatsappNumber } from "@dtc/catalogue-core"
+import type { NavData } from "@/lib/store"
 
-export function SiteFooter({ settings }: { settings: SiteSettings }) {
+export function SiteFooter({ settings, nav }: { settings: SiteSettings; nav: NavData }) {
   const wa = normalizeWhatsappNumber(settings.whatsappNumber)
   const messenger = messengerUrl(settings.messengerPage, "footer")
   const year = new Date().getFullYear()
 
   return (
     <footer className="grain relative overflow-hidden bg-brand-graphite-dark pt-20">
-      <div className="mx-auto grid max-w-editorial gap-12 px-5 md:grid-cols-[1.4fr_1fr_1fr] md:px-10">
+      <div className="mx-auto grid max-w-editorial gap-12 px-5 md:grid-cols-[1.2fr_1fr_1.4fr] md:px-10">
         <div>
           <PauseMark size={40} className="text-brand-accent" />
           <p className="mt-6 max-w-sm text-brand-bone/70">
@@ -51,13 +52,27 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
             )}
           </ul>
         </div>
-        <div>
-          <p className="font-hud text-[11px] text-brand-accent">Shop</p>
-          <ul className="mt-4 space-y-3 text-sm">
-            <li><Link href="/#collection" className="hover:text-brand-accent">Collection</Link></li>
-            <li><Link href="/#how-to-order" className="hover:text-brand-accent">How to order</Link></li>
-            <li><Link href="/#faq" className="hover:text-brand-accent">FAQ</Link></li>
-          </ul>
+        <div className="grid grid-cols-2 gap-8">
+          <div>
+            <p className="font-hud text-[11px] text-brand-accent">Shop</p>
+            <ul className="mt-4 space-y-3 text-sm">
+              <li><Link href="/shop/" className="hover:text-brand-accent">Shop all</Link></li>
+              {nav.categories.map((c) => (
+                <li key={c.href}><Link href={c.href} className="hover:text-brand-accent">{c.name}</Link></li>
+              ))}
+              {nav.hasNew && <li><Link href="/new/" className="hover:text-brand-accent">New arrivals</Link></li>}
+              {nav.hasSale && <li><Link href="/sale/" className="hover:text-brand-accent">Sale</Link></li>}
+              {nav.collections.length > 0 && <li><Link href="/collections/" className="hover:text-brand-accent">Collections</Link></li>}
+            </ul>
+          </div>
+          <div>
+            <p className="font-hud text-[11px] text-brand-accent">Help</p>
+            <ul className="mt-4 space-y-3 text-sm">
+              <li><Link href="/#how-to-order" className="hover:text-brand-accent">How to order</Link></li>
+              <li><Link href="/#faq" className="hover:text-brand-accent">FAQ</Link></li>
+              <li><Link href="/search/" className="hover:text-brand-accent">Search</Link></li>
+            </ul>
+          </div>
         </div>
       </div>
       <p aria-hidden className="display mt-20 select-none whitespace-nowrap text-center text-[15.5vw] leading-[0.78] text-brand-bone/[0.06]">
