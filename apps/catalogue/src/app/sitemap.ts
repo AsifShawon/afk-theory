@@ -24,5 +24,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(catalogue.autoCollections.new.length > 0 ? [entry("/new/", 0.7)] : []),
     ...(catalogue.autoCollections.sale.length > 0 ? [entry("/sale/", 0.7)] : []),
     ...products.map((p) => entry(`/products/${p.slug}/`, 0.8)),
+    entry("/lookbook/", 0.5),
+    ...(catalogue.settings.faq.length > 0 ? [entry("/faq/", 0.5)] : []),
+    ...catalogue.pages.map((p) => entry(`/${p.slug}/`, 0.4)),
   ]
 }

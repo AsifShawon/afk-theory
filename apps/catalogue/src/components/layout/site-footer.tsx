@@ -69,7 +69,11 @@ export function SiteFooter({ settings, nav }: { settings: SiteSettings; nav: Nav
             <p className="font-hud text-[11px] text-brand-accent">Help</p>
             <ul className="mt-4 space-y-3 text-sm">
               <li><Link href="/#how-to-order" className="hover:text-brand-accent">How to order</Link></li>
-              <li><Link href="/#faq" className="hover:text-brand-accent">FAQ</Link></li>
+              <li><Link href="/faq/" className="hover:text-brand-accent">FAQ</Link></li>
+              <li><Link href="/lookbook/" className="hover:text-brand-accent">Lookbook</Link></li>
+              {nav.pages.map((p) => (
+                <li key={p.slug}><Link href={`/${p.slug}/`} className="hover:text-brand-accent">{p.title}</Link></li>
+              ))}
               <li><Link href="/search/" className="hover:text-brand-accent">Search</Link></li>
             </ul>
           </div>
