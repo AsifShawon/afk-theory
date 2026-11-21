@@ -29,6 +29,29 @@ function isHostedBuild(): boolean {
   return Boolean(process.env.CF_PAGES || process.env.VERCEL || process.env.NETLIFY || process.env.CATALOGUE_REQUIRE_SUPABASE)
 }
 
+/**
+ * The sitemap, robots.txt and every canonical link use NEXT_PUBLIC_SITE_URL.
+ * On a hosting provider a wrong value would publish the wrong domain to search
+ * engines, so the build stops instead and prints the address it will use.
+ */
+function checkSiteUrl(): void {
+  if (!isHostedBuild()) return
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim()
+  if (!raw) {
+    throw new Error("NEXT_PUBLIC_SITE_URL is not set. Add your public address, for example https://afktheory.com, to the build settings.")
+  }
+  let url: URL
+  try {
+    url = new URL(raw)
+  } catch {
+    throw new Error(`NEXT_PUBLIC_SITE_URL is not a valid address: "${raw}"`)
+  }
+  if (url.protocol !== "https:" || url.hostname === "localhost" || url.hostname.endsWith(".test")) {
+    throw new Error(`NEXT_PUBLIC_SITE_URL must be your public https address, not "${raw}"`)
+  }
+  console.log(`[catalogue] Sitemap and links will use ${url.origin}`)
+}
+
 /** A product photo, or a category or collection banner. */
 type StoredImage = { path: string; widths: number[] }
 
@@ -101,6 +124,7 @@ async function main() {
     process.loadEnvFile(envFile)
   }
 
+  checkSiteUrl()
   const env = readSiteSupabaseEnv()
   let raw: RawCatalogue
   let source: "supabase" | "fixture"
@@ -145,6 +169,8 @@ async function main() {
 
 main().catch((err) => {
   console.error(`[catalogue] Sync failed: ${err instanceof Error ? err.message : String(err)}`)
-  console.error("[catalogue] If Supabase is paused (free projects pause after a week of inactivity), restore it in the Supabase dashboard and build again.")
+  if (/supabase/i.test(String(err))) {
+    console.error("[catalogue] If Supabase is paused (free projects pause after a week of inactivity), restore it in the Supabase dashboard and build again.")
+  }
   process.exit(1)
 })
