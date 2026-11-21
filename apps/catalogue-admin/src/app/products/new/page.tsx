@@ -2,7 +2,7 @@ import Link from "next/link"
 import { DEFAULT_SIZES, type ProductInput } from "@dtc/catalogue-core"
 import { DbError } from "@/components/db-error"
 import { ProductForm } from "@/components/product-form"
-import { loadCategories, loadSizeGuides, loadColorPresets } from "@/lib/data"
+import { loadCategories, loadSizeGuides, loadColorPresets, loadProductStoreOptions } from "@/lib/data"
 
 const EMPTY: ProductInput = {
   name: "",
@@ -21,14 +21,23 @@ const EMPTY: ProductInput = {
   soldOutSizes: [],
   details: {},
   sizeChart: { columns: [], rows: [] },
+  badge: "none",
+  designGroup: "",
+  collectionIds: [],
 }
 
 export default async function NewProductPage() {
   let categories
   let sizeGuides
   let colorPresets
+  let storeOptions
   try {
-    ;[categories, sizeGuides, colorPresets] = await Promise.all([loadCategories(), loadSizeGuides(), loadColorPresets()])
+    ;[categories, sizeGuides, colorPresets, storeOptions] = await Promise.all([
+      loadCategories(),
+      loadSizeGuides(),
+      loadColorPresets(),
+      loadProductStoreOptions(null),
+    ])
   } catch (err) {
     return <DbError error={err} />
   }
@@ -44,11 +53,13 @@ export default async function NewProductPage() {
         id={null}
         initial={{ ...EMPTY, categoryId: categories[0]?.id ?? null }}
         initialColors={[{ name: "Graphite Black", hex: "#20241F", inStock: true }]}
+        initialDesigns={[]}
         categories={categories}
         imageCount={0}
         sizeGuides={sizeGuides.guides}
         guidesAvailable={!sizeGuides.migrationMissing}
         colorPresets={colorPresets}
+        storeOptions={storeOptions}
       />
     </div>
   )

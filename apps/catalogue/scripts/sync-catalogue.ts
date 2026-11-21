@@ -1,9 +1,11 @@
 /**
  * Pulls the published catalogue from Supabase into the static site.
  *
- *   1. Reads published products, colors, images, categories and settings
- *      with the publishable key (row level security hides drafts).
- *   2. Downloads every image width into public/media/.
+ *   1. Reads published products, colors, images, categories, collections,
+ *      pages and settings with the publishable key (row level security
+ *      hides drafts).
+ *   2. Downloads every image width (product photos plus category and
+ *      collection banners) into public/media/.
  *   3. Writes src/generated/catalogue.json, which every page renders from.
  *
  * Runs before `next dev` and `next build`. With no Supabase settings it falls
@@ -14,7 +16,7 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "fs"
 import { createRequire } from "module"
 import path from "path"
-import { buildCatalogue, fetchRawCatalogue, imageObjectKey, type ProductImageRow, type RawCatalogue } from "@dtc/catalogue-core"
+import { buildCatalogue, fetchRawCatalogue, imageObjectKey, usedImageObjects, type RawCatalogue } from "@dtc/catalogue-core"
 import { SEED_MEDIA_DIR, seedToRawCatalogue } from "@dtc/catalogue-core/seed"
 import { createPublicClient, localMediaUrl, readSiteSupabaseEnv, storageObjectUrl, type SiteSupabaseEnv } from "../src/lib/catalogue-source"
 
@@ -27,7 +29,10 @@ function isHostedBuild(): boolean {
   return Boolean(process.env.CF_PAGES || process.env.VERCEL || process.env.NETLIFY || process.env.CATALOGUE_REQUIRE_SUPABASE)
 }
 
-async function downloadAll(env: SiteSupabaseEnv, images: ProductImageRow[]) {
+/** A product photo, or a category or collection banner. */
+type StoredImage = { path: string; widths: number[] }
+
+async function downloadAll(env: SiteSupabaseEnv, images: StoredImage[]) {
   const jobs = images.flatMap((img) =>
     img.widths.map((width) => ({ key: imageObjectKey(img.path, width), url: storageObjectUrl(env, img.path, width) }))
   )
@@ -67,7 +72,7 @@ function copySeedMedia(raw: RawCatalogue) {
   }
 }
 
-/** Deletes media files that no published product uses any more. */
+/** Deletes media files that the built catalogue no longer uses. */
 function pruneMedia(keep: Set<string>) {
   if (!existsSync(mediaDir)) return 0
   let removed = 0
@@ -112,7 +117,7 @@ async function main() {
   }
 
   const { catalogue, skipped } = buildCatalogue(raw, (img, width) => localMediaUrl(img.path, width), source)
-  const usedImages = raw.images.filter((img) => catalogue.products.some((p) => p.images.some((i) => i.id === img.id)))
+  const usedImages = usedImageObjects(raw, catalogue)
 
   mkdirSync(mediaDir, { recursive: true })
   if (env) {

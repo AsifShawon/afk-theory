@@ -10,8 +10,8 @@
 import { existsSync, readFileSync } from "fs"
 import { createRequire } from "module"
 import path from "path"
-import { TABLES, type SiteSettingsRow } from "@dtc/catalogue-core"
-import { SEED_CATEGORIES, SEED_MEDIA_DIR, SEED_PRODUCTS, SEED_SETTINGS } from "@dtc/catalogue-core/seed"
+import { isMissingTable, TABLES, type SiteSettingsRow } from "@dtc/catalogue-core"
+import { SEED_CATEGORIES, SEED_COLLECTIONS, SEED_MEDIA_DIR, SEED_PRODUCTS, SEED_SETTINGS } from "@dtc/catalogue-core/seed"
 import { missingEnvKeys, readAdminEnv } from "../src/lib/env"
 import { processAndUploadImage } from "../src/lib/images"
 import { createAdminClient } from "../src/lib/supabase"
@@ -91,6 +91,34 @@ async function main() {
     const { error: publishError } = await client.from(TABLES.products).update({ status: "published" }).eq("id", product.id)
     if (publishError) throw new Error(publishError.message)
     console.log(`- ${seed.name}: created and published`)
+  }
+
+  // Collections (migration 20261122000000). Skipped until that migration runs.
+  const { error: collectionError } = await client
+    .from(TABLES.collections)
+    .upsert(
+      SEED_COLLECTIONS.map((c, i) => ({ slug: c.slug, name: c.name, description: c.description, show_on_home: true, sort_order: i })),
+      { onConflict: "slug", ignoreDuplicates: true }
+    )
+  if (collectionError && isMissingTable(collectionError)) {
+    console.log("- Collections: skipped. Run migration 20261122000000_store_structure.sql, then seed again.")
+  } else if (collectionError) {
+    throw new Error(`Collections: ${collectionError.message}`)
+  } else {
+    const [{ data: collections }, { data: products }] = await Promise.all([
+      client.from(TABLES.collections).select("id, slug"),
+      client.from(TABLES.products).select("id, slug"),
+    ])
+    const links = SEED_COLLECTIONS.flatMap((c) =>
+      c.productSlugs.flatMap((slug, i) => {
+        const collectionId = collections?.find((x) => x.slug === c.slug)?.id
+        const productId = products?.find((x) => x.slug === slug)?.id
+        return collectionId && productId ? [{ collection_id: collectionId, product_id: productId, sort_order: i }] : []
+      })
+    )
+    const { error } = await client.from(TABLES.productCollections).upsert(links, { onConflict: "product_id,collection_id", ignoreDuplicates: true })
+    if (error) throw new Error(`Collection products: ${error.message}`)
+    console.log("- Collections: Drop 01 ready")
   }
 
   // Settings: fill only what is still empty.

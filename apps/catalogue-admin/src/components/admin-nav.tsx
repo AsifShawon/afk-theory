@@ -2,6 +2,16 @@ import Link from "next/link"
 import { loadPublishStatus, type PublishStatus } from "@/lib/data"
 import { PublishButton } from "./publish-button"
 
+const NAV_LINKS = [
+  { href: "/", label: "Products" },
+  { href: "/products/new", label: "New product" },
+  { href: "/categories", label: "Categories" },
+  { href: "/collections", label: "Collections" },
+  { href: "/site-pages", label: "Pages" },
+  { href: "/homepage", label: "Homepage" },
+  { href: "/settings", label: "Settings" },
+]
+
 export async function AdminNav() {
   let status: PublishStatus | null = null
   let error: string | null = null
@@ -13,15 +23,17 @@ export async function AdminNav() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-brand-graphite-light bg-brand-graphite text-brand-bone">
-      <div className="mx-auto flex h-16 max-w-content items-center gap-8 px-6">
+      <div className="mx-auto flex min-h-[4rem] max-w-content items-center gap-6 px-6 py-2">
         <Link href="/" className="font-display text-lg font-bold uppercase tracking-tight">
           AFK <span className="text-brand-accent">Theory</span>
           <span className="ml-2 text-xs font-medium tracking-[0.2em] text-brand-muted-light">ADMIN</span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-semibold">
-          <Link href="/" className="hover:text-brand-accent">Products</Link>
-          <Link href="/products/new" className="hover:text-brand-accent">New product</Link>
-          <Link href="/settings" className="hover:text-brand-accent">Settings</Link>
+        <nav className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-semibold">
+          {NAV_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="hover:text-brand-accent">
+              {link.label}
+            </Link>
+          ))}
         </nav>
         <div className="ml-auto flex items-center gap-4">
           {status && (

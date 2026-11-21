@@ -4,17 +4,22 @@ import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { clsx } from "clsx"
 import {
+  buildCategoryTree,
   DEFAULT_SIZES,
+  flattenTree,
   slugify,
   type CategoryRow,
   type ColorInput,
+  type DesignInput,
   type ProductDetails,
   type ProductInput,
   type SizeGuideRow,
 } from "@dtc/catalogue-core"
 import { deleteProduct, saveProduct } from "@/app/actions/products"
-import type { ColorPreset } from "@/lib/data"
+import type { ColorPreset, ProductStoreOptions } from "@/lib/data"
 import { ColorsCard } from "./colors-card"
+import { DesignsCard } from "./designs-card"
+import { MerchandisingCard } from "./merchandising-card"
 import { RichTextEditor } from "./rich-text-editor"
 import { SeoCard } from "./seo-card"
 import { SizeGuidePicker } from "./size-guide-picker"
@@ -41,12 +46,27 @@ export interface ProductFormProps {
   guidesAvailable: boolean
   /** Colors already used on other products, for quick add. */
   colorPresets: ColorPreset[]
+  /** Collections, design groups and whether the store structure migration has run. */
+  storeOptions: ProductStoreOptions
+  initialDesigns: DesignInput[]
 }
 
-export function ProductForm({ id, initial, initialColors, categories, imageCount, sizeGuides, guidesAvailable, colorPresets }: ProductFormProps) {
+export function ProductForm({
+  id,
+  initial,
+  initialColors,
+  categories,
+  imageCount,
+  sizeGuides,
+  guidesAvailable,
+  colorPresets,
+  storeOptions,
+  initialDesigns,
+}: ProductFormProps) {
   const router = useRouter()
   const [form, setForm] = useState<ProductInput>(initial)
   const [colors, setColors] = useState<ColorInput[]>(initialColors)
+  const [designs, setDesigns] = useState<DesignInput[]>(initialDesigns)
   const [slugTouched, setSlugTouched] = useState(Boolean(id))
   const [customSize, setCustomSize] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -75,7 +95,7 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
       return
     }
     startTransition(async () => {
-      const result = await saveProduct(id, publishLater ? { ...form, status: "draft" } : form, colors)
+      const result = await saveProduct(id, publishLater ? { ...form, status: "draft" } : form, colors, storeOptions.available ? designs : null)
       if (!result.ok) {
         const fieldErrors = result.fieldErrors ?? {}
         setErrors(fieldErrors)
@@ -151,12 +171,12 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
               onChange={(e) => set("compareAtBdt", e.target.value === "" ? null : Number(e.target.value))}
             />
           </Field>
-          <Field label="Category" error={errors.categoryId} hint="Manage categories in Settings">
+          <Field label="Main category" error={errors.categoryId} hint="Manage categories under Categories">
             <Select value={form.categoryId ?? ""} onChange={(e) => set("categoryId", e.target.value || null)}>
               <option value="">No category</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
+              {flattenTree(buildCategoryTree(categories)).map((n) => (
+                <option key={n.row.id} value={n.row.id}>
+                  {n.trailNames.join(" / ")}
                 </option>
               ))}
             </Select>
@@ -227,6 +247,17 @@ export function ProductForm({ id, initial, initialColors, categories, imageCount
       </Card>
 
       <ColorsCard colors={colors} presets={colorPresets} errors={errors} onChange={setColors} />
+
+      <DesignsCard designs={designs} available={storeOptions.available} errors={errors} onChange={setDesigns} />
+
+      <MerchandisingCard
+        options={storeOptions}
+        badge={form.badge}
+        collectionIds={form.collectionIds}
+        designGroup={form.designGroup}
+        errors={errors}
+        onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+      />
 
       <Card title="Details">
         <div className="grid gap-5 md:grid-cols-2">
@@ -303,6 +334,9 @@ const FIELD_LABELS: Record<string, string> = {
   status: "Status",
   sizes: "Sizes",
   soldOutSizes: "Sold out sizes",
+  badge: "Badge",
+  designGroup: "More designs group",
+  collectionIds: "Collections",
 }
 
 /** Turns validation keys such as "sizeChart.columns.2" or "0.name" into readable lines. */
@@ -311,6 +345,7 @@ function describeErrors(fieldErrors: Record<string, string>): string[] {
     const message = /at least 1 character/i.test(raw) ? "cannot be empty" : raw
     const [head, ...rest] = key.split(".")
     if (/^\d+$/.test(head)) return `Color ${Number(head) + 1}: ${message}`
+    if (head === "designs") return `Design ${Number(rest[0]) + 1}: ${message}`
     if (head === "sizeChart") {
       const part = rest[0] === "columns" ? `measurement ${Number(rest[1]) + 1} name` : rest[0] === "rows" ? "a measurement value" : rest[0] ?? ""
       return `Size chart, ${part}: ${message}`

@@ -27,6 +27,7 @@ Why it is built this way:
 2. Open **SQL Editor** and run each file in `apps/catalogue-admin/supabase/migrations/`, oldest first: paste the whole file and click **Run**. Running a file twice is safe.
    - `20261120000000_catalogue.sql` creates the tables, the security rules and the `catalogue` storage bucket.
    - `20261121000000_size_guides_seo.sql` adds shared size guides and the search title and description fields. Until it runs, the admin shows a reminder and the site falls back to each product's own chart.
+   - `20261122000000_store_structure.sql` adds the store structure: subcategories, category banners and SEO fields, collections, mega menu product picks, Design options (for example Front design / Back design) with photos per design, product badges and "More designs" groups, content pages (About, Delivery and returns, Contact, Privacy, Terms) and the homepage section order. Until it runs, the site keeps building without them and the admin's new screens show a reminder.
 3. Open **Project Settings > API Keys** and note three values:
    - the **Project URL** (`https://xxxx.supabase.co`)
    - the **publishable** key (or the legacy **anon** key)
@@ -68,6 +69,11 @@ Then manage products:
 - **Description**: use the toolbar for headings, bold, italic, quotes, lists and links. The product name is already the page's main title (H1), so sections inside the description start at **H2** (Heading) and **H3** (Subheading). Anything pasted from elsewhere is cleaned up when the site is built.
 - **Size guides**: write each measurement chart once in **Settings > Size guides** (for example "Oversized tee"), then pick it under **Size guide** on every product that uses it. Changing a guide updates all of those products at the next Publish. Choose **Custom chart for this product only** for a one-off.
 - **Search and sharing**: the search title (about 60 characters) and search description (about 160) control how the product appears in Google and in WhatsApp or Facebook link previews. Leave them empty to use the name and tagline. The preview shows what people will see.
+- **Categories** (top menu): put a category inside another with **Parent** (for example T-Shirts > Drop shoulder; its page is `/c/t-shirts/drop-shoulder/`). Add a banner, a short description, search fields, and pick up to 2 **menu products** for its menu panel; with none picked, the newest products show. Categories without published products stay hidden on the site.
+- **Collections**: groups such as "Drop 01" that mix categories. Add products in the order you want, a banner, and **Show on home** for the homepage spotlight.
+- **Design options**: on a product, add designs (for example Front design and Back design) when customers choose one next to the color. Tag each photo with its design in **Images**. Products without designs show color only. To link separate products instead, give them the same **More designs group**.
+- **Badge**: New or Bestseller. Sale (a compare-at price) and Sold out are added automatically, and products created in the last 30 days count as new.
+- **Pages** and **Homepage**: write the About, Delivery and returns, Contact, Privacy and Terms pages, and choose the order of the homepage sections and which ones show.
 
 **Before launch, replace the starter values:** the starter price of ৳1,450 comes from the old draft fixture. Size charts and fabric weight (GSM) are empty until you add them.
 
