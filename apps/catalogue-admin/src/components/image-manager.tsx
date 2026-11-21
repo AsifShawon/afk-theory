@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { clsx } from "clsx"
-import { IMAGE_ROLES, type ImageRole, type ProductColorRow } from "@dtc/catalogue-core"
+import { IMAGE_ROLES, type ImageRole, type ProductColorRow, type ProductDesignRow } from "@dtc/catalogue-core"
 import { deleteImage, reorderImages, updateImage, uploadImages } from "@/app/actions/images"
 import type { AdminImage } from "@/lib/data"
 import { Button, Card, Notice, Select, TextInput } from "./ui"
@@ -15,18 +15,39 @@ const ROLE_LABELS: Record<ImageRole, string> = {
   detail: "Detail",
 }
 
-export function ImageManager({ productId, images, colors }: { productId: string; images: AdminImage[]; colors: ProductColorRow[] }) {
+export function ImageManager({
+  productId,
+  images,
+  colors,
+  designs = [],
+  designsAvailable = false,
+}: {
+  productId: string
+  images: AdminImage[]
+  colors: ProductColorRow[]
+  /** Saved design options. The Design selector shows only when there are some. */
+  designs?: ProductDesignRow[]
+  /** False until the store structure migration has run. */
+  designsAvailable?: boolean
+}) {
+  const showDesigns = designsAvailable && designs.length > 0
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [items, setItems] = useState(images)
   const [uploadRole, setUploadRole] = useState<ImageRole>("model")
   const [uploadColor, setUploadColor] = useState("")
+  const [uploadDesign, setUploadDesign] = useState("")
   const [dragOver, setDragOver] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
   const [notice, setNotice] = useState<{ tone: "error" | "success" | "info"; text: string } | null>(null)
   const [pending, startTransition] = useTransition()
 
   useEffect(() => setItems(images), [images])
+
+  const missingPhotos = [
+    ...colors.filter((c) => !items.some((i) => i.color_id === c.id)).map((c) => c.name),
+    ...(showDesigns ? designs.filter((d) => !items.some((i) => i.design_id === d.id)).map((d) => d.name) : []),
+  ]
 
   const upload = (files: FileList | File[]) => {
     const list = Array.from(files)
@@ -35,6 +56,7 @@ export function ImageManager({ productId, images, colors }: { productId: string;
     list.forEach((f) => data.append("files", f))
     data.set("role", uploadRole)
     data.set("colorId", uploadColor)
+    if (showDesigns) data.set("designId", uploadDesign)
     setNotice({ tone: "info", text: `Converting and uploading ${list.length} image${list.length > 1 ? "s" : ""}...` })
     startTransition(async () => {
       const result = await uploadImages(productId, data)
@@ -53,11 +75,18 @@ export function ImageManager({ productId, images, colors }: { productId: string;
     })
   }
 
-  const saveImage = (image: AdminImage, patch: Partial<Pick<AdminImage, "color_id" | "role" | "alt">>) => {
+  const saveImage = (image: AdminImage, patch: Partial<Pick<AdminImage, "color_id" | "design_id" | "role" | "alt">>) => {
     const next = { ...image, ...patch }
     setItems((prev) => prev.map((i) => (i.id === image.id ? next : i)))
     startTransition(async () => {
-      const result = await updateImage({ id: next.id, colorId: next.color_id, role: next.role, alt: next.alt })
+      const result = await updateImage({
+        id: next.id,
+        colorId: next.color_id,
+        // Sent only when the column exists.
+        ...(designsAvailable ? { designId: next.design_id ?? null } : {}),
+        role: next.role,
+        alt: next.alt,
+      })
       if (!result.ok) setNotice({ tone: "error", text: result.error })
     })
   }
@@ -89,6 +118,9 @@ export function ImageManager({ productId, images, colors }: { productId: string;
     <Card title={`Images (${items.length})`}>
       <div className="space-y-4">
         {notice && <Notice tone={notice.tone}>{notice.text}</Notice>}
+        {items.length > 0 && missingPhotos.length > 0 && (
+          <Notice tone="info">No photos tagged yet for {missingPhotos.join(", ")}. Shoppers who pick it see the shared photos.</Notice>
+        )}
 
         <div
           onDragOver={(e) => {
@@ -130,6 +162,16 @@ export function ImageManager({ productId, images, colors }: { productId: string;
                 </option>
               ))}
             </Select>
+            {showDesigns && (
+              <Select value={uploadDesign} onChange={(e) => setUploadDesign(e.target.value)} className="w-48" aria-label="Design for new images">
+                <option value="">Any design</option>
+                {designs.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </Select>
+            )}
             <Button type="button" variant="secondary" disabled={pending} onClick={() => inputRef.current?.click()}>
               {pending ? "Working" : "Choose files"}
             </Button>
@@ -182,6 +224,16 @@ export function ImageManager({ productId, images, colors }: { productId: string;
                       </option>
                     ))}
                   </Select>
+                  {showDesigns && (
+                    <Select value={image.design_id ?? ""} onChange={(e) => saveImage(image, { design_id: e.target.value || null })} aria-label="Image design">
+                      <option value="">Any design</option>
+                      {designs.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
                   <AltInput value={image.alt} onSave={(alt) => saveImage(image, { alt })} />
                   <div className="flex items-center justify-between text-[11px] text-brand-muted">
                     <span>

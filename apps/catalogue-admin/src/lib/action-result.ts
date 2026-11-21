@@ -8,10 +8,11 @@ export function fail(error: unknown): { ok: false; error: string } {
   return { ok: false, error: error instanceof Error ? error.message : String(error) }
 }
 
-export function zodFail(error: ZodError): { ok: false; error: string; fieldErrors: Record<string, string> } {
+/** `prefix` namespaces the keys, for example "designs" gives "designs.0.name". */
+export function zodFail(error: ZodError, prefix?: string): { ok: false; error: string; fieldErrors: Record<string, string> } {
   const fieldErrors: Record<string, string> = {}
   for (const issue of error.issues) {
-    const key = issue.path.join(".")
+    const key = [...(prefix ? [prefix] : []), ...issue.path].join(".")
     if (!fieldErrors[key]) {
       fieldErrors[key] = issue.message
     }

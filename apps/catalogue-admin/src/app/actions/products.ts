@@ -3,19 +3,24 @@
 import { revalidatePath } from "next/cache"
 import {
   colorInputSchema,
+  designInputSchema,
   productInputSchema,
   TABLES,
   type ColorInput,
+  type DesignInput,
   type ProductImageRow,
   type ProductInput,
 } from "@dtc/catalogue-core"
 import { z } from "zod"
 import { fail, zodFail, type ActionResult } from "@/lib/action-result"
 import { removeImageObjects } from "@/lib/images"
+import { storeError, storeStructureReady } from "@/lib/store-structure"
 import { getAdmin } from "@/lib/supabase-server"
 
-function toRow(input: ProductInput) {
+function toRow(input: ProductInput, storeReady: boolean) {
   return {
+    // Sent only once migration 20261122000000 has added the columns.
+    ...(storeReady ? { badge: input.badge, design_group: input.designGroup.trim() } : {}),
     name: input.name,
     slug: input.slug,
     tagline: input.tagline,
@@ -36,11 +41,16 @@ function toRow(input: ProductInput) {
   }
 }
 
-/** Creates or updates a product and replaces its colors. */
+/**
+ * Creates or updates a product and replaces its colors. Designs and
+ * collections are saved too once the store structure migration has run;
+ * pass `designs` as null to leave them unchanged.
+ */
 export async function saveProduct(
   id: string | null,
   product: unknown,
-  colors: unknown
+  colors: unknown,
+  designs: unknown = null
 ): Promise<ActionResult<{ id: string }>> {
   const parsed = productInputSchema.safeParse(product)
   if (!parsed.success) {
@@ -50,10 +60,15 @@ export async function saveProduct(
   if (!parsedColors.success) {
     return zodFail(parsedColors.error)
   }
+  const parsedDesigns = z.array(designInputSchema).max(12).nullable().safeParse(designs)
+  if (!parsedDesigns.success) {
+    return zodFail(parsedDesigns.error, "designs")
+  }
 
   try {
     const { client } = getAdmin()
-    const row = toRow(parsed.data)
+    const storeReady = await storeStructureReady(client)
+    const row = toRow(parsed.data, storeReady)
     let productId = id
 
     if (productId) {
@@ -76,6 +91,10 @@ export async function saveProduct(
     }
 
     await syncColors(productId as string, parsedColors.data)
+    if (storeReady) {
+      if (parsedDesigns.data) await syncDesigns(productId as string, parsedDesigns.data)
+      await syncCollections(productId as string, parsed.data.collectionIds)
+    }
     revalidatePath("/", "layout")
     return { ok: true, data: { id: productId as string }, message: "Saved" }
   } catch (err) {
@@ -106,6 +125,60 @@ async function syncColors(productId: string, colors: ColorInput[]) {
       ? await client.from(TABLES.colors).update(values).eq("id", color.id).eq("product_id", productId)
       : await client.from(TABLES.colors).insert(values)
     if (error) throw new Error(`Could not save color ${color.name}: ${error.message}`)
+  }
+}
+
+async function syncDesigns(productId: string, designs: DesignInput[]) {
+  const { client } = getAdmin()
+  const keepIds = designs.map((d) => d.id).filter((v): v is string => Boolean(v))
+
+  // Photos of a removed design become shared photos (design_id is set null).
+  let removeQuery = client.from(TABLES.designs).delete().eq("product_id", productId)
+  if (keepIds.length > 0) {
+    removeQuery = removeQuery.not("id", "in", `(${keepIds.join(",")})`)
+  }
+  const { error: removeError } = await removeQuery
+  if (removeError) throw storeError(removeError)
+
+  for (const [index, design] of designs.entries()) {
+    const values = { product_id: productId, name: design.name, in_stock: design.inStock, sort_order: index }
+    const { error } = design.id
+      ? await client.from(TABLES.designs).update(values).eq("id", design.id).eq("product_id", productId)
+      : await client.from(TABLES.designs).insert(values)
+    if (error) throw new Error(`Could not save design ${design.name}: ${error.message}`)
+  }
+}
+
+/** Keeps the product's place in collections it stays in; new ones add it at the end. */
+async function syncCollections(productId: string, collectionIds: string[]) {
+  const { client } = getAdmin()
+  const { data, error } = await client.from(TABLES.productCollections).select("collection_id").eq("product_id", productId)
+  if (error) throw storeError(error)
+  const current = new Set((data ?? []).map((r) => r.collection_id as string))
+  const wanted = new Set(collectionIds)
+
+  const removed = [...current].filter((cid) => !wanted.has(cid))
+  if (removed.length > 0) {
+    const { error: removeError } = await client
+      .from(TABLES.productCollections)
+      .delete()
+      .eq("product_id", productId)
+      .in("collection_id", removed)
+    if (removeError) throw storeError(removeError)
+  }
+
+  for (const collectionId of [...wanted].filter((cid) => !current.has(cid))) {
+    const { data: last } = await client
+      .from(TABLES.productCollections)
+      .select("sort_order")
+      .eq("collection_id", collectionId)
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const { error: insertError } = await client
+      .from(TABLES.productCollections)
+      .insert({ product_id: productId, collection_id: collectionId, sort_order: (last?.sort_order ?? -1) + 1 })
+    if (insertError) throw new Error(`Could not add the product to a collection: ${insertError.message}`)
   }
 }
 

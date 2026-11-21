@@ -5,6 +5,7 @@ import { IMAGE_ROLES, imageUpdateSchema, TABLES, type ImageRole, type ProductIma
 import { z } from "zod"
 import { fail, type ActionResult } from "@/lib/action-result"
 import { MAX_UPLOAD_BYTES, processAndUploadImage, removeImageObjects } from "@/lib/images"
+import { storeStructureReady } from "@/lib/store-structure"
 import { getAdmin } from "@/lib/supabase-server"
 
 /** Marks the product as changed so the admin shows "unpublished changes". */
@@ -29,6 +30,8 @@ export async function uploadImages(
     const role: ImageRole = (IMAGE_ROLES as readonly string[]).includes(roleValue) ? (roleValue as ImageRole) : "detail"
     const colorValue = String(formData.get("colorId") ?? "")
     const colorId = z.string().uuid().safeParse(colorValue).success ? colorValue : null
+    const designValue = String(formData.get("designId") ?? "")
+    const designId = z.string().uuid().safeParse(designValue).success && (await storeStructureReady(client)) ? designValue : null
 
     const { data: product, error: productError } = await client
       .from(TABLES.products)
@@ -61,6 +64,7 @@ export async function uploadImages(
         await processAndUploadImage(client, Buffer.from(await file.arrayBuffer()), {
           productId,
           colorId,
+          designId,
           role,
           alt: `${product.name}`,
           sortOrder: sortOrder++,
@@ -88,7 +92,13 @@ export async function updateImage(input: unknown): Promise<ActionResult> {
     const { client } = getAdmin()
     const { data, error } = await client
       .from(TABLES.images)
-      .update({ color_id: parsed.data.colorId, role: parsed.data.role, alt: parsed.data.alt })
+      .update({
+        color_id: parsed.data.colorId,
+        // Left out until the store structure migration adds the column.
+        ...(parsed.data.designId !== undefined ? { design_id: parsed.data.designId } : {}),
+        role: parsed.data.role,
+        alt: parsed.data.alt,
+      })
       .eq("id", parsed.data.id)
       .select("product_id")
       .single()

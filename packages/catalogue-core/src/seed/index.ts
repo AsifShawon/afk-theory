@@ -1,7 +1,9 @@
 import { DEFAULT_SETTINGS, DEFAULT_SIZES } from "../constants"
 import type {
   CategoryRow,
+  CollectionRow,
   ImageRole,
+  ProductCollectionRow,
   ProductColorRow,
   ProductDetails,
   ProductImageRow,
@@ -47,6 +49,16 @@ export interface SeedProduct {
 }
 
 export const SEED_CATEGORIES = [{ slug: "t-shirts", name: "T-Shirts" }]
+
+/** Collections cut across categories. Product slugs are in display order. */
+export const SEED_COLLECTIONS = [
+  {
+    slug: "drop-01",
+    name: "Drop 01",
+    description: "The first AFK THEORY drop.",
+    productSlugs: ["drop-01-oversized-tee"],
+  },
+]
 
 export const SEED_PRODUCTS: SeedProduct[] = [
   {
@@ -187,11 +199,39 @@ export function seedToRawCatalogue(): RawCatalogue {
     })
   })
 
+  const collections: CollectionRow[] = SEED_COLLECTIONS.map((c, i) => ({
+    id: fixtureId(5, i),
+    slug: c.slug,
+    name: c.name,
+    description: c.description,
+    image_path: null,
+    image_widths: [],
+    image_width: null,
+    image_height: null,
+    show_on_home: true,
+    sort_order: i,
+    seo_title: "",
+    seo_description: "",
+    created_at: now,
+    updated_at: now,
+  }))
+  const productCollections: ProductCollectionRow[] = SEED_COLLECTIONS.flatMap((c, ci) =>
+    c.productSlugs.flatMap((slug, pi) => {
+      const product = products.find((p) => p.slug === slug)
+      return product ? [{ product_id: product.id, collection_id: collections[ci].id, sort_order: pi }] : []
+    })
+  )
+
   return {
     categories,
     products,
     colors,
     images,
+    collections,
+    productCollections,
+    menuProducts: [],
+    designs: [],
+    pages: [],
     sizeGuides: [],
     settings: {
       id: 1,

@@ -5,7 +5,7 @@ import { ImageManager } from "@/components/image-manager"
 import { ProductForm } from "@/components/product-form"
 import { Badge, Notice } from "@/components/ui"
 import { descriptionToHtml } from "@dtc/catalogue-core"
-import { loadCategories, loadProduct, loadSizeGuides, loadColorPresets } from "@/lib/data"
+import { loadCategories, loadProduct, loadSizeGuides, loadColorPresets, loadProductStoreOptions } from "@/lib/data"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -24,8 +24,15 @@ export default async function EditProductPage({
   let categories
   let sizeGuides
   let colorPresets
+  let storeOptions
   try {
-    ;[data, categories, sizeGuides, colorPresets] = await Promise.all([loadProduct(id), loadCategories(), loadSizeGuides(), loadColorPresets()])
+    ;[data, categories, sizeGuides, colorPresets, storeOptions] = await Promise.all([
+      loadProduct(id),
+      loadCategories(),
+      loadSizeGuides(),
+      loadColorPresets(),
+      loadProductStoreOptions(id),
+    ])
   } catch (err) {
     return <DbError error={err} />
   }
@@ -50,7 +57,7 @@ export default async function EditProductPage({
         </Notice>
       )}
 
-      <ImageManager productId={product.id} images={images} colors={colors} />
+      <ImageManager productId={product.id} images={images} colors={colors} designs={storeOptions.designs} designsAvailable={storeOptions.available} />
 
       <ProductForm
         key={product.updated_at}
@@ -60,6 +67,8 @@ export default async function EditProductPage({
         sizeGuides={sizeGuides.guides}
         guidesAvailable={!sizeGuides.migrationMissing}
         colorPresets={colorPresets}
+        storeOptions={storeOptions}
+        initialDesigns={storeOptions.designs.map((d) => ({ id: d.id, name: d.name, inStock: d.in_stock }))}
         initial={{
           name: product.name,
           slug: product.slug,
@@ -78,6 +87,9 @@ export default async function EditProductPage({
           soldOutSizes: product.sold_out_sizes,
           details: product.details ?? {},
           sizeChart: product.size_chart ?? { columns: [], rows: [] },
+          badge: product.badge ?? "none",
+          designGroup: product.design_group ?? "",
+          collectionIds: storeOptions.collectionIds,
         }}
         initialColors={colors.map((c) => ({ id: c.id, name: c.name, hex: c.hex, inStock: c.in_stock }))}
       />

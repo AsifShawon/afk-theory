@@ -6,11 +6,21 @@ import { clsx } from "clsx"
 import type { ReactNode } from "react"
 
 /**
- * Formatted description editor. Stores HTML. Headings are h2 and h3 only
- * because the product name is already the page's h1. The site sanitizes the
+ * Formatted text editor for product descriptions and content pages. Stores
+ * HTML. Headings are h2 and h3 only because the product name or page title
+ * is already the page's h1. The site sanitizes the
  * HTML again at build time.
  */
-export function RichTextEditor({ value, onChange }: { value: string; onChange: (html: string) => void }) {
+export function RichTextEditor({
+  value,
+  onChange,
+  label = "Product description",
+}: {
+  value: string
+  onChange: (html: string) => void
+  /** Accessible name of the editing area. */
+  label?: string
+}) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -26,7 +36,7 @@ export function RichTextEditor({ value, onChange }: { value: string; onChange: (
     editorProps: {
       attributes: {
         class: "rich-text min-h-[200px] px-4 py-3 focus:outline-none",
-        "aria-label": "Product description",
+        "aria-label": label,
       },
     },
     onUpdate: ({ editor }) => onChange(editor.isEmpty ? "" : editor.getHTML()),
