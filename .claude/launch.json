@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "catalogue-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@dtc/catalogue", "dev"],
+      "port": 8100
+    }
+  ]
+}
