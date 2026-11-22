@@ -379,6 +379,9 @@ importers:
 
   packages/catalogue-core:
     dependencies:
+      '@dtc/commerce-contracts':
+        specifier: workspace:*
+        version: link:../commerce-contracts
       '@supabase/supabase-js':
         specifier: ^2.49.0
         version: 2.119.2(@opentelemetry/api@1.9.1)

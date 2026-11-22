@@ -3,11 +3,12 @@ import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/components/seo/json-
 import { ListingHero, ListingShell } from "@/components/shop/listing-hero"
 import { ProductListing } from "@/components/shop/product-listing"
 import { getCatalogue } from "@/lib/catalogue"
+import { ORDER_HOW } from "@/lib/checkout"
 import { coverImage, productsInCategory } from "@/lib/store"
 
 export const metadata: Metadata = {
   title: "Shop all",
-  description: "Every AFK THEORY piece in one place. Filter by category, color, size and price, then order on WhatsApp or Messenger.",
+  description: `Every AFK THEORY piece in one place. Filter by category, color, size and price. ${ORDER_HOW}, cash on delivery.`,
   alternates: { canonical: "/shop/" },
 }
 

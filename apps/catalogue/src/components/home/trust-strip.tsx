@@ -1,5 +1,6 @@
 import { formatBdt, type SiteSettings } from "@dtc/catalogue-core"
 import { MessengerIcon, PauseMark, WhatsAppIcon } from "@/components/ui/icons"
+import { CHECKOUT_ENABLED } from "@/lib/checkout"
 
 /**
  * Four short reasons to order, built from the site settings: payment,
@@ -17,8 +18,8 @@ export function TrustStrip({ settings }: { settings: SiteSettings }) {
       icon: <span className="font-hud text-sm">BD</span>,
     },
     {
-      title: "Order in one message",
-      body: "WhatsApp or Messenger. Your order is written for you.",
+      title: CHECKOUT_ENABLED ? "No account needed" : "Order in one message",
+      body: CHECKOUT_ENABLED ? "Check out in a minute, or send your cart on WhatsApp." : "WhatsApp or Messenger. Your order is written for you.",
       icon: (
         <span className="flex gap-1">
           <WhatsAppIcon size={16} />

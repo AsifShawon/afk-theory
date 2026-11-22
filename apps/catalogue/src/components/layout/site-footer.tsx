@@ -1,6 +1,7 @@
 import { Link } from "next-view-transitions"
 import type { SiteSettings } from "@dtc/catalogue-core"
 import { MessengerIcon, PauseMark, WhatsAppIcon } from "@/components/ui/icons"
+import { CHECKOUT_ENABLED } from "@/lib/checkout"
 import { messengerUrl } from "@/lib/order-message"
 import { normalizeWhatsappNumber } from "@dtc/catalogue-core"
 import type { NavData } from "@/lib/store"
@@ -16,7 +17,7 @@ export function SiteFooter({ settings, nav }: { settings: SiteSettings; nav: Nav
         <div>
           <PauseMark size={40} className="text-brand-accent" />
           <p className="mt-6 max-w-sm text-brand-bone/70">
-            Streetwear for the hours you spend offline. Made in Bangladesh, ordered in one message, paid on delivery.
+            Streetwear for the hours you spend offline. Made in Bangladesh, {CHECKOUT_ENABLED ? "ordered in a minute" : "ordered in one message"}, paid on delivery.
           </p>
         </div>
         <div>

@@ -1,8 +1,9 @@
 import { formatBdt, type SiteSettings } from "@dtc/catalogue-core"
 import { MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { Reveal } from "@/components/motion/reveal"
+import { CHECKOUT_ENABLED } from "@/lib/checkout"
 
-const STEPS = [
+const CHAT_STEPS = [
   {
     title: "Pick your size",
     body: "Choose the color, size and quantity on any product. Add more than one piece to your order list if you like.",
@@ -17,12 +18,29 @@ const STEPS = [
   },
 ]
 
+const CHECKOUT_STEPS = [
+  {
+    title: "Pick your size",
+    body: "Choose the color, size and quantity on any product and add it to your cart.",
+  },
+  {
+    title: "Check out in a minute",
+    body: "Your name, phone and address. No account, no card. Prefer chat? Send the cart on WhatsApp instead.",
+  },
+  {
+    title: "Pay on delivery",
+    body: "We call to confirm and ship it. Pay the courier in cash when the parcel reaches you.",
+  },
+]
+
+const STEPS = CHECKOUT_ENABLED ? CHECKOUT_STEPS : CHAT_STEPS
+
 export function HowToOrder({ settings }: { settings: SiteSettings }) {
   return (
     <section id="how-to-order" aria-labelledby="how-title" className="bg-brand-bone py-24 text-brand-graphite md:py-32">
       <div className="mx-auto max-w-editorial px-5 md:px-10">
         <Reveal>
-          <p className="font-hud text-[11px] text-brand-olive">No account. No card. No checkout.</p>
+          <p className="font-hud text-[11px] text-brand-olive">{CHECKOUT_ENABLED ? "No account. No card. Cash on delivery." : "No account. No card. No checkout."}</p>
           <h2 id="how-title" className="display mt-3 text-6xl md:text-8xl">
             How to order
           </h2>
@@ -39,7 +57,7 @@ export function HowToOrder({ settings }: { settings: SiteSettings }) {
                 {step.title}
               </h3>
               <p className="mt-3 text-brand-olive">{step.body}</p>
-              {i === 1 && (
+              {i === 1 && !CHECKOUT_ENABLED && (
                 <div className="mt-5 flex gap-3 text-brand-graphite" aria-hidden>
                   <WhatsAppIcon size={22} />
                   <MessengerIcon size={22} />

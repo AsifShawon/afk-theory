@@ -1,11 +1,13 @@
 "use client"
 
+import NextLink from "next/link"
 import { Link } from "next-view-transitions"
 import { useEffect, useRef } from "react"
 import { clsx } from "clsx"
 import { formatBdt, type SiteSettings } from "@dtc/catalogue-core"
 import { useLenis } from "@/components/motion/smooth-scroll"
-import { CloseIcon, MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
+import { ArrowIcon, CloseIcon, MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
+import { CHECKOUT_ENABLED } from "@/lib/checkout"
 import { describeVariant, lineTotal, MAX_QUANTITY, orderSubtotal } from "@/lib/order-message"
 import { useOrder } from "./order-provider"
 import { useSendOrder } from "./use-send-order"
@@ -39,7 +41,7 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Order list"
+        aria-label={CHECKOUT_ENABLED ? "Cart" : "Order list"}
         inert={!drawerOpen}
         className={clsx(
           "absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-brand-bone text-brand-graphite transition-transform duration-500 ease-out-expo",
@@ -48,10 +50,12 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
       >
         <div className="flex items-center justify-between border-b border-brand-graphite/10 px-6 py-5">
           <div>
-            <h2 className="display text-3xl">Order list</h2>
-            <p className="font-hud mt-1 text-[10px] text-brand-muted">Sent as one message. Pay cash on delivery.</p>
+            <h2 className="display text-3xl">{CHECKOUT_ENABLED ? "Cart" : "Order list"}</h2>
+            <p className="font-hud mt-1 text-[10px] text-brand-muted">
+              {CHECKOUT_ENABLED ? "Pay cash on delivery." : "Sent as one message. Pay cash on delivery."}
+            </p>
           </div>
-          <button ref={closeRef} onClick={() => setDrawerOpen(false)} className="p-2 hover:text-brand-olive" aria-label="Close order list">
+          <button ref={closeRef} onClick={() => setDrawerOpen(false)} className="p-2 hover:text-brand-olive" aria-label={CHECKOUT_ENABLED ? "Close cart" : "Close order list"}>
             <CloseIcon />
           </button>
         </div>
@@ -60,7 +64,7 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
           {items.length === 0 ? (
             <div className="py-16 text-center">
               <p className="display text-2xl">Nothing here yet</p>
-              <p className="mt-2 text-sm text-brand-muted">Pick a size on any product and choose Add to order list.</p>
+              <p className="mt-2 text-sm text-brand-muted">Pick a size on any product and choose {CHECKOUT_ENABLED ? "Add to cart" : "Add to order list"}.</p>
               <Link href="/#collection" onClick={() => setDrawerOpen(false)} className="btn-outline mt-6 h-12">
                 Browse the collection
               </Link>
@@ -94,8 +98,32 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
               <span className="font-hud text-[11px] text-brand-muted">Subtotal</span>
               <span className="display text-3xl tracking-normal">{formatBdt(subtotal)}</span>
             </div>
-            <p className="text-xs text-brand-muted">Delivery is added by area and confirmed in the chat.</p>
-            {hasChannel ? (
+            {CHECKOUT_ENABLED ? (
+              <>
+                <p className="text-xs text-brand-muted">Delivery is added at checkout, by district.</p>
+                <NextLink href="/checkout/" onClick={() => setDrawerOpen(false)} className="btn-signal w-full">
+                  Checkout <ArrowIcon />
+                </NextLink>
+                {hasChannel && (
+                  <div className="flex items-center justify-center gap-4 pt-1 text-xs font-semibold text-brand-muted">
+                    <span>Or order by message:</span>
+                    {channels.whatsapp && (
+                      <button onClick={() => send("whatsapp", items)} className="inline-flex items-center gap-1.5 hover:text-brand-graphite">
+                        <WhatsAppIcon size={16} /> WhatsApp
+                      </button>
+                    )}
+                    {channels.messenger && (
+                      <button onClick={() => send("messenger", items)} className="inline-flex items-center gap-1.5 hover:text-brand-graphite">
+                        <MessengerIcon size={16} /> Messenger
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-xs text-brand-muted">Delivery is added by area and confirmed in the chat.</p>
+            )}
+            {CHECKOUT_ENABLED ? null : hasChannel ? (
               <div className="grid gap-2">
                 {channels.whatsapp && (
                   <button onClick={() => send("whatsapp", items)} className="btn-signal w-full">
@@ -112,7 +140,7 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
               <p className="text-sm font-semibold">Ordering opens soon.</p>
             )}
             <button onClick={clear} className="w-full text-center text-xs font-semibold text-brand-muted hover:underline">
-              Clear order list
+              {CHECKOUT_ENABLED ? "Clear cart" : "Clear order list"}
             </button>
           </div>
         )}

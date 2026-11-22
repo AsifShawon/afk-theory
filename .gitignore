@@ -64,3 +64,6 @@ Thumbs.db
 # Uploaded product and campaign media (production uses S3/R2 object storage).
 # Files already tracked stay tracked until removed with: git rm -r --cached apps/backend/static
 apps/backend/static/
+
+# Wrangler local state (wrangler pages dev for the checkout functions)
+.wrangler/

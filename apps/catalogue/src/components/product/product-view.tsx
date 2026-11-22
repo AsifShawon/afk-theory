@@ -1,6 +1,7 @@
 "use client"
 
 import { Link } from "next-view-transitions"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { clsx } from "clsx"
 import { formatBdt, type CatalogueProduct, type SiteSettings } from "@dtc/catalogue-core"
@@ -8,6 +9,7 @@ import { QuantityStepper } from "@/components/order/order-drawer"
 import { useOrder } from "@/components/order/order-provider"
 import { useSendOrder } from "@/components/order/use-send-order"
 import { MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
+import { CART_LABEL, CHECKOUT_ENABLED } from "@/lib/checkout"
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap"
 import { findByParam, optionParam } from "@/lib/gallery"
 import type { OrderLine } from "@/lib/order-message"
@@ -27,6 +29,7 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
   const actionsRef = useRef<HTMLDivElement>(null)
   const sizesRef = useRef<HTMLFieldSetElement>(null)
   const { add, setDrawerOpen, showToast } = useOrder()
+  const router = useRouter()
   const { send, channels, hasChannel } = useSendOrder(settings)
 
   // Default: the first in-stock color that has photos.
@@ -131,8 +134,15 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
     const line = currentLine()
     if (!line) return
     add(line)
-    showToast(`Added ${product.name}${size ? `, size ${size}` : ""} to your order list.`)
+    showToast(`Added ${product.name}${size ? `, size ${size}` : ""} to your ${CART_LABEL.toLowerCase()}.`)
     setDrawerOpen(true)
+  }
+
+  const buyNow = () => {
+    const line = currentLine()
+    if (!line) return
+    add(line)
+    router.push("/checkout/")
   }
 
   return (
@@ -249,7 +259,34 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
                   <QuantityStepper value={quantity} onChange={setQuantity} label={product.name} tone="dark" />
                   <span className="font-hud text-[11px] text-brand-bone/50">Total {formatBdt(product.priceBdt * quantity)}</span>
                 </div>
-                {hasChannel ? (
+                {CHECKOUT_ENABLED ? (
+                  <>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <button type="button" onClick={addToList} className="btn-signal">
+                        Add to cart
+                      </button>
+                      <button type="button" onClick={buyNow} className="btn-outline">
+                        Buy now
+                      </button>
+                    </div>
+                    {hasChannel && (
+                      <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-brand-bone/60">
+                        <span>Prefer chat?</span>
+                        {channels.whatsapp && (
+                          <button type="button" onClick={() => orderNow("whatsapp")} className="inline-flex items-center gap-1.5 font-semibold text-brand-bone hover:text-brand-accent">
+                            <WhatsAppIcon size={16} /> Order on WhatsApp
+                          </button>
+                        )}
+                        {channels.messenger && (
+                          <button type="button" onClick={() => orderNow("messenger")} className="inline-flex items-center gap-1.5 font-semibold text-brand-bone hover:text-brand-accent">
+                            <MessengerIcon size={16} /> Messenger
+                          </button>
+                        )}
+                      </p>
+                    )}
+                    <p className="text-xs text-brand-bone/50">No account needed. Pay cash on delivery.</p>
+                  </>
+                ) : hasChannel ? (
                   <div className="grid gap-2 sm:grid-cols-2">
                     {channels.whatsapp && (
                       <button type="button" onClick={() => orderNow("whatsapp")} className={clsx("btn-signal", !channels.messenger && "sm:col-span-2")}>
@@ -265,10 +302,14 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
                 ) : (
                   <p className="border border-white/15 p-4 text-sm text-brand-bone/70">Ordering opens soon.</p>
                 )}
-                <button type="button" onClick={addToList} className="h-12 w-full border border-white/15 font-hud text-[11px] transition-colors hover:border-brand-bone">
-                  Add to order list
-                </button>
-                <p className="text-xs text-brand-bone/50">Your order opens as a message you can check before sending. Pay cash on delivery.</p>
+                {!CHECKOUT_ENABLED && (
+                  <>
+                    <button type="button" onClick={addToList} className="h-12 w-full border border-white/15 font-hud text-[11px] transition-colors hover:border-brand-bone">
+                      Add to order list
+                    </button>
+                    <p className="text-xs text-brand-bone/50">Your order opens as a message you can check before sending. Pay cash on delivery.</p>
+                  </>
+                )}
               </>
             ) : (
               <p className="border border-white/15 p-4 text-sm">
@@ -335,7 +376,7 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
         </div>
       </div>
 
-      {canOrder && hasChannel && (
+      {canOrder && (hasChannel || CHECKOUT_ENABLED) && (
         <div
           className={clsx(
             "fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-white/10 bg-brand-graphite/95 px-4 py-3 backdrop-blur transition-transform duration-500 md:hidden",
@@ -351,8 +392,12 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
               {size ? ` / ${size}` : ""}
             </p>
           </div>
-          <button type="button" onClick={() => orderNow(channels.whatsapp ? "whatsapp" : "messenger")} className="btn-signal h-12 px-5">
-            {size || !needsSize ? "Order now" : "Choose size"}
+          <button
+            type="button"
+            onClick={() => (CHECKOUT_ENABLED ? addToList() : orderNow(channels.whatsapp ? "whatsapp" : "messenger"))}
+            className="btn-signal h-12 px-5"
+          >
+            {size || !needsSize ? (CHECKOUT_ENABLED ? "Add to cart" : "Order now") : "Choose size"}
           </button>
         </div>
       )}

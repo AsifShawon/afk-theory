@@ -37,7 +37,8 @@ This project is strictly a **production-ready, single-brand direct-to-consumer c
 │   ├── storefront/               # OPTIONAL storefront
 │   ├── catalogue/                # Temporary static showcase (Supabase data, WhatsApp/Messenger orders). See its AGENTS.md
 │   └── catalogue-admin/          # LOCAL-ONLY admin for catalogue. Never deploy. See its AGENTS.md
-├── packages/catalogue-core/      # Types, schemas, queries and seed data shared by the two catalogue apps
+├── packages/catalogue-core/      # Types, schemas, queries and seed data shared by the two catalogue apps (orders logic in src/orders/)
+├── functions/api/                # Cloudflare Pages Functions for the catalogue's checkout (thin wrappers over catalogue-core/orders)
 ├── eslint.config.ts              # Root ESLint: @medusajs/eslint-plugin recommended
 ├── turbo.json                    # Task graph: build, dev, start, lint, test, seed
 ```

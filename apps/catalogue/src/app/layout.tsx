@@ -13,6 +13,7 @@ import { OrderToast } from "@/components/order/order-toast"
 import { SearchOverlay } from "@/components/search/search-overlay"
 import { JsonLd, siteJsonLd } from "@/components/seo/json-ld"
 import { getCatalogue, siteUrl } from "@/lib/catalogue"
+import { ORDER_HOW } from "@/lib/checkout"
 import { buildNavData } from "@/lib/store"
 import "./globals.css"
 
@@ -21,7 +22,7 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", displa
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jetbrains-mono", display: "swap" })
 
 const DESCRIPTION =
-  "Oversized streetwear made in Bangladesh. Browse the AFK THEORY collection and order in one message on WhatsApp or Messenger. Cash on delivery."
+  `Oversized streetwear made in Bangladesh. Browse the AFK THEORY collection. ${ORDER_HOW}, cash on delivery.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -38,7 +39,9 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const catalogue = await getCatalogue()
-  const prices: PriceBook = Object.fromEntries(catalogue.products.map((p) => [p.slug, { name: p.name, priceBdt: p.priceBdt }]))
+  const prices: PriceBook = Object.fromEntries(
+    catalogue.products.map((p) => [p.slug, { name: p.name, priceBdt: p.priceBdt, image: p.images[0]?.sources[0]?.src }])
+  )
   const tip = catalogue.settings.announcement || "Every order is cash on delivery. Pay the courier when it arrives."
   const nav = buildNavData(catalogue)
   const suggestions = [

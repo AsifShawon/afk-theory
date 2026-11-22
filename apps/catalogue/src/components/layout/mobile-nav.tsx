@@ -8,6 +8,7 @@ import { clsx } from "clsx"
 import type { SiteSettings } from "@dtc/catalogue-core"
 import { useOrder } from "@/components/order/order-provider"
 import { BagIcon, ChevronIcon, CloseIcon, HomeIcon, MessengerIcon, SearchIcon, ShopIcon, WhatsAppIcon } from "@/components/ui/icons"
+import { CART_LABEL } from "@/lib/checkout"
 import { messengerUrl } from "@/lib/order-message"
 import type { NavData } from "@/lib/store"
 import { normalizeWhatsappNumber } from "@dtc/catalogue-core"
@@ -228,7 +229,7 @@ export function BottomBar() {
         <button type="button" onClick={() => setSearchOpen(true)} className={clsx(item, searchOpen ? "text-brand-accent" : "text-brand-bone/70")}>
           <SearchIcon /> Search
         </button>
-        <button type="button" onClick={() => setDrawerOpen(true)} className={clsx(item, "relative text-brand-bone/70")} aria-label={`Order list, ${count} items`}>
+        <button type="button" onClick={() => setDrawerOpen(true)} className={clsx(item, "relative text-brand-bone/70")} aria-label={`${CART_LABEL}, ${count} items`}>
           <span className="relative">
             <BagIcon />
             {count > 0 && (
@@ -237,7 +238,7 @@ export function BottomBar() {
               </span>
             )}
           </span>
-          Order list
+          {CART_LABEL}
         </button>
       </nav>
     </>

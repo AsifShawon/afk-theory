@@ -9,6 +9,7 @@ import { useOrder } from "@/components/order/order-provider"
 import { BagIcon, ChevronIcon, MenuIcon, SearchIcon } from "@/components/ui/icons"
 import { Picture } from "@/components/ui/picture"
 import type { NavData, NavProduct } from "@/lib/store"
+import { CART_LABEL } from "@/lib/checkout"
 import { BADGE_LABEL } from "@/lib/store"
 import { useNavUI } from "./nav-ui"
 
@@ -167,10 +168,10 @@ export function SiteHeader({ nav, announcement }: { nav: NavData; announcement: 
               type="button"
               onClick={() => setDrawerOpen(true)}
               className="flex h-10 items-center gap-2 border border-white/15 px-3 transition-colors hover:border-brand-accent"
-              aria-label={`Open order list, ${count} item${count === 1 ? "" : "s"}`}
+              aria-label={`Open ${CART_LABEL.toLowerCase()}, ${count} item${count === 1 ? "" : "s"}`}
             >
               <BagIcon size={18} />
-              <span className="font-hud hidden text-[11px] sm:inline">Order list</span>
+              <span className="font-hud hidden text-[11px] sm:inline">{CART_LABEL}</span>
               <span
                 className={clsx(
                   "flex h-5 min-w-5 items-center justify-center px-1 font-hud text-[10px] tracking-normal",

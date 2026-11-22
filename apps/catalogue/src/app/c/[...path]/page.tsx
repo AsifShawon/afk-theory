@@ -4,6 +4,7 @@ import { breadcrumbJsonLd, itemListJsonLd, JsonLd } from "@/components/seo/json-
 import { ListingHero, ListingShell } from "@/components/shop/listing-hero"
 import { ProductListing } from "@/components/shop/product-listing"
 import { absoluteUrl, getCatalogue } from "@/lib/catalogue"
+import { ORDER_HOW } from "@/lib/checkout"
 import { allCategoryNodes, categoryAncestors, categoryPathSegments, coverImage, findCategoryByPath, productsInCategory } from "@/lib/store"
 
 export const dynamicParams = false
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ path: str
   const catalogue = await getCatalogue()
   const node = findCategoryByPath(catalogue, path)
   if (!node) return { robots: { index: false } }
-  const description = node.seoDescription || node.description || `Shop ${node.name} from AFK THEORY. Order on WhatsApp or Messenger, cash on delivery.`
+  const description = node.seoDescription || node.description || `Shop ${node.name} from AFK THEORY. ${ORDER_HOW}, cash on delivery.`
   const image = coverImage(node.image, productsInCategory(catalogue, node.id))
   return {
     title: node.seoTitle ? { absolute: node.seoTitle } : node.name,

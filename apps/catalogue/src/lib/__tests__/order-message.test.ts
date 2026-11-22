@@ -47,6 +47,18 @@ test("builds a single-item message", () => {
   )
 })
 
+test("fills in the customer's details and fee when checkout falls back to WhatsApp", () => {
+  const message = buildOrderMessage({
+    code: "AFK-261120-K7Q",
+    lines: [tee],
+    deliveryZones: DEFAULT_DELIVERY_ZONES,
+    customer: { name: "Rahim Uddin", phone: "01712345678", address: "House 12\nRoad 5", district: "Dhaka", note: "After 5pm" },
+    delivery: { label: "Inside Dhaka", feeBdt: 60 },
+  })
+  assert.ok(message.includes("Delivery (Inside Dhaka): BDT 60\nTotal: BDT 2,960"))
+  assert.ok(message.includes("Name: Rahim Uddin\nPhone: 01712345678\nFull address: House 12, Road 5\nDistrict: Dhaka\nNote: After 5pm"))
+})
+
 test("builds a multi-item message with a subtotal", () => {
   const cap: OrderLine = { slug: "cap", productName: "Pause Cap", colorName: null, size: null, quantity: 1, unitPriceBdt: 650 }
   const message = buildOrderMessage({ code: "AFK-261120-K7Q", lines: [tee, cap], deliveryZones: [] })

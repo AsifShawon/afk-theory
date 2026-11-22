@@ -128,8 +128,9 @@ The site is plain static files, so any static host works with the same build com
 
 - **WhatsApp:** the button opens `wa.me/<your number>` with the whole order already typed in. The customer checks it, adds name, phone and address, and taps send.
 - **Messenger:** Messenger cannot reliably pre-type a message, so the site copies the order to the clipboard, shows "Order copied. Paste it in the Messenger chat and send.", and opens your page's chat.
-- Every order gets a short code such as `AFK-261120-K7Q`, so you can refer to it in the chat. Nothing about the customer is stored anywhere.
+- Every order gets a short code such as `AFK-261120-K7Q`, so you can refer to it in the chat. Chat orders store nothing about the customer.
 - Customers can collect several items in the **order list** (saved in their browser) and send them as one message.
+- With online checkout switched on (next section), the order list becomes a **cart** with a Checkout button, and WhatsApp stays as the second option.
 
 Example message:
 
@@ -149,6 +150,57 @@ Phone:
 Full address:
 District:
 ```
+
+## Online checkout (cash on delivery)
+
+Customers fill in name, phone, district and address (email optional) and tap **Place order**. The order is saved in Supabase, you get an email with the full order, and customers who gave an email get a confirmation. You manage orders on the admin's **Orders** screen.
+
+How it works: the site stays static. Two small server functions in `functions/api/` (repository root) run on Cloudflare next to it:
+
+- `GET /api/challenge` hands out a spam check that the browser solves in the background (proof of work, no cookies, nothing to click).
+- `POST /api/order` checks the form, loads the real prices from Supabase (prices sent by the browser are never charged), saves the order, then sends the emails.
+
+If Supabase is down, you still get the order by email marked **[NOT SAVED]**, and the customer is asked to send it on WhatsApp too (the message is already written, with their details). If email is down, the order is still saved and the Orders screen shows **Email failed** with a resend button. A double tap or a retry never creates a second order.
+
+### Switch it on (about 30 minutes, once)
+
+1. **Database.** In Supabase open the SQL editor, paste `apps/catalogue-admin/supabase/migrations/20261123000000_orders.sql`, and run it. Orders get no public access at all: only the order function and your admin (both with the secret key) can read them.
+2. **Email sender (Resend).** Create a free account at resend.com and add a domain. Using a subdomain such as `send.afktheory.com` keeps your main domain's mail settings untouched. Copy each DNS record Resend shows into Cloudflare > your domain > DNS, then press Verify in Resend. Create an API key with sending access. Check the free plan's daily and monthly sending limits on Resend's pricing page; each order uses one or two emails.
+3. **Cloudflare settings.** Cloudflare Pages > your project > Settings > Variables and secrets, for **Production**. Add each as type **Secret** except the last:
+
+   | Name | Value |
+   |---|---|
+   | `SUPABASE_SECRET_KEY` | The secret key (`sb_secret_...`) from Supabase > Project Settings > API Keys. Never put it in a `NEXT_PUBLIC_` variable. |
+   | `ORDER_SECRET` | Any long random text, for example from a password generator (40+ characters). It signs the spam check. |
+   | `RESEND_API_KEY` | The Resend API key (`re_...`). |
+   | `ORDER_EMAIL_FROM` | `AFK THEORY <orders@send.afktheory.com>` (an address on the domain you verified). |
+   | `ORDER_NOTIFY_EMAIL` | The inbox that should receive every order. |
+   | `NEXT_PUBLIC_CHECKOUT` | `1` (type **Text**). Switches the site's buttons to the cart and checkout. Remove it to go back to chat-only ordering. |
+
+   `SUPABASE_URL` is already there from the build settings.
+4. **Privacy page.** In the admin open Pages > Privacy and say what you keep. A starting point, to adjust to how you actually work (this is not legal advice):
+
+   > When you order on this site we keep your name, mobile number, delivery address, district, any note you add and, if you give it, your email. We use them only to deliver your order and to contact you about it. They are stored in our order database (Supabase) and order emails are sent through Resend. We do not sell or share them for marketing. We delete or anonymise order details after [how long you keep them]. To see or delete your details, message us on WhatsApp.
+
+5. **Admin email (optional).** To email customers when you mark an order shipped, and to resend failed emails, add `RESEND_API_KEY`, `ORDER_EMAIL_FROM`, `ORDER_NOTIFY_EMAIL` and `CATALOGUE_SITE_URL` to `apps/catalogue-admin/.env.local` (see its `.env.template`).
+6. **Keep Supabase awake.** In GitHub > Settings > Secrets and variables > Actions, add `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`. The workflow `.github/workflows/supabase-keep-alive.yml` then reads one row every three days. Run it once by hand (Actions > Keep Supabase awake > Run workflow) to check.
+7. **Publish** in the admin (or retry the latest deployment) so the site rebuilds with checkout on.
+8. **Test order.** On your phone: add an item, check out with your own details, and confirm both emails arrive (check spam), the order shows in the admin, and tapping Place order twice made one order. Then mark it Cancelled.
+
+### Try it on your computer first
+
+```bash
+pnpm --filter @dtc/catalogue build                     # with NEXT_PUBLIC_CHECKOUT=1 in apps/catalogue/.env.local
+npx wrangler pages dev apps/catalogue/out --binding ORDER_SECRET=local-test --binding EMAIL_PROVIDER=console --binding ORDER_NOTIFY_EMAIL=you@example.com --binding SUPABASE_URL=<url> --binding SUPABASE_SECRET_KEY=<secret>
+```
+
+Run it from the repository root. `EMAIL_PROVIDER=console` prints the emails in the terminal instead of sending them. Orders placed this way are real rows in that Supabase project, so cancel them afterwards.
+
+### Limits
+
+- Cloudflare Functions free plan: 100,000 requests a day across your account. Each order uses two (spam check and order).
+- Orders keep their prices and delivery fee from the moment they were placed; editing a product later never changes an order.
+- Stock is not counted automatically. Keep sold-out sizes and colors up to date in the admin, and use the Orders screen to spot overselling.
 
 ## After the first deploy, check on a real phone
 

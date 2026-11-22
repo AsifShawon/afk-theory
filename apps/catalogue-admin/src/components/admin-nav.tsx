@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { loadPublishStatus, type PublishStatus } from "@/lib/data"
+import { countNewOrders } from "@/lib/orders"
 import { PublishButton } from "./publish-button"
 
 const NAV_LINKS = [
+  { href: "/orders", label: "Orders" },
   { href: "/", label: "Products" },
   { href: "/products/new", label: "New product" },
   { href: "/categories", label: "Categories" },
@@ -15,6 +17,7 @@ const NAV_LINKS = [
 export async function AdminNav() {
   let status: PublishStatus | null = null
   let error: string | null = null
+  const newOrders = await countNewOrders()
   try {
     status = await loadPublishStatus()
   } catch (err) {
@@ -22,7 +25,7 @@ export async function AdminNav() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-brand-graphite-light bg-brand-graphite text-brand-bone">
+    <header className="sticky top-0 z-20 print:hidden border-b border-brand-graphite-light bg-brand-graphite text-brand-bone">
       <div className="mx-auto flex min-h-[4rem] max-w-content items-center gap-6 px-6 py-2">
         <Link href="/" className="font-display text-lg font-bold uppercase tracking-tight">
           AFK <span className="text-brand-accent">Theory</span>
@@ -32,6 +35,9 @@ export async function AdminNav() {
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-brand-accent">
               {link.label}
+              {link.href === "/orders" && newOrders ? (
+                <span className="ml-1.5 rounded-pill bg-brand-accent px-1.5 py-0.5 text-[10px] font-bold text-brand-graphite">{newOrders} new</span>
+              ) : null}
             </Link>
           ))}
         </nav>

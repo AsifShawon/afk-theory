@@ -44,17 +44,30 @@ export function describeVariant(line: Pick<OrderLine, "designName" | "colorName"
  * The text the customer sends. Plain text so it reads well in WhatsApp and
  * Messenger, with blank fields for the details we need to deliver.
  */
-export function buildOrderMessage(input: { code: string; lines: OrderLine[]; deliveryZones: DeliveryZone[] }): string {
-  const { code, lines, deliveryZones } = input
+export function buildOrderMessage(input: {
+  code: string
+  lines: OrderLine[]
+  deliveryZones: DeliveryZone[]
+  /** Filled in when the customer already typed them at checkout. */
+  customer?: { name: string; phone: string; address: string; district: string; note?: string }
+  /** The fee for the customer's area, when known. */
+  delivery?: { label: string; feeBdt: number }
+}): string {
+  const { code, lines, deliveryZones, customer, delivery: quote } = input
   const items = lines.map((line, i) => {
     const variant = describeVariant(line)
     const detail = `${variant ? `${variant} ` : ""}x ${line.quantity} = ${formatBdtPlain(lineTotal(line))}`
     return `${i + 1}) ${line.productName}\n   ${detail}`
   })
 
-  const delivery = deliveryZones.length
-    ? `Delivery: ${deliveryZones.map((z) => `${z.name} ${formatBdtPlain(z.feeBdt)}`).join(" / ")}`
-    : "Delivery: charge depends on your area"
+  const subtotal = orderSubtotal(lines)
+  const delivery = quote
+    ? [`Delivery (${quote.label}): ${formatBdtPlain(quote.feeBdt)}`, `Total: ${formatBdtPlain(subtotal + quote.feeBdt)}`]
+    : [
+        deliveryZones.length
+          ? `Delivery: ${deliveryZones.map((z) => `${z.name} ${formatBdtPlain(z.feeBdt)}`).join(" / ")}`
+          : "Delivery: charge depends on your area",
+      ]
 
   return [
     "Hi AFK THEORY, I would like to order:",
@@ -62,14 +75,15 @@ export function buildOrderMessage(input: { code: string; lines: OrderLine[]; del
     `Order ${code}`,
     ...items,
     "",
-    `Subtotal: ${formatBdtPlain(orderSubtotal(lines))}`,
-    delivery,
+    `Subtotal: ${formatBdtPlain(subtotal)}`,
+    ...delivery,
     "Payment: Cash on delivery",
     "",
-    "Name:",
-    "Phone:",
-    "Full address:",
-    "District:",
+    `Name: ${customer?.name ?? ""}`.trimEnd(),
+    `Phone: ${customer?.phone ?? ""}`.trimEnd(),
+    `Full address: ${customer?.address.replace(/\s*\n\s*/g, ", ") ?? ""}`.trimEnd(),
+    `District: ${customer?.district ?? ""}`.trimEnd(),
+    ...(customer?.note ? [`Note: ${customer.note.replace(/\s*\n\s*/g, " ")}`] : []),
   ].join("\n")
 }
 

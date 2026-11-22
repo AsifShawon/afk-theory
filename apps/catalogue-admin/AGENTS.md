@@ -6,6 +6,7 @@ LOCAL-ONLY admin for the showcase catalogue (`apps/catalogue`). It holds the Sup
 - `src/lib/supabase-server.ts` imports `server-only`. Code shared with `scripts/seed.ts` (`src/lib/env.ts`, `src/lib/supabase.ts`, `src/lib/images.ts`) must not import it.
 - Images: `src/lib/images.ts` converts uploads to webp at the widths in `IMAGE_WIDTHS` and stores them as `products/<productId>/<imageId>-<width>.webp`. File names are never reused, so the public site caches them forever.
 - Schema changes: add a new file in `supabase/migrations/`; never edit one that may already have run. Update the row types in `@dtc/catalogue-core` to match.
+- Orders (`/orders`): read and updated with the secret key through `src/lib/orders.ts` and `src/app/actions/orders.ts`. Customer emails go through the same `@dtc/catalogue-core/orders` templates as the order endpoint. Never log or export order data anywhere except the CSV the owner downloads.
 - The layout shows a setup screen instead of crashing when env is missing, so `pnpm dev` at the root keeps working for people who never set up Supabase.
 
 ```bash

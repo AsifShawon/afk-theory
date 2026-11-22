@@ -6,7 +6,7 @@ import { MAX_QUANTITY, type OrderLine } from "@/lib/order-message"
 const STORAGE_KEY = "afk-order-list-v1"
 
 /** Current name and price for each product, so saved lists never show stale prices. */
-export type PriceBook = Record<string, { name: string; priceBdt: number }>
+export type PriceBook = Record<string, { name: string; priceBdt: number; image?: string }>
 
 export interface OrderItem extends OrderLine {
   key: string
@@ -19,6 +19,9 @@ interface Toast {
 
 interface OrderContextValue {
   items: OrderItem[]
+  /** False until the saved list has been read, so pages do not flash "empty". */
+  loaded: boolean
+  prices: PriceBook
   count: number
   add: (line: OrderLine) => void
   setQuantity: (key: string, quantity: number) => void
@@ -101,6 +104,8 @@ export function OrderProvider({ prices, children }: { prices: PriceBook; childre
   const value = useMemo<OrderContextValue>(
     () => ({
       items,
+      loaded,
+      prices,
       count: items.reduce((n, i) => n + i.quantity, 0),
       add,
       setQuantity: (key, quantity) => setItems((prev) => prev.map((i) => (i.key === key ? { ...i, quantity: clampQuantity(quantity) } : i))),
@@ -111,7 +116,7 @@ export function OrderProvider({ prices, children }: { prices: PriceBook; childre
       toast,
       showToast,
     }),
-    [items, add, drawerOpen, toast, showToast]
+    [items, loaded, prices, add, drawerOpen, toast, showToast]
   )
 
   return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>
