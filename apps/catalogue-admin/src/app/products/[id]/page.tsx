@@ -90,6 +90,7 @@ export default async function EditProductPage({
           badge: product.badge ?? "none",
           designGroup: product.design_group ?? "",
           collectionIds: storeOptions.collectionIds,
+          metaContentId: product.meta_content_id ?? "",
         }}
         initialColors={colors.map((c) => ({ id: c.id, name: c.name, hex: c.hex, inStock: c.in_stock }))}
       />

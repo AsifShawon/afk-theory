@@ -12,6 +12,7 @@ import { OrderProvider, type PriceBook } from "@/components/order/order-provider
 import { OrderToast } from "@/components/order/order-toast"
 import { SearchOverlay } from "@/components/search/search-overlay"
 import { JsonLd, siteJsonLd } from "@/components/seo/json-ld"
+import { MetaPixelClient } from "@/components/analytics/meta-pixel-client"
 import { getCatalogue, siteUrl } from "@/lib/catalogue"
 import { ORDER_HOW } from "@/lib/checkout"
 import { buildNavData } from "@/lib/store"
@@ -30,6 +31,11 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   openGraph: { siteName: "AFK THEORY", type: "website", locale: "en_BD", description: DESCRIPTION },
   twitter: { card: "summary_large_image" },
+  verification: {
+    other: {
+      "p:domain_verify": "b935d6b490e97846718762220705ce38",
+    },
+  },
 }
 
 export const viewport: Viewport = {
@@ -40,7 +46,15 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const catalogue = await getCatalogue()
   const prices: PriceBook = Object.fromEntries(
-    catalogue.products.map((p) => [p.slug, { name: p.name, priceBdt: p.priceBdt, image: p.images[0]?.sources[0]?.src }])
+    catalogue.products.map((p) => [
+      p.slug,
+      {
+        name: p.name,
+        priceBdt: p.priceBdt,
+        image: p.images[0]?.sources[0]?.src,
+        metaContentId: p.metaContentId ?? null,
+      },
+    ])
   )
   const tip = catalogue.settings.announcement || "Every order is cash on delivery. Pay the courier when it arrives."
   const nav = buildNavData(catalogue)
@@ -55,9 +69,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <html lang="en" className={`${chakra.variable} ${manrope.variable} ${mono.variable}`} suppressHydrationWarning>
         <head>
           <script dangerouslySetInnerHTML={{ __html: PRELOADER_HEAD_SCRIPT }} />
-          <JsonLd data={siteJsonLd(catalogue.settings)} />
+          <JsonLd data={siteJsonLd(catalogue.settings, catalogue.pages)} />
         </head>
         <body>
+          <MetaPixelClient />
           <a href="#main" className="sr-only z-[200] bg-brand-accent px-4 py-2 font-semibold text-brand-graphite focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
             Skip to content
           </a>

@@ -6,7 +6,7 @@ import { MAX_QUANTITY, type OrderLine } from "@/lib/order-message"
 const STORAGE_KEY = "afk-order-list-v1"
 
 /** Current name and price for each product, so saved lists never show stale prices. */
-export type PriceBook = Record<string, { name: string; priceBdt: number; image?: string }>
+export type PriceBook = Record<string, { name: string; priceBdt: number; image?: string; metaContentId?: string | null }>
 
 export interface OrderItem extends OrderLine {
   key: string

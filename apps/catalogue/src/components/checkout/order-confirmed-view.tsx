@@ -5,7 +5,9 @@ import { useEffect, useState } from "react"
 import { formatBdt, normalizeWhatsappNumber } from "@dtc/catalogue-core"
 import type { PlacedOrderSummary } from "@dtc/catalogue-core/orders"
 import { WhatsAppIcon } from "@/components/ui/icons"
+import { useOrder } from "@/components/order/order-provider"
 import { LAST_ORDER_KEY } from "@/lib/checkout"
+import { trackPurchase } from "@/lib/meta-pixel"
 import { describeVariant } from "@/lib/order-message"
 
 /**
@@ -15,15 +17,23 @@ import { describeVariant } from "@/lib/order-message"
  */
 export function OrderConfirmedView({ whatsappNumber }: { whatsappNumber: string }) {
   const [order, setOrder] = useState<PlacedOrderSummary | null | undefined>(undefined)
+  const { prices } = useOrder()
 
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(LAST_ORDER_KEY)
-      setOrder(raw ? (JSON.parse(raw) as PlacedOrderSummary) : null)
+      const parsed = raw ? (JSON.parse(raw) as PlacedOrderSummary) : null
+      setOrder(parsed)
+      if (parsed) {
+        const metaIdMap: Record<string, string | null | undefined> = Object.fromEntries(
+          Object.entries(prices).map(([slug, data]) => [slug, data.metaContentId])
+        )
+        trackPurchase(parsed, metaIdMap)
+      }
     } catch {
       setOrder(null)
     }
-  }, [])
+  }, [prices])
 
   if (order === undefined) {
     return <p className="font-hud text-[11px] text-brand-bone/50">Loading...</p>

@@ -18,6 +18,16 @@ export async function storeStructureReady(client: SupabaseClient): Promise<boole
   throw new Error(error.message)
 }
 
+/**
+ * True once migration 20261124000000 has added meta_content_id to products.
+ */
+export async function metaContentIdReady(client: SupabaseClient): Promise<boolean> {
+  const { error } = await client.from(TABLES.products).select("meta_content_id").limit(1)
+  if (!error) return true
+  if (isMissingColumn(error)) return false
+  return false
+}
+
 /** Replaces database errors about the missing migration with the hint. */
 export function storeError(err: unknown): Error {
   const error = err && typeof err === "object" && "message" in err ? (err as { message: string; code?: string }) : { message: String(err) }

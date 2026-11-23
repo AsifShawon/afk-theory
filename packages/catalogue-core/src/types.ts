@@ -174,6 +174,8 @@ export interface ProductRow {
   /** Columns from migration 20261122000000. */
   badge?: ProductBadgeSetting
   design_group?: string
+  /** Column from migration 20261124000000. */
+  meta_content_id?: string | null
   created_at: string
   updated_at: string
 }
@@ -392,6 +394,8 @@ export interface CatalogueProduct {
   collectionSlugs: string[]
   /** Slugs of other products in the same design group. */
   moreDesigns: string[]
+  /** Meta Commerce Manager catalog retailer_id for pixel events. Null if unmapped. */
+  metaContentId: string | null
 }
 
 export interface SiteSettings {

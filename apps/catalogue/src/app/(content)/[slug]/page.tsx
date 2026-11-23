@@ -37,7 +37,10 @@ export default async function ContentPage({ params }: { params: Promise<{ slug: 
   const updated = page.updatedAt ? new Date(page.updatedAt) : null
 
   return (
-    <article className="mx-auto max-w-3xl px-5 pb-28 pt-28 md:px-10 md:pt-36">
+    <article
+      id={page.slug === "delivery-returns" ? "return-policy" : undefined}
+      className="mx-auto max-w-3xl px-5 pb-28 pt-28 md:px-10 md:pt-36"
+    >
       <nav aria-label="Breadcrumb" className="font-hud text-[11px] text-brand-bone/50">
         <Link href="/" className="hover:text-brand-accent">
           Home

@@ -3,7 +3,7 @@ import { SEO_LIMITS, truncateText } from "@dtc/catalogue-core"
 import { notFound } from "next/navigation"
 import { ProductCard } from "@/components/product/product-card"
 import { ProductView } from "@/components/product/product-view"
-import { breadcrumbJsonLd, JsonLd } from "@/components/seo/json-ld"
+import { breadcrumbJsonLd, hasReturnPolicyPage, JsonLd, productJsonLd, returnPolicyId } from "@/components/seo/json-ld"
 import { absoluteUrl, getCatalogue, getProduct, getRelated } from "@/lib/catalogue"
 
 export const dynamicParams = false
@@ -43,22 +43,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = await getProduct(slug)
   if (!product) notFound()
   const related = getRelated(catalogue, product)
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.description || product.tagline,
-    image: product.images.map((img) => absoluteUrl(img.sources[img.sources.length - 1].src)),
-    brand: { "@type": "Brand", name: "AFK THEORY" },
-    offers: {
-      "@type": "Offer",
-      price: product.priceBdt,
-      priceCurrency: "BDT",
-      availability: product.soldOut ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
-      url: absoluteUrl(`/products/${product.slug}/`),
-    },
-  }
+  const policyId = hasReturnPolicyPage(catalogue.pages) ? returnPolicyId() : null
 
   return (
     <>
@@ -69,7 +54,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           { name: product.name, href: `/products/${product.slug}/` },
         ])}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <JsonLd data={productJsonLd(product, policyId)} />
       <ProductView product={product} settings={catalogue.settings} />
       {related.length > 0 && (
         <section aria-labelledby="related-title" className="bg-brand-bone py-20 text-brand-graphite md:py-28">

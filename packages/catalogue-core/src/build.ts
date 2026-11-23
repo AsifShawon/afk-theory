@@ -218,6 +218,7 @@ export function buildCatalogue(
       badges,
       collectionSlugs: [...new Set(collectionSlugs)],
       moreDesigns: [],
+      metaContentId: (row.meta_content_id ?? "").trim() || null,
     })
   }
 

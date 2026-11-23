@@ -12,6 +12,7 @@ import { MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { CART_LABEL, CHECKOUT_ENABLED } from "@/lib/checkout"
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap"
 import { findByParam, optionParam } from "@/lib/gallery"
+import { trackAddToCart, trackChatClick, trackViewContent } from "@/lib/meta-pixel"
 import type { OrderLine } from "@/lib/order-message"
 import { ProductGallery, type GalleryJump } from "./product-gallery"
 import { SizeGuide } from "./size-guide"
@@ -108,6 +109,10 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
     { scope: root }
   )
 
+  useEffect(() => {
+    trackViewContent(product)
+  }, [product])
+
   /** Returns the order line, or null after asking for a size. */
   const currentLine = (): OrderLine | null => {
     if (needsSize && !size) {
@@ -127,13 +132,22 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
 
   const orderNow = (channel: "whatsapp" | "messenger") => {
     const line = currentLine()
-    if (line) send(channel, [line])
+    if (line) {
+      trackChatClick(channel)
+      send(channel, [line])
+    }
   }
 
   const addToList = () => {
     const line = currentLine()
     if (!line) return
     add(line)
+    trackAddToCart({
+      metaContentId: product.metaContentId,
+      name: product.name,
+      unitPriceBdt: product.priceBdt,
+      quantity,
+    })
     showToast(`Added ${product.name}${size ? `, size ${size}` : ""} to your ${CART_LABEL.toLowerCase()}.`)
     setDrawerOpen(true)
   }
@@ -142,6 +156,12 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
     const line = currentLine()
     if (!line) return
     add(line)
+    trackAddToCart({
+      metaContentId: product.metaContentId,
+      name: product.name,
+      unitPriceBdt: product.priceBdt,
+      quantity,
+    })
     router.push("/checkout/")
   }
 

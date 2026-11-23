@@ -73,6 +73,10 @@ export const productInputSchema = z
     badge: z.enum(PRODUCT_BADGE_SETTINGS).default("none"),
     designGroup: shortText(60, "Keep the design group under 60 characters").default(""),
     collectionIds: z.array(z.string().uuid()).max(20).default([]),
+    // Optional Meta Catalog Content ID (migration 20261124000000).
+    metaContentId: shortText(100, "Keep Meta Content ID under 100 characters")
+      .regex(/^[A-Za-z0-9_.:-]*$/, "Use letters, numbers, dashes, underscores, dots or colons")
+      .default(""),
   })
   .refine((p) => p.compareAtBdt === null || p.compareAtBdt > p.priceBdt, {
     message: "Compare-at price must be higher than the price",

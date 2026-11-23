@@ -24,6 +24,7 @@ const EMPTY: ProductInput = {
   badge: "none",
   designGroup: "",
   collectionIds: [],
+  metaContentId: "",
 }
 
 export default async function NewProductPage() {

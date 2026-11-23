@@ -290,6 +290,20 @@ export function ProductForm({
         onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
       />
 
+      <Card title="Meta Catalog">
+        <Field
+          label="Meta Content ID"
+          error={errors.metaContentId}
+          hint="Optional. Matches the retailer_id / Content ID in Meta Commerce Manager catalog. Leave empty if unmapped."
+        >
+          <TextInput
+            value={form.metaContentId ?? ""}
+            onChange={(e) => set("metaContentId", e.target.value)}
+            placeholder="e.g. AFK-TEE-SIG-01"
+          />
+        </Field>
+      </Card>
+
       <div className="sticky bottom-0 -mx-6 space-y-3 border-t border-brand-border bg-brand-bone/95 px-6 py-4 backdrop-blur">
         {/* Messages sit next to the button, where the click happened. */}
         {notice && (
@@ -337,6 +351,7 @@ const FIELD_LABELS: Record<string, string> = {
   badge: "Badge",
   designGroup: "More designs group",
   collectionIds: "Collections",
+  metaContentId: "Meta Content ID",
 }
 
 /** Turns validation keys such as "sizeChart.columns.2" or "0.name" into readable lines. */

@@ -14,13 +14,15 @@ import {
 import { z } from "zod"
 import { fail, zodFail, type ActionResult } from "@/lib/action-result"
 import { removeImageObjects } from "@/lib/images"
-import { storeError, storeStructureReady } from "@/lib/store-structure"
+import { metaContentIdReady, storeError, storeStructureReady } from "@/lib/store-structure"
 import { getAdmin } from "@/lib/supabase-server"
 
-function toRow(input: ProductInput, storeReady: boolean) {
+function toRow(input: ProductInput, storeReady: boolean, metaReady: boolean) {
   return {
     // Sent only once migration 20261122000000 has added the columns.
     ...(storeReady ? { badge: input.badge, design_group: input.designGroup.trim() } : {}),
+    // Sent only once migration 20261124000000 has added meta_content_id.
+    ...(metaReady ? { meta_content_id: input.metaContentId ? input.metaContentId.trim() : null } : {}),
     name: input.name,
     slug: input.slug,
     tagline: input.tagline,
@@ -67,8 +69,8 @@ export async function saveProduct(
 
   try {
     const { client } = getAdmin()
-    const storeReady = await storeStructureReady(client)
-    const row = toRow(parsed.data, storeReady)
+    const [storeReady, metaReady] = await Promise.all([storeStructureReady(client), metaContentIdReady(client)])
+    const row = toRow(parsed.data, storeReady, metaReady)
     let productId = id
 
     if (productId) {
