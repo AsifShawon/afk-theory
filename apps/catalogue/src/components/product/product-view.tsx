@@ -4,7 +4,7 @@ import { Link } from "next-view-transitions"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { clsx } from "clsx"
-import { formatBdt, type CatalogueProduct, type SiteSettings } from "@dtc/catalogue-core"
+import { CUSTOM_HOODIE_CONFIG, CUSTOM_TEE_CONFIG, formatBdt, type CatalogueProduct, type SiteSettings } from "@dtc/catalogue-core"
 import { QuantityStepper } from "@/components/order/order-drawer"
 import { useOrder } from "@/components/order/order-provider"
 import { useSendOrder } from "@/components/order/use-send-order"
@@ -335,6 +335,28 @@ export function ProductView({ product, settings }: { product: CatalogueProduct; 
               <p className="border border-white/15 p-4 text-sm">
                 {product.soldOut ? "Sold out. Message us to hear when it is back." : `${color?.name} is coming soon. Choose another color.`}
               </p>
+            )}
+            {product.slug === CUSTOM_HOODIE_CONFIG.baseProductSlug && (
+              <div className="mt-4 border border-white/15 bg-brand-graphite-dark p-3.5 text-xs text-brand-bone/80">
+                <p className="font-hud text-[10px] text-brand-accent">Custom DTF option</p>
+                <p className="mt-1">
+                  Want a custom print on this hoodie? Configure placements and dimensions live from {formatBdt(CUSTOM_HOODIE_CONFIG.customBasePriceBdt)}.{" "}
+                  <Link href="/custom-hoodie/" className="font-semibold text-brand-accent underline underline-offset-4 hover:text-brand-bone">
+                    Open Custom Hoodie Calculator
+                  </Link>
+                </p>
+              </div>
+            )}
+            {product.category?.slug === "drop-shoulder-tees" && (
+              <div className="mt-4 border border-white/15 bg-brand-graphite-dark p-3.5 text-xs text-brand-bone/80">
+                <p className="font-hud text-[10px] text-brand-accent">Custom DTF option</p>
+                <p className="mt-1">
+                  Want your own DTF print on this drop-shoulder tee? Configure placements and dimensions live from {formatBdt(CUSTOM_TEE_CONFIG.customBasePriceBdt)}.{" "}
+                  <Link href="/custom-tee/" className="font-semibold text-brand-accent underline underline-offset-4 hover:text-brand-bone">
+                    Open Custom Tee Calculator
+                  </Link>
+                </p>
+              </div>
             )}
           </div>
 

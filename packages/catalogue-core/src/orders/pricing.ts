@@ -1,4 +1,9 @@
 import { BANGLADESH_SHIPPING_RATES, classifyBangladeshDeliveryAddress, type BangladeshShippingZone } from "@dtc/commerce-contracts"
+import {
+  formatCustomDtfDesignSummary,
+  getCustomGarmentConfig,
+  priceCustomDtfItem,
+} from "../custom-hoodie"
 import type { DeliveryZone } from "../types"
 import { MAX_LINE_QUANTITY, type CheckoutCustomer, type CheckoutLine } from "./schema"
 
@@ -100,19 +105,21 @@ export function priceOrder(input: {
   const merged = new Map<string, PricedLine>()
 
   for (const line of input.lines) {
-    const product = bySlug.get(line.slug)
+    const customGarment = getCustomGarmentConfig(line.slug)
+    const lookupSlug = customGarment ? customGarment.baseProductSlug : line.slug
+    const product = bySlug.get(lookupSlug)
     if (!product || !product.published) {
       problems.push({ kind: "unavailable", slug: line.slug, message: "This item is no longer available" })
       continue
     }
 
     const color = resolveOption(product.colors, line.color)
-    const design = resolveOption(product.designs, line.design)
+    const design = customGarment ? null : resolveOption(product.designs, line.design)
     const size = line.size ? product.sizes.find((s) => same(s, line.size!)) ?? null : null
-    const label = product.name
+    const label = customGarment ? customGarment.customProductName : product.name
 
     if (color === undefined || design === undefined || (product.sizes.length > 0 && !size) || (product.sizes.length === 0 && line.size)) {
-      problems.push({ kind: "invalid_option", slug: product.slug, message: `Pick the color, design and size again for ${label}` })
+      problems.push({ kind: "invalid_option", slug: line.slug, message: `Pick the color, design and size again for ${label}` })
       continue
     }
     if (
@@ -121,31 +128,40 @@ export function priceOrder(input: {
       (size && product.soldOutSizes.some((s) => same(s, size)))
     ) {
       const variant = [design?.name, color?.name, size].filter(Boolean).join(" / ")
-      problems.push({ kind: "sold_out", slug: product.slug, message: `${label}${variant ? ` (${variant})` : ""} is sold out` })
-      continue
-    }
-    if (line.unitPriceBdt !== product.priceBdt) {
-      problems.push({ kind: "price_changed", slug: product.slug, priceBdt: product.priceBdt, message: `The price of ${label} is now ${product.priceBdt}` })
+      problems.push({ kind: "sold_out", slug: line.slug, message: `${label}${variant ? ` (${variant})` : ""} is sold out` })
       continue
     }
 
-    const key = [product.slug, design?.name ?? "", color?.name ?? "", size ?? ""].join("|")
+    const expectedPriceBdt = customGarment
+      ? priceCustomDtfItem(line.customDtf?.placements ?? [], customGarment.customBasePriceBdt).unitPriceBdt
+      : product.priceBdt
+
+    if (line.unitPriceBdt !== expectedPriceBdt) {
+      problems.push({ kind: "price_changed", slug: line.slug, priceBdt: expectedPriceBdt, message: `The price of ${label} is now ${expectedPriceBdt}` })
+      continue
+    }
+
+    const resolvedDesignName = customGarment
+      ? formatCustomDtfDesignSummary(line.customDtf?.placements ?? [], line.customDtf?.artworkNote)
+      : design?.name ?? null
+
+    const key = [line.slug, resolvedDesignName ?? "", color?.name ?? "", size ?? ""].join("|")
     const existing = merged.get(key)
     const quantity = (existing?.quantity ?? 0) + line.quantity
     if (quantity > MAX_LINE_QUANTITY) {
-      problems.push({ kind: "too_many", slug: product.slug, message: `At most ${MAX_LINE_QUANTITY} of one item per order` })
+      problems.push({ kind: "too_many", slug: line.slug, message: `At most ${MAX_LINE_QUANTITY} of one item per order` })
       continue
     }
     merged.set(key, {
       productId: product.id,
-      slug: product.slug,
-      name: product.name,
+      slug: line.slug,
+      name: label,
       color: color?.name ?? null,
-      design: design?.name ?? null,
+      design: resolvedDesignName,
       size,
       quantity,
-      unitPriceBdt: product.priceBdt,
-      lineTotalBdt: product.priceBdt * quantity,
+      unitPriceBdt: expectedPriceBdt,
+      lineTotalBdt: expectedPriceBdt * quantity,
     })
   }
 

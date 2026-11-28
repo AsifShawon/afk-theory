@@ -1,4 +1,14 @@
-import { formatBdtPlain, normalizeMessengerPage, normalizeWhatsappNumber, type DeliveryZone } from "@dtc/catalogue-core"
+import {
+  CUSTOM_HOODIE_CONFIG,
+  CUSTOM_PLACEMENTS,
+  formatBdtPlain,
+  formatDimension,
+  getCustomGarmentConfig,
+  normalizeMessengerPage,
+  normalizeWhatsappNumber,
+  type CustomDtfConfig,
+  type DeliveryZone,
+} from "@dtc/catalogue-core"
 
 export interface OrderLine {
   slug: string
@@ -9,6 +19,8 @@ export interface OrderLine {
   size: string | null
   quantity: number
   unitPriceBdt: number
+  /** Custom DTF print specification, when ordering a Custom DTF Hoodie. */
+  customDtf?: CustomDtfConfig
 }
 
 export const MAX_QUANTITY = 10
@@ -57,7 +69,19 @@ export function buildOrderMessage(input: {
   const items = lines.map((line, i) => {
     const variant = describeVariant(line)
     const detail = `${variant ? `${variant} ` : ""}x ${line.quantity} = ${formatBdtPlain(lineTotal(line))}`
-    return `${i + 1}) ${line.productName}\n   ${detail}`
+    if (!line.customDtf) {
+      return `${i + 1}) ${line.productName}\n   ${detail}`
+    }
+    const prints = line.customDtf.placements.map(
+      (p) => `${CUSTOM_PLACEMENTS[p.id].breakdownLabel} (${formatDimension(p.widthIn)}" x ${formatDimension(p.heightIn)}"): +${formatBdtPlain(p.priceBdt)}`
+    )
+    const basePriceBdt = getCustomGarmentConfig(line.slug)?.customBasePriceBdt ?? CUSTOM_HOODIE_CONFIG.customBasePriceBdt
+    const extra = [
+      `Base: ${formatBdtPlain(basePriceBdt)}`,
+      ...(prints.length ? [`Prints: ${prints.join(" | ")}`] : ["Prints: None"]),
+      ...(line.customDtf.artworkNote?.trim() ? [`Artwork/Note: ${line.customDtf.artworkNote.trim()}`] : []),
+    ]
+    return `${i + 1}) ${line.productName}\n   ${detail}\n   ${extra.join("\n   ")}`
   })
 
   const subtotal = orderSubtotal(lines)

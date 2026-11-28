@@ -1,6 +1,12 @@
 "use client"
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import {
+  getCustomGarmentConfig,
+  isValidPlacementDimensions,
+  priceCustomDtfItem,
+  type CustomDtfConfig,
+} from "@dtc/catalogue-core"
 import { MAX_QUANTITY, type OrderLine } from "@/lib/order-message"
 
 const STORAGE_KEY = "afk-order-list-v1"
@@ -35,8 +41,17 @@ interface OrderContextValue {
 
 const OrderContext = createContext<OrderContextValue | null>(null)
 
-export function itemKey(line: Pick<OrderLine, "slug" | "designName" | "colorName" | "size">): string {
-  return [line.slug, line.designName ?? "", line.colorName ?? "", line.size ?? ""].join("|")
+function customSignature(customDtf?: CustomDtfConfig): string {
+  if (!customDtf) return ""
+  const placements = [...customDtf.placements]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((p) => `${p.id}:${p.widthIn}x${p.heightIn}`)
+    .join(",")
+  return `dtf[${placements}|${customDtf.artworkNote?.trim() ?? ""}]`
+}
+
+export function itemKey(line: Pick<OrderLine, "slug" | "designName" | "colorName" | "size" | "customDtf">): string {
+  return [line.slug, line.designName ?? "", line.colorName ?? "", line.size ?? "", customSignature(line.customDtf)].join("|")
 }
 
 function clampQuantity(quantity: number): number {
@@ -47,15 +62,47 @@ function readStored(prices: PriceBook): OrderItem[] {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]")
     if (!Array.isArray(parsed)) return []
-    return parsed
-      .filter((item): item is OrderItem => typeof item?.slug === "string" && Boolean(prices[item.slug]))
-      .map((item) => ({
+    const items: OrderItem[] = []
+    for (const item of parsed) {
+      if (typeof item?.slug !== "string") continue
+      const garment = getCustomGarmentConfig(item.slug)
+      if (garment && item.customDtf && Array.isArray(item.customDtf.placements)) {
+        const validPlacements = (item.customDtf as CustomDtfConfig).placements.filter(
+          (p) => p && typeof p.id === "string" && isValidPlacementDimensions(p.id, p.widthIn, p.heightIn)
+        )
+        const priced = priceCustomDtfItem(validPlacements, garment.customBasePriceBdt)
+        const normalizedCustom: CustomDtfConfig = {
+          placements: priced.itemized.map((p) => ({
+            id: p.id,
+            preset: p.preset ?? "custom",
+            widthIn: p.widthIn,
+            heightIn: p.heightIn,
+            priceBdt: p.priceBdt,
+          })),
+          ...(typeof item.customDtf.artworkNote === "string" && item.customDtf.artworkNote.trim()
+            ? { artworkNote: item.customDtf.artworkNote.trim().slice(0, 300) }
+            : {}),
+        }
+        const normalized: OrderLine = {
+          ...item,
+          productName: garment.customProductName,
+          unitPriceBdt: priced.unitPriceBdt,
+          quantity: clampQuantity(item.quantity),
+          customDtf: normalizedCustom,
+        }
+        items.push({ ...normalized, key: itemKey(normalized) })
+        continue
+      }
+      if (!prices[item.slug]) continue
+      items.push({
         ...item,
         productName: prices[item.slug].name,
         unitPriceBdt: prices[item.slug].priceBdt,
         quantity: clampQuantity(item.quantity),
         key: itemKey(item),
-      }))
+      })
+    }
+    return items
   } catch {
     return []
   }

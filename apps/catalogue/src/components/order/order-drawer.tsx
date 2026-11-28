@@ -4,7 +4,7 @@ import NextLink from "next/link"
 import { Link } from "next-view-transitions"
 import { useEffect, useRef } from "react"
 import { clsx } from "clsx"
-import { formatBdt, type SiteSettings } from "@dtc/catalogue-core"
+import { CUSTOM_HOODIE_CONFIG, CUSTOM_PLACEMENTS, formatBdt, formatDimension, getCustomGarmentConfig, type SiteSettings } from "@dtc/catalogue-core"
 import { useLenis } from "@/components/motion/smooth-scroll"
 import { ArrowIcon, CloseIcon, MessengerIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { CHECKOUT_ENABLED } from "@/lib/checkout"
@@ -71,13 +71,29 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
             </div>
           ) : (
             <ul className="divide-y divide-brand-graphite/10">
-              {items.map((item) => (
+              {items.map((item) => {
+                const customGarment = getCustomGarmentConfig(item.slug)
+                const href = customGarment ? customGarment.route : `/products/${item.slug}/`
+                return (
                 <li key={item.key} className="flex gap-4 py-5">
                   <div className="min-w-0 flex-1">
-                    <Link href={`/products/${item.slug}/`} onClick={() => setDrawerOpen(false)} className="font-semibold hover:underline">
+                    <Link href={href} onClick={() => setDrawerOpen(false)} className="font-semibold hover:underline">
                       {item.productName}
                     </Link>
                     <p className="font-hud mt-1 text-[10px] text-brand-muted">{describeVariant(item) || "One size"}</p>
+                    {item.customDtf && (
+                      <div className="mt-2 space-y-0.5 border-l-2 border-brand-graphite/25 pl-2.5 text-xs text-brand-muted">
+                        <p>
+                          Base {customGarment?.shortTitle ?? "Custom"}: {formatBdt(customGarment?.customBasePriceBdt ?? CUSTOM_HOODIE_CONFIG.customBasePriceBdt)}
+                        </p>
+                        {item.customDtf.placements.map((p) => (
+                          <p key={p.id}>
+                            {CUSTOM_PLACEMENTS[p.id].breakdownLabel} ({formatDimension(p.widthIn)}&quot; × {formatDimension(p.heightIn)}&quot;): +{formatBdt(p.priceBdt)}
+                          </p>
+                        ))}
+                        {item.customDtf.artworkNote && <p className="truncate">Artwork: {item.customDtf.artworkNote}</p>}
+                      </div>
+                    )}
                     <div className="mt-3 flex items-center gap-3">
                       <QuantityStepper value={item.quantity} onChange={(q) => setQuantity(item.key, q)} label={item.productName} />
                       <button onClick={() => remove(item.key)} className="text-xs font-semibold text-brand-muted underline-offset-2 hover:underline">
@@ -87,7 +103,8 @@ export function OrderDrawer({ settings }: { settings: SiteSettings }) {
                   </div>
                   <p className="font-hud text-sm tracking-normal">{formatBdt(lineTotal(item))}</p>
                 </li>
-              ))}
+                )
+              })}
             </ul>
           )}
         </div>

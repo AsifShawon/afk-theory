@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { clsx } from "clsx"
-import { formatBdt, type SiteSettings } from "@dtc/catalogue-core"
+import { CUSTOM_HOODIE_CONFIG, CUSTOM_PLACEMENTS, formatBdt, formatDimension, getCustomGarmentConfig, type SiteSettings } from "@dtc/catalogue-core"
 import {
   CHECKOUT_DISTRICTS,
   checkoutCustomerSchema,
@@ -139,6 +139,19 @@ export function CheckoutView({ settings, privacyHref }: { settings: SiteSettings
         size: l.size,
         quantity: l.quantity,
         unitPriceBdt: l.unitPriceBdt,
+        ...(l.customDtf
+          ? {
+              customDtf: {
+                placements: l.customDtf.placements.map((p) => ({
+                  id: p.id,
+                  preset: p.preset,
+                  widthIn: p.widthIn,
+                  heightIn: p.heightIn,
+                })),
+                ...(l.customDtf.artworkNote ? { artworkNote: l.customDtf.artworkNote } : {}),
+              },
+            }
+          : {}),
       })),
     }
 
@@ -413,17 +426,35 @@ export function CheckoutView({ settings, privacyHref }: { settings: SiteSettings
               </span>
             </div>
             <ul className="mt-4 divide-y divide-white/10">
-              {lines.map((line) => (
+              {lines.map((line) => {
+                const customGarment = getCustomGarmentConfig(line.slug)
+                const thumb =
+                  prices[line.slug]?.image ??
+                  (customGarment ? prices[customGarment.baseProductSlug]?.image : undefined)
+                return (
                 <li key={line.key} className="flex gap-4 py-4">
-                  {prices[line.slug]?.image ? (
+                  {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={prices[line.slug].image} alt="" width={64} height={80} className="h-20 w-16 shrink-0 bg-white/5 object-cover" />
+                    <img src={thumb} alt="" width={64} height={80} className="h-20 w-16 shrink-0 bg-white/5 object-cover" />
                   ) : (
                     <span aria-hidden className="h-20 w-16 shrink-0 bg-white/5" />
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold leading-snug">{line.productName}</p>
                     <p className="font-hud mt-1 text-[10px] text-brand-bone/50">{describeVariant(line) || "One size"}</p>
+                    {line.customDtf && (
+                      <div className="mt-1.5 space-y-0.5 text-[11px] text-brand-bone/65">
+                        <p>
+                          Base {customGarment?.shortTitle ?? "Custom"}: {formatBdt(customGarment?.customBasePriceBdt ?? CUSTOM_HOODIE_CONFIG.customBasePriceBdt)}
+                        </p>
+                        {line.customDtf.placements.map((p) => (
+                          <p key={p.id}>
+                            {CUSTOM_PLACEMENTS[p.id].breakdownLabel} ({formatDimension(p.widthIn)}&quot; × {formatDimension(p.heightIn)}&quot;): +{formatBdt(p.priceBdt)}
+                          </p>
+                        ))}
+                        {line.customDtf.artworkNote && <p className="truncate">Artwork: {line.customDtf.artworkNote}</p>}
+                      </div>
+                    )}
                     <div className="mt-2 flex items-center gap-3">
                       <QuantityStepper value={line.quantity} onChange={(q) => setQuantity(line.key, q)} label={line.productName} tone="dark" />
                       <button type="button" onClick={() => remove(line.key)} className="text-xs text-brand-bone/50 underline-offset-2 hover:underline">
@@ -433,7 +464,8 @@ export function CheckoutView({ settings, privacyHref }: { settings: SiteSettings
                   </div>
                   <p className="font-hud text-sm tracking-normal">{formatBdt(lineTotal(line))}</p>
                 </li>
-              ))}
+                )
+              })}
             </ul>
             <div className="hidden border-t border-white/10 pt-4 lg:block">
               <Totals subtotal={subtotal} quote={quote} />

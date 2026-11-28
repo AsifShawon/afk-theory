@@ -3,6 +3,7 @@
  * with plain fetch (no SDK), which keeps the Cloudflare bundle small and fast
  * to start.
  */
+import { getCustomGarmentConfig } from "../custom-hoodie"
 import { SLUG_PATTERN } from "../format"
 import type { DeliveryZone } from "../types"
 import type { OrderableProduct, PricedOrder } from "./pricing"
@@ -123,7 +124,8 @@ export function supabaseOrderStore(options: { url: string; secretKey: string; fe
 
   return {
     async loadProducts(slugs) {
-      const safe = [...new Set(slugs)].filter((s) => SLUG_PATTERN.test(s))
+      const expanded = slugs.map((s) => getCustomGarmentConfig(s)?.baseProductSlug ?? s)
+      const safe = [...new Set(expanded)].filter((s) => SLUG_PATTERN.test(s))
       if (safe.length === 0) return []
       const select = "id,slug,name,price_bdt,status,sizes,sold_out_sizes,product_colors(name,in_stock,sort_order),product_designs(name,in_stock,sort_order)"
       const rows = await request<ProductRowWithOptions[]>(`/products?select=${encodeURIComponent(select)}&slug=in.(${safe.map(encodeURIComponent).join(",")})`)

@@ -27,6 +27,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/", 1),
     entry("/shop/", 0.9),
     entry("/custom-design/", 0.8, customLastMod),
+    entry("/custom-hoodie/", 0.8),
+    entry("/custom-tee/", 0.8),
     ...allCategoryNodes(catalogue).map((node) => entry(node.href, 0.8)),
     ...(collections.length > 0 ? [entry("/collections/", 0.6), ...collections.map((c) => entry(c.href, 0.7))] : []),
     ...(catalogue.autoCollections.new.length > 0 ? [entry("/new/", 0.7)] : []),

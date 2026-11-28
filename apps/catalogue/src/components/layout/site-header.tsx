@@ -290,6 +290,16 @@ function MegaPanel({ id, open, nav, onPointerEnter }: { id: PanelId; open: boole
                   Custom designs
                 </Link>
               </li>
+              <li>
+                <Link href="/custom-hoodie/" className="hover:text-brand-accent">
+                  Custom DTF hoodie
+                </Link>
+              </li>
+              <li>
+                <Link href="/custom-tee/" className="hover:text-brand-accent">
+                  Custom DTF tee
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

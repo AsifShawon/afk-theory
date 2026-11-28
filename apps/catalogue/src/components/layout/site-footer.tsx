@@ -65,6 +65,8 @@ export function SiteFooter({ settings, nav }: { settings: SiteSettings; nav: Nav
               {nav.hasSale && <li><Link href="/sale/" className="hover:text-brand-accent">Sale</Link></li>}
               {nav.collections.length > 0 && <li><Link href="/collections/" className="hover:text-brand-accent">Collections</Link></li>}
               <li><Link href="/custom-design/" className="hover:text-brand-accent">Custom designs</Link></li>
+              <li><Link href="/custom-hoodie/" className="hover:text-brand-accent">Custom DTF hoodie</Link></li>
+              <li><Link href="/custom-tee/" className="hover:text-brand-accent">Custom DTF tee</Link></li>
             </ul>
           </div>
           <div>

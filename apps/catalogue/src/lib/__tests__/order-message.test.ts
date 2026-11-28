@@ -129,4 +129,46 @@ test("builds custom design WhatsApp message with and without a gallery reference
   assert.equal(whatsappUrl("", withRef), null)
 })
 
+test("builds Custom DTF Hoodie order message with print dimensions and calculated total", () => {
+  const customLine: OrderLine = {
+    slug: "custom-dtf-hoodie",
+    productName: "Custom DTF Hoodie",
+    colorName: "Black",
+    size: "L",
+    quantity: 2,
+    unitPriceBdt: 925,
+    customDtf: {
+      placements: [{ id: "back", preset: "14x10", widthIn: 14, heightIn: 10, priceBdt: 55 }],
+      artworkNote: "https://example.com/design.png",
+    },
+  }
+  const msg = buildOrderMessage({ code: "AFK-261129-XYZ", lines: [customLine], deliveryZones: DEFAULT_DELIVERY_ZONES })
+  assert.ok(msg.includes("1) Custom DTF Hoodie\n   Black / L x 2 = BDT 1,850"))
+  assert.ok(msg.includes("Base: BDT 870"))
+  assert.ok(msg.includes('Prints: Back Print (14" x 10"): +BDT 55'))
+  assert.ok(msg.includes("Artwork/Note: https://example.com/design.png"))
+  assert.ok(msg.includes("Subtotal: BDT 1,850"))
+})
+
+test("builds Custom DTF Drop-Shoulder Tee order message with 580 base and calculated total", () => {
+  const customTee: OrderLine = {
+    slug: "custom-dtf-tee",
+    productName: "Custom DTF Drop-Shoulder Tee",
+    colorName: "Charcoal Grey",
+    size: "XL",
+    quantity: 2,
+    unitPriceBdt: 635,
+    customDtf: {
+      placements: [{ id: "back", preset: "14x10", widthIn: 14, heightIn: 10, priceBdt: 55 }],
+      artworkNote: "Front chest clean",
+    },
+  }
+  const msg = buildOrderMessage({ code: "AFK-261129-TEE", lines: [customTee], deliveryZones: DEFAULT_DELIVERY_ZONES })
+  assert.ok(msg.includes("1) Custom DTF Drop-Shoulder Tee\n   Charcoal Grey / XL x 2 = BDT 1,270"))
+  assert.ok(msg.includes("Base: BDT 580"))
+  assert.ok(msg.includes('Prints: Back Print (14" x 10"): +BDT 55'))
+  assert.ok(msg.includes("Artwork/Note: Front chest clean"))
+  assert.ok(msg.includes("Subtotal: BDT 1,270"))
+})
+
 console.log(`order-message: ${passed} tests passed`)

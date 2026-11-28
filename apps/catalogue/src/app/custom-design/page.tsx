@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
+import { Link } from "next-view-transitions"
 import type { CatalogueCustomDesign, CatalogueImage } from "@dtc/catalogue-core"
 import { CustomGalleryShowcase } from "@/components/custom/custom-gallery-showcase"
 import { CustomHeroSlider, type HeroSlide } from "@/components/custom/custom-hero-slider"
 import { MissingWhatsappFallback, WhatsAppChatLink } from "@/components/custom/whatsapp-chat-link"
 import { breadcrumbJsonLd, JsonLd } from "@/components/seo/json-ld"
-import { WhatsAppIcon } from "@/components/ui/icons"
+import { ArrowIcon, WhatsAppIcon } from "@/components/ui/icons"
 import { absoluteUrl, getCatalogue, getFeatured } from "@/lib/catalogue"
 import { buildCustomDesignMessage, messengerUrl, whatsappUrl } from "@/lib/order-message"
 
@@ -159,17 +160,23 @@ export default async function CustomDesignPage() {
             pricing and timeline are confirmed directly with you on WhatsApp before any payment is taken.
           </p>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap items-center gap-4">
             {generalWaHref ? (
-              <>
+              <div>
                 <WhatsAppChatLink href={generalWaHref} className="btn-signal h-14 w-full px-7 text-sm sm:w-auto">
                   <WhatsAppIcon size={18} /> Share your design on WhatsApp
                 </WhatsAppChatLink>
                 <p className="mt-2.5 text-xs text-brand-bone/65">Open the chat and attach your design or reference image there.</p>
-              </>
+              </div>
             ) : (
               <MissingWhatsappFallback messengerHref={messengerHref} hasContactPage={hasContactPage} />
             )}
+            <Link href="/custom-hoodie/" className="btn-outline h-14 border-white/25 px-7 text-sm self-start">
+              Custom DTF Hoodie Calculator <ArrowIcon />
+            </Link>
+            <Link href="/custom-tee/" className="btn-outline h-14 border-white/25 px-7 text-sm self-start">
+              Custom DTF Tee Calculator <ArrowIcon />
+            </Link>
           </div>
         </div>
       </section>

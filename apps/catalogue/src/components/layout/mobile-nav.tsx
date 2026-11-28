@@ -138,6 +138,16 @@ export function MobileNav({ nav, settings }: { nav: NavData; settings: SiteSetti
                 Custom designs
               </Link>
             </li>
+            <li>
+              <Link href="/custom-hoodie/" onClick={close} className={clsx(row, "display text-2xl")}>
+                Custom DTF hoodie
+              </Link>
+            </li>
+            <li>
+              <Link href="/custom-tee/" onClick={close} className={clsx(row, "display text-2xl")}>
+                Custom DTF tee
+              </Link>
+            </li>
           </ul>
 
           {nav.collections.length > 0 && (

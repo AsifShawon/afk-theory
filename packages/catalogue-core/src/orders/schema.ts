@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { BANGLADESH_DISTRICTS, findBangladeshDistrict, isValidBangladeshPhone, normalizeBangladeshPhone } from "@dtc/commerce-contracts"
+import { CUSTOM_PLACEMENT_IDS, CUSTOM_PRESET_IDS, isValidPlacementDimensions, CUSTOM_PLACEMENTS } from "../custom-hoodie"
 
 /** Most of one variant a customer can order at once. */
 export const MAX_LINE_QUANTITY = 10
@@ -51,6 +52,31 @@ const optionName = z
   .optional()
   .transform((v) => v || null)
 
+export const customDtfPlacementSchema = z
+  .object({
+    id: z.enum(CUSTOM_PLACEMENT_IDS),
+    preset: z.enum(CUSTOM_PRESET_IDS).optional(),
+    widthIn: z.number().finite(),
+    heightIn: z.number().finite(),
+  })
+  .superRefine((p, ctx) => {
+    if (!isValidPlacementDimensions(p.id, p.widthIn, p.heightIn)) {
+      const bounds = CUSTOM_PLACEMENTS[p.id]
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `${bounds.label} dimensions must fit within ${bounds.maxWidthIn}" × ${bounds.maxHeightIn}"`,
+      })
+    }
+  })
+
+export const checkoutCustomDtfSchema = z.object({
+  placements: z
+    .array(customDtfPlacementSchema)
+    .max(CUSTOM_PLACEMENT_IDS.length)
+    .refine((list) => new Set(list.map((p) => p.id)).size === list.length, "Each print placement can be chosen once"),
+  artworkNote: z.string().max(300).transform(cleanLine).optional(),
+})
+
 export const checkoutLineSchema = z.object({
   slug: z.string().min(1).max(80),
   /** Product name as the customer saw it. Only used in the emergency email when prices cannot be checked. */
@@ -61,6 +87,7 @@ export const checkoutLineSchema = z.object({
   quantity: z.number().int().min(1).max(MAX_LINE_QUANTITY),
   /** The price the customer saw. Only used to warn when it changed; never charged. */
   unitPriceBdt: z.number().int().min(0),
+  customDtf: checkoutCustomDtfSchema.optional(),
 })
 
 export const checkoutCustomerSchema = z.object({

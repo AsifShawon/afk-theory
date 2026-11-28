@@ -1,19 +1,25 @@
 import assert from "node:assert/strict"
 import { DEFAULT_DELIVERY_ZONES } from "../constants"
 import {
+  calculatePlacementPriceBdt,
   CHECKOUT_DISTRICTS,
   checkoutFieldErrors,
   checkoutInputSchema,
   consoleEmailProvider,
+  CUSTOM_HOODIE_CONFIG,
+  CUSTOM_TEE_CONFIG,
   customerOrderEmail,
   normalizeCheckoutPhone,
   orderStatusEmail,
   ordersToCsv,
   ownerOrderEmail,
+  priceCustomDtfHoodie,
+  priceCustomDtfTee,
   pricedOrderFromRows,
   priceOrder,
   quoteDelivery,
   resendEmailProvider,
+  roundToNearest5,
   statusHasEmail,
   type CheckoutCustomer,
   type OrderableProduct,
@@ -357,6 +363,141 @@ const customer = (over: Partial<CheckoutCustomer> = {}): CheckoutCustomer => ({
     assert.ok(!email.html.includes("<b>Rahim") && email.html.includes("&lt;b&gt;Rahim"))
     assert.ok(email.text.includes("BDT 2,560 ready in cash"))
     assert.equal(orderStatusEmail({ code: "A", name: "R", status: "returned", totalBdt: 1 }, { siteUrl: "", whatsappNumber: "" }), null)
+  })
+
+  await test("Custom DTF Hoodie calculates nearest-5 print fees, enforces bounds, and blocks tampered prices", () => {
+    assert.equal(roundToNearest5(84), 85)
+    assert.equal(roundToNearest5(82), 80)
+    assert.equal(roundToNearest5(82.5), 85)
+
+    // 4x4 hits MIN_PRINT_FEE (20 BDT)
+    assert.equal(calculatePlacementPriceBdt(4, 4).priceBdt, 20)
+    // 14x10 -> 140 * (350 / 877.5) = 55.84 -> 55 BDT
+    assert.equal(calculatePlacementPriceBdt(14, 10).priceBdt, 55)
+    // A4 (8.27x11.69) -> 96.6763 * 0.39886 = 38.56 -> 40 BDT
+    assert.equal(calculatePlacementPriceBdt(8.27, 11.69).priceBdt, 40)
+    // A3 (11.69x16.54) -> 193.3526 * 0.39886 = 77.12 -> 75 BDT
+    assert.equal(calculatePlacementPriceBdt(11.69, 16.54).priceBdt, 75)
+
+    const calc = priceCustomDtfHoodie([
+      { id: "back", preset: "14x10", widthIn: 14, heightIn: 10 },
+      { id: "front", preset: "4x4", widthIn: 4, heightIn: 4 },
+    ])
+    assert.equal(calc.basePriceBdt, 870)
+    assert.equal(calc.unitPriceBdt, 870 + 55 + 20)
+
+    const solidHoodieProduct: OrderableProduct = {
+      id: "prod-hoodie",
+      slug: CUSTOM_HOODIE_CONFIG.baseProductSlug,
+      name: "Premium Drop Shoulder Hoodie - Solid",
+      priceBdt: 850,
+      published: true,
+      sizes: ["M", "L", "XL"],
+      soldOutSizes: [],
+      colors: [
+        { name: "Black", inStock: true },
+        { name: "Lavender", inStock: true },
+        { name: "Whitish Grey", inStock: true },
+      ],
+      designs: [],
+    }
+
+    const customLine = {
+      slug: CUSTOM_HOODIE_CONFIG.customProductSlug,
+      color: "Black",
+      design: null,
+      size: "L",
+      quantity: 2,
+      unitPriceBdt: 945,
+      customDtf: {
+        placements: [
+          { id: "back" as const, preset: "14x10" as const, widthIn: 14, heightIn: 10 },
+          { id: "front" as const, preset: "4x4" as const, widthIn: 4, heightIn: 4 },
+        ],
+        artworkNote: "https://example.com/art.png",
+      },
+    }
+
+    // Valid order prices cleanly
+    const pricedOk = priceOrder({
+      lines: [customLine],
+      customer: { district: "Dhaka", address: "House 10, Road 4, Dhanmondi" },
+      products: [solidHoodieProduct],
+      deliveryZones: DEFAULT_DELIVERY_ZONES,
+    })
+    assert.equal(pricedOk.ok, true)
+    if (pricedOk.ok) {
+      assert.equal(pricedOk.order.lines[0].unitPriceBdt, 945)
+      assert.equal(pricedOk.order.lines[0].lineTotalBdt, 1890)
+      assert.ok(pricedOk.order.lines[0].design?.includes('Back 14"×10" (+BDT 55)'))
+      assert.ok(pricedOk.order.lines[0].design?.includes("Artwork: https://example.com/art.png"))
+    }
+
+    // Tampered client price (850 instead of 945) is rejected with price_changed = 945
+    const tampered = priceOrder({
+      lines: [{ ...customLine, unitPriceBdt: 850 }],
+      customer: { district: "Dhaka", address: "House 10, Road 4, Dhanmondi" },
+      products: [solidHoodieProduct],
+      deliveryZones: DEFAULT_DELIVERY_ZONES,
+    })
+    assert.equal(tampered.ok, false)
+    if (!tampered.ok) {
+      assert.equal(tampered.problems[0].kind, "price_changed")
+      if (tampered.problems[0].kind === "price_changed") {
+        assert.equal(tampered.problems[0].priceBdt, 945)
+      }
+    }
+
+    // Sleeve exceeding 4" max width fails schema validation
+    const invalidSleeve = checkoutInputSchema.safeParse({
+      idempotencyKey: "co_validkey1234567890",
+      customer: { name: "Rahim", phone: "01712345678", district: "Dhaka", address: "House 12, Road 5, Dhaka" },
+      lines: [
+        {
+          ...customLine,
+          customDtf: { placements: [{ id: "left_sleeve", preset: "custom", widthIn: 5, heightIn: 10 }] },
+        },
+      ],
+    })
+    assert.equal(invalidSleeve.success, false)
+
+    // Custom DTF Drop-Shoulder Tee (base 580 BDT + Back 14x10 (55) = 635 BDT)
+    const teeCalc = priceCustomDtfTee([{ id: "back", preset: "14x10", widthIn: 14, heightIn: 10 }])
+    assert.equal(teeCalc.basePriceBdt, 580)
+    assert.equal(teeCalc.unitPriceBdt, 635)
+
+    const teeProduct: OrderableProduct = {
+      id: "prod-tee",
+      slug: CUSTOM_TEE_CONFIG.baseProductSlug,
+      name: "Drop Shoulder Tee",
+      priceBdt: 600,
+      published: true,
+      sizes: ["M", "L", "XL", "XXL"],
+      soldOutSizes: [],
+      colors: [{ name: "Charcoal Grey", inStock: true }, { name: "Bottle Green", inStock: true }, { name: "Maroon", inStock: true }],
+      designs: [],
+    }
+    const teePriced = priceOrder({
+      lines: [
+        {
+          slug: CUSTOM_TEE_CONFIG.customProductSlug,
+          color: "Bottle Green",
+          design: null,
+          size: "XL",
+          quantity: 1,
+          unitPriceBdt: 635,
+          customDtf: { placements: [{ id: "back", preset: "14x10", widthIn: 14, heightIn: 10 }] },
+        },
+      ],
+      customer: { district: "Dhaka", address: "House 10, Road 4, Dhanmondi" },
+      products: [teeProduct],
+      deliveryZones: DEFAULT_DELIVERY_ZONES,
+    })
+    assert.equal(teePriced.ok, true)
+    if (teePriced.ok) {
+      assert.equal(teePriced.order.lines[0].unitPriceBdt, 635)
+      assert.equal(teePriced.order.lines[0].name, CUSTOM_TEE_CONFIG.customProductName)
+    }
   })
 
   console.log(`${passed} passed`)
