@@ -232,6 +232,7 @@ export function seedToRawCatalogue(): RawCatalogue {
     menuProducts: [],
     designs: [],
     pages: [],
+    customDesigns: [],
     sizeGuides: [],
     settings: {
       id: 1,

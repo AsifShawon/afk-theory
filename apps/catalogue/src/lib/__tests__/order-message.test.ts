@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { DEFAULT_DELIVERY_ZONES } from "@dtc/catalogue-core"
-import { buildOrderMessage, createOrderCode, messengerUrl, orderSubtotal, whatsappUrl, type OrderLine } from "../order-message"
+import { buildCustomDesignMessage, buildOrderMessage, createOrderCode, messengerUrl, orderSubtotal, whatsappUrl, type OrderLine } from "../order-message"
 
 let passed = 0
 function test(name: string, fn: () => void) {
@@ -90,6 +90,43 @@ test("encodes the WhatsApp link so the decoded text matches exactly", () => {
 test("builds the Messenger link with the order code as ref", () => {
   assert.equal(messengerUrl("https://facebook.com/afktheory", "AFK-261120-K7Q"), "https://m.me/afktheory?ref=AFK-261120-K7Q")
   assert.equal(messengerUrl("", "AFK-261120-K7Q"), null)
+})
+
+test("builds custom design WhatsApp message with and without a gallery reference", () => {
+  const plain = buildCustomDesignMessage()
+  assert.equal(
+    plain,
+    [
+      "Hi AFK THEORY, I'd like to request a custom design.",
+      "Garment type:",
+      "Size and colour:",
+      "Quantity:",
+      "Print placement:",
+      "I'll attach my design or reference image in this chat.",
+    ].join("\n")
+  )
+  assert.ok(!plain.includes("Reference from your gallery:"))
+
+  const withRef = buildCustomDesignMessage({ referenceTitle: "  Lantern Back Print  " })
+  assert.equal(
+    withRef,
+    [
+      "Hi AFK THEORY, I'd like to request a custom design.",
+      "Reference from your gallery: Lantern Back Print",
+      "Garment type:",
+      "Size and colour:",
+      "Quantity:",
+      "Print placement:",
+      "I'll attach my design or reference image in this chat.",
+    ].join("\n")
+  )
+
+  const urlPlain = whatsappUrl("8801610689040", plain)
+  const urlRef = whatsappUrl("8801610689040", withRef)
+  assert.ok(urlPlain && urlRef)
+  assert.equal(new URL(urlPlain as string).searchParams.get("text"), plain)
+  assert.equal(new URL(urlRef as string).searchParams.get("text"), withRef)
+  assert.equal(whatsappUrl("", withRef), null)
 })
 
 console.log(`order-message: ${passed} tests passed`)

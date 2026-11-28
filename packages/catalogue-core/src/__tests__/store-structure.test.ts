@@ -3,11 +3,11 @@ import { buildCatalogue, usedImageObjects } from "../build"
 import { buildCategoryTree, categoryAndDescendantIds, flattenTree, resolveParents } from "../category-tree"
 import { applyListing, filterProducts, listingFacets, sortProducts, type ListingProduct } from "../listing"
 import { newestFirst, pickMenuProducts, type MenuCandidate } from "../menu"
-import { homeSectionsInputSchema, productInputSchema } from "../schema"
+import { homeSectionsInputSchema, customDesignInputSchema, productInputSchema } from "../schema"
 import { editDistance, matchWord, scoreSearchEntry, searchCatalogue } from "../search"
 import { seedToRawCatalogue } from "../seed"
 import { normalizeHomeSections } from "../store-defaults"
-import type { CategoryRow, ProductRow, RawCatalogue, SearchIndexEntry } from "../types"
+import type { CategoryRow, CustomDesignRow, ProductRow, RawCatalogue, SearchIndexEntry } from "../types"
 
 let passed = 0
 function test(name: string, fn: () => void) {
@@ -431,13 +431,119 @@ test("lists the images the site must download", () => {
 
 test("the seed catalogue still builds with the new tables empty", () => {
   const raw = seedToRawCatalogue()
-  const empty = { ...raw, collections: [], productCollections: [], menuProducts: [], designs: [], pages: [] }
+  const empty = { ...raw, collections: [], productCollections: [], menuProducts: [], designs: [], pages: [], customDesigns: [] }
   const { catalogue } = buildCatalogue(empty, () => "", "fixture")
   assert.equal(catalogue.products.length, 1)
   assert.equal(catalogue.collections.length, 0)
   assert.equal(catalogue.menu.length, 1)
   assert.equal(catalogue.homeSections.length, 9)
   assert.equal(catalogue.pages.length, 0)
+  assert.equal(catalogue.customDesigns.length, 0)
+})
+
+test("customDesigns filters drafts and missing photos, keeps order and detail images, and tracks usedImageObjects", () => {
+  const raw = seedToRawCatalogue()
+  const customDesigns: CustomDesignRow[] = [
+    {
+      id: uuid(960),
+      title: "Draft custom",
+      garment_type: "Tee",
+      status: "draft",
+      is_featured: false,
+      sort_order: 0,
+      image_path: "custom-designs/draft/main",
+      image_widths: [640],
+      image_width: 640,
+      image_height: 800,
+      image_alt: "Draft alt",
+      detail_image_path: null,
+      detail_image_widths: [],
+      detail_image_width: null,
+      detail_image_height: null,
+      detail_image_alt: "",
+      created_at: "2026-11-27T00:00:00Z",
+      updated_at: "2026-11-27T00:00:00Z",
+    },
+    {
+      id: uuid(961),
+      title: "No photo published",
+      garment_type: "Hoodie",
+      status: "published",
+      is_featured: false,
+      sort_order: 1,
+      image_path: null,
+      image_widths: [],
+      image_width: null,
+      image_height: null,
+      image_alt: "",
+      detail_image_path: null,
+      detail_image_widths: [],
+      detail_image_width: null,
+      detail_image_height: null,
+      detail_image_alt: "",
+      created_at: "2026-11-27T00:00:00Z",
+      updated_at: "2026-11-27T00:00:00Z",
+    },
+    {
+      id: uuid(962),
+      title: "Lantern Back Print",
+      garment_type: "Drop-shoulder tee",
+      status: "published",
+      is_featured: true,
+      sort_order: 2,
+      image_path: "custom-designs/lantern/main",
+      image_widths: [640, 1080],
+      image_width: 1080,
+      image_height: 1350,
+      image_alt: "Back of charcoal drop-shoulder tee with lantern print",
+      detail_image_path: "custom-designs/lantern/detail",
+      detail_image_widths: [640],
+      detail_image_width: 640,
+      detail_image_height: 800,
+      detail_image_alt: "Close-up of white puff print texture",
+      created_at: "2026-11-27T00:00:00Z",
+      updated_at: "2026-11-28T00:00:00Z",
+    },
+  ]
+
+  const { catalogue, skipped } = buildCatalogue({ ...raw, customDesigns }, (img, w) => `/media/${img.path}-${w}.webp`, "fixture")
+  assert.equal(catalogue.customDesigns.length, 1)
+  assert.ok(skipped.some((s) => s.includes("No photo published")))
+  const built = catalogue.customDesigns[0]
+  assert.equal(built.title, "Lantern Back Print")
+  assert.equal(built.garmentType, "Drop-shoulder tee")
+  assert.equal(built.isFeatured, true)
+  assert.equal(built.image.alt, "Back of charcoal drop-shoulder tee with lantern print")
+  assert.equal(built.image.sources[0].src, "/media/custom-designs/lantern/main-640.webp")
+  assert.equal(built.detailImage?.sources[0].src, "/media/custom-designs/lantern/detail-640.webp")
+
+  const mediaPaths = usedImageObjects({ ...raw, customDesigns }, catalogue).map((m) => m.path)
+  assert.ok(mediaPaths.includes("custom-designs/lantern/main"))
+  assert.ok(mediaPaths.includes("custom-designs/lantern/detail"))
+  assert.ok(!mediaPaths.includes("custom-designs/draft/main"))
+
+  assert.equal(
+    customDesignInputSchema.safeParse({
+      title: "Custom hoodie",
+      garmentType: "Heavyweight hoodie",
+      status: "draft",
+      isFeatured: false,
+      imageAlt: "",
+      detailImageAlt: "",
+    }).success,
+    true
+  )
+  assert.equal(
+    customDesignInputSchema.safeParse({
+      title: "",
+      garmentType: "Tee",
+      status: "draft",
+      isFeatured: false,
+      imageAlt: "",
+      detailImageAlt: "",
+    }).success,
+    false
+  )
 })
 
 console.log(`store-structure: ${passed} tests passed`)

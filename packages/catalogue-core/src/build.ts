@@ -9,6 +9,7 @@ import {
   type CatalogueCategory,
   type CatalogueCategoryNode,
   type CatalogueCollection,
+  type CatalogueCustomDesign,
   type CatalogueDesign,
   type CatalogueImage,
   type CatalogueMenuItem,
@@ -72,7 +73,13 @@ interface StoredImageColumns {
   image_height?: number | null
 }
 
-function bannerImage(id: string, alt: string, row: StoredImageColumns, resolveSrc: ImageSrcResolver): CatalogueImage | null {
+function bannerImage(
+  id: string,
+  alt: string,
+  row: StoredImageColumns,
+  resolveSrc: ImageSrcResolver,
+  role: ImageRole = "detail"
+): CatalogueImage | null {
   const path = row.image_path
   const widths = (row.image_widths ?? []).filter((w) => w > 0)
   if (!path || widths.length === 0 || !row.image_width || !row.image_height) {
@@ -82,7 +89,7 @@ function bannerImage(id: string, alt: string, row: StoredImageColumns, resolveSr
     id,
     colorId: null,
     designId: null,
-    role: "detail",
+    role,
     alt,
     width: row.image_width,
     height: row.image_height,
@@ -308,6 +315,40 @@ export function buildCatalogue(
     .filter((p) => p.title && p.html)
     .sort((a, b) => pageOrder(a.slug) - pageOrder(b.slug) || a.slug.localeCompare(b.slug))
 
+  const customDesigns: CatalogueCustomDesign[] = []
+  for (const row of [...(raw.customDesigns ?? [])].sort(bySortOrder)) {
+    if (row.status !== "published") continue
+    const title = row.title.trim()
+    const garmentType = (row.garment_type ?? "").trim()
+    const defaultAlt = garmentType ? `${title} (${garmentType})` : title
+    const image = bannerImage(`custom-${row.id}`, row.image_alt?.trim() || defaultAlt, row, resolveSrc, "front")
+    if (!image) {
+      skipped.push(`custom design "${title || row.id}" has no main image`)
+      continue
+    }
+    const detailImage = bannerImage(
+      `custom-${row.id}-detail`,
+      row.detail_image_alt?.trim() || `${defaultAlt}, print close-up`,
+      {
+        image_path: row.detail_image_path,
+        image_widths: row.detail_image_widths,
+        image_width: row.detail_image_width,
+        image_height: row.detail_image_height,
+      },
+      resolveSrc,
+      "detail"
+    )
+    customDesigns.push({
+      id: row.id,
+      title,
+      garmentType,
+      isFeatured: Boolean(row.is_featured),
+      image,
+      detailImage,
+      updatedAt: row.updated_at,
+    })
+  }
+
   const searchIndex: SearchIndexEntry[] = products.map((p) => ({
     slug: p.slug,
     name: p.name,
@@ -339,6 +380,7 @@ export function buildCatalogue(
       },
       menu,
       pages,
+      customDesigns,
       homeSections: normalizeHomeSections(raw.settings?.home_sections),
       searchIndex,
     },
@@ -347,20 +389,28 @@ export function buildCatalogue(
 }
 
 /**
- * Every stored image the built catalogue shows: product photos plus
- * category and collection banners. The site's sync script downloads these
- * and deletes everything else from its media folder.
+ * Every stored image the built catalogue shows: product photos, category and
+ * collection banners, plus published custom design examples. The site's sync
+ * script downloads these and deletes everything else from its media folder.
  */
 export function usedImageObjects(raw: RawCatalogue, catalogue: Catalogue): { path: string; widths: number[] }[] {
   const imageIds = new Set(catalogue.products.flatMap((p) => p.images.map((i) => i.id)))
   const categoryIds = new Set(flattenTree(catalogue.categoryTree).filter((c) => c.image).map((c) => c.id))
   const collectionIds = new Set(catalogue.collections.filter((c) => c.image).map((c) => c.id))
+  const customDesignIds = new Set(catalogue.customDesigns.map((d) => d.id))
   const banners = [
     ...raw.categories.filter((c) => categoryIds.has(c.id)),
     ...(raw.collections ?? []).filter((c) => collectionIds.has(c.id)),
   ]
+  const customImages = (raw.customDesigns ?? [])
+    .filter((d) => customDesignIds.has(d.id))
+    .flatMap((d) => [
+      ...(d.image_path && d.image_widths?.length ? [{ path: d.image_path, widths: d.image_widths }] : []),
+      ...(d.detail_image_path && d.detail_image_widths?.length ? [{ path: d.detail_image_path, widths: d.detail_image_widths }] : []),
+    ])
   return [
     ...raw.images.filter((img) => imageIds.has(img.id)).map((img) => ({ path: img.path, widths: img.widths })),
     ...banners.map((b) => ({ path: b.image_path as string, widths: b.image_widths ?? [] })),
+    ...customImages,
   ]
 }

@@ -1,5 +1,7 @@
 import { Fragment } from "react"
+import { Link } from "next-view-transitions"
 import type { HomeSectionId } from "@dtc/catalogue-core"
+import { ArrowIcon } from "@/components/ui/icons"
 import { BestSellers } from "@/components/home/best-sellers"
 import { CategoryTiles } from "@/components/home/category-tiles"
 import { Collection } from "@/components/home/collection"
@@ -75,6 +77,25 @@ export default async function HomePage() {
         .map((section) => (
           <Fragment key={section.id}>{render[section.id]()}</Fragment>
         ))}
+      <section aria-labelledby="home-custom-title" className="border-t border-white/10 bg-brand-graphite py-16 text-brand-bone md:py-20">
+        <div className="mx-auto flex max-w-editorial flex-col gap-6 px-5 md:flex-row md:items-center md:justify-between md:px-10">
+          <div className="max-w-xl">
+            <p className="font-hud text-[11px] text-brand-accent">Pre-order custom prints</p>
+            <h2 id="home-custom-title" className="display mt-2 text-4xl md:text-5xl">
+              Custom designs
+            </h2>
+            <p className="mt-3 text-sm text-brand-bone/75 md:text-base">
+              Want your own graphic printed on an AFK THEORY tee or hoodie? Browse real custom pieces and share your idea on WhatsApp.
+            </p>
+          </div>
+          <Link
+            href="/custom-design/"
+            className="btn-outline shrink-0 border-brand-accent text-brand-accent hover:border-brand-accent hover:bg-brand-accent hover:text-brand-graphite"
+          >
+            Explore custom designs <ArrowIcon />
+          </Link>
+        </div>
+      </section>
     </>
   )
 }

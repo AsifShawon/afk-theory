@@ -150,6 +150,28 @@ export interface SitePageRow {
   updated_at: string
 }
 
+/** Custom garment example uploaded for the /custom-design/ showcase. */
+export interface CustomDesignRow {
+  id: string
+  title: string
+  garment_type: string
+  status: ProductStatus
+  is_featured: boolean
+  sort_order: number
+  image_path: string | null
+  image_widths: number[]
+  image_width: number | null
+  image_height: number | null
+  image_alt: string
+  detail_image_path: string | null
+  detail_image_widths: number[]
+  detail_image_width: number | null
+  detail_image_height: number | null
+  detail_image_alt: string
+  created_at: string
+  updated_at: string
+}
+
 export interface ProductRow {
   id: string
   slug: string
@@ -244,6 +266,7 @@ export interface RawCatalogue {
   menuProducts: CategoryMenuProductRow[]
   designs: ProductDesignRow[]
   pages: SitePageRow[]
+  customDesigns?: CustomDesignRow[]
 }
 
 /* ---------------------------- render-ready model ---------------------------- */
@@ -344,6 +367,18 @@ export interface CataloguePage {
   updatedAt: string
 }
 
+export interface CatalogueCustomDesign {
+  id: string
+  title: string
+  garmentType: string
+  isFeatured: boolean
+  /** Full garment view. */
+  image: CatalogueImage
+  /** Optional back view or print close-up. */
+  detailImage: CatalogueImage | null
+  updatedAt: string
+}
+
 /** Compact product entry for client-side search. */
 export interface SearchIndexEntry {
   slug: string
@@ -423,6 +458,7 @@ export interface Catalogue {
   autoCollections: { new: string[]; sale: string[] }
   menu: CatalogueMenuItem[]
   pages: CataloguePage[]
+  customDesigns: CatalogueCustomDesign[]
   homeSections: HomeSection[]
   searchIndex: SearchIndexEntry[]
 }

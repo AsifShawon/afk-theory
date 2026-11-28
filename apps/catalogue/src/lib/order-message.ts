@@ -87,6 +87,23 @@ export function buildOrderMessage(input: {
   ].join("\n")
 }
 
+/**
+ * Builds the prefilled WhatsApp request message for custom design pre-orders.
+ * Includes the gallery reference line only when a specific example is picked.
+ */
+export function buildCustomDesignMessage(input?: { referenceTitle?: string | null }): string {
+  const reference = input?.referenceTitle?.trim()
+  return [
+    "Hi AFK THEORY, I'd like to request a custom design.",
+    ...(reference ? [`Reference from your gallery: ${reference}`] : []),
+    "Garment type:",
+    "Size and colour:",
+    "Quantity:",
+    "Print placement:",
+    "I'll attach my design or reference image in this chat.",
+  ].join("\n")
+}
+
 /** wa.me link that opens a chat with the message typed in, ready to send. */
 export function whatsappUrl(number: string, message: string): string | null {
   const digits = normalizeWhatsappNumber(number)

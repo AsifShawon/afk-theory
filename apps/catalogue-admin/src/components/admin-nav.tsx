@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "/products/new", label: "New product" },
   { href: "/categories", label: "Categories" },
   { href: "/collections", label: "Collections" },
+  { href: "/custom-designs", label: "Custom gallery" },
   { href: "/site-pages", label: "Pages" },
   { href: "/homepage", label: "Homepage" },
   { href: "/settings", label: "Settings" },

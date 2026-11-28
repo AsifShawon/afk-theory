@@ -3,6 +3,7 @@ import type {
   CategoryMenuProductRow,
   CategoryRow,
   CollectionRow,
+  CustomDesignRow,
   ProductCollectionRow,
   ProductColorRow,
   ProductDesignRow,
@@ -26,10 +27,12 @@ export const TABLES = {
   menuProducts: "category_menu_products",
   designs: "product_designs",
   pages: "site_pages",
+  customDesigns: "custom_designs",
 } as const
 
 /** Migration that adds collections, designs, menu picks, pages and homepage sections. */
 export const STORE_STRUCTURE_MIGRATION = "20261122000000_store_structure.sql"
+export const CUSTOM_DESIGNS_MIGRATION = "20261128000000_custom_designs.sql"
 
 type QueryResult = { data: unknown; error: { message: string; code?: string } | null }
 
@@ -56,8 +59,12 @@ export async function fetchRawCatalogue(
   if (!options.includeDrafts) {
     productQuery = productQuery.eq("status", "published")
   }
+  let customDesignQuery = client.from(TABLES.customDesigns).select("*").order("sort_order")
+  if (!options.includeDrafts) {
+    customDesignQuery = customDesignQuery.eq("status", "published")
+  }
 
-  const [categories, products, colors, images, settings, sizeGuides, collections, productCollections, menuProducts, designs, pages] =
+  const [categories, products, colors, images, settings, sizeGuides, collections, productCollections, menuProducts, designs, pages, customDesigns] =
     await Promise.all([
       client.from(TABLES.categories).select("*"),
       productQuery,
@@ -70,6 +77,7 @@ export async function fetchRawCatalogue(
       client.from(TABLES.menuProducts).select("*"),
       client.from(TABLES.designs).select("*"),
       client.from(TABLES.pages).select("*"),
+      customDesignQuery,
     ])
 
   const productRows = unwrap<ProductRow[]>(products, "products")
@@ -110,6 +118,12 @@ export async function fetchRawCatalogue(
 
   if (missing.length > 0) {
     console.warn(`[catalogue] ${missing.join(", ")} not found. Run migration ${STORE_STRUCTURE_MIGRATION}. Building without them.`)
+    missing.length = 0
+  }
+
+  raw.customDesigns = optional<CustomDesignRow>(customDesigns, TABLES.customDesigns)
+  if (missing.length > 0) {
+    console.warn(`[catalogue] ${missing.join(", ")} not found. Run migration ${CUSTOM_DESIGNS_MIGRATION}. Building without them.`)
   }
   return raw
 }

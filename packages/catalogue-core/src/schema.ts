@@ -158,6 +158,17 @@ export const sitePageInputSchema = z.object({
 
 export type SitePageInput = z.infer<typeof sitePageInputSchema>
 
+export const customDesignInputSchema = z.object({
+  title: shortText(120).min(1, "Title is required"),
+  garmentType: shortText(80).min(1, "Garment type is required"),
+  status: z.enum(PRODUCT_STATUSES),
+  isFeatured: z.boolean(),
+  imageAlt: shortText(200, "Keep the main photo alt text under 200 characters"),
+  detailImageAlt: shortText(200, "Keep the detail photo alt text under 200 characters"),
+})
+
+export type CustomDesignInput = z.infer<typeof customDesignInputSchema>
+
 export const homeSectionsInputSchema = z
   .array(z.object({ id: z.enum(HOME_SECTION_IDS), enabled: z.boolean() }))
   .max(HOME_SECTION_IDS.length)

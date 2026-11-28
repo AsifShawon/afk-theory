@@ -10,6 +10,7 @@ import {
   type CategoryMenuProductRow,
   type CategoryRow,
   type CollectionRow,
+  type CustomDesignRow,
   type HomeSection,
   type ProductCollectionRow,
   type ProductColorRow,
@@ -328,6 +329,28 @@ export async function loadSettings(): Promise<{ settings: SiteSettings; row: Sit
   return { settings: settingsFromRow(row), row }
 }
 
+export interface CustomDesignsState {
+  designs: (CustomDesignRow & { imageUrl: string | null; detailImageUrl: string | null })[]
+  migrationMissing: boolean
+}
+
+export async function loadCustomDesignsState(): Promise<CustomDesignsState> {
+  const { client } = getAdmin()
+  const result = await client.from(TABLES.customDesigns).select("*").order("sort_order")
+  if (result.error) {
+    if (isMissingTable(result.error)) return { designs: [], migrationMissing: true }
+    throw new Error(result.error.message)
+  }
+  return {
+    designs: (result.data as CustomDesignRow[]).map((d) => ({
+      ...d,
+      imageUrl: bannerUrl(d),
+      detailImageUrl: bannerUrl({ image_path: d.detail_image_path, image_widths: d.detail_image_widths }),
+    })),
+    migrationMissing: false,
+  }
+}
+
 export interface PublishStatus {
   publishedAt: string | null
   lastChangeAt: string | null
@@ -342,10 +365,11 @@ export async function loadPublishStatus(): Promise<PublishStatus> {
   const [settings, latestProduct, ...storeTables] = await Promise.all([
     client.from(TABLES.settings).select("published_at, updated_at").eq("id", 1).maybeSingle(),
     latest(TABLES.products),
-    // These have updated_at only after migration 20261122000000; errors before that are ignored.
+    // These have updated_at only after migrations 20261122000000 and 20261128000000; errors before that are ignored.
     latest(TABLES.categories),
     latest(TABLES.collections),
     latest(TABLES.pages),
+    latest(TABLES.customDesigns),
   ])
   const s = check(settings) as { published_at: string | null; updated_at: string } | null
   const p = check(latestProduct) as { updated_at: string } | null

@@ -207,6 +207,26 @@ Run it from the repository root. `EMAIL_PROVIDER=console` prints the emails in t
 - Send the site link to yourself on WhatsApp and Messenger and check the preview card. The home page uses `src/app/opengraph-image.jpg`. Product pages use the product's first photo, which is webp; if a chat app shows no image for product links, tell the developer so it can switch to JPEG previews.
 - Tap **Order on WhatsApp** and **Order on Messenger** on a phone and confirm each opens your chat.
 
+## Custom design gallery (`/custom-design/`)
+
+1. In Supabase SQL editor, run `apps/catalogue-admin/supabase/migrations/20261128000000_custom_designs.sql`.
+2. In the local admin (`http://127.0.0.1:8200`), open **Custom gallery** to add examples with a short title, garment type, approved full-garment photo, descriptive alt text, and an optional back or print close-up.
+3. Mark one published item as featured to lead the `/custom-design/` hero, reorder items, set status to **Published**, and click **Publish**.
+
+## Cloudflare `www` to apex 301 redirect
+
+Before adding any rule, check **Cloudflare Dashboard > Account > Bulk Redirects** and **Domain (`afktheory.com`) > Rules > Redirect Rules** (or legacy Page Rules) to confirm a `www` redirect does not already exist. Avoid creating a second redirect rule.
+
+If none exists, configure one **Single Redirect** rule under **afktheory.com > Rules > Redirect Rules**:
+
+- **Rule name:** `Redirect www to apex`
+- **When incoming requests match:** Custom filter expression -> `(http.host eq "www.afktheory.com")`
+- **URL redirect:** Dynamic -> `concat("https://afktheory.com", http.request.uri.path)`
+- **Status code:** `301`
+- **Preserve query string:** Enabled (checked)
+
+Also ensure `www` has a proxied (`Orange cloud`) DNS record (`CNAME` `www` -> `afktheory.com` or Pages host) so Cloudflare intercepts requests to `www.afktheory.com` and preserves both path and query string on the 301 redirect.
+
 ## Limits of the free plans
 
 - Supabase free: 500 MB database, 1 GB file storage, 5 GB bandwidth a month (only the admin and builds use it). Pauses after a week of inactivity.

@@ -82,6 +82,7 @@ export function SiteHeader({ nav, announcement }: { nav: NavData; announcement: 
     ...(nav.hasNew ? [{ label: "New", href: "/new/" }] : []),
     ...(nav.hasSale ? [{ label: "Sale", href: "/sale/" }] : []),
     ...(nav.collections.length > 0 ? [{ label: "Collections", href: "/collections/" }] : []),
+    { label: "Custom designs", href: "/custom-design/" },
   ]
 
   return (
@@ -150,7 +151,7 @@ export function SiteHeader({ nav, announcement }: { nav: NavData; announcement: 
                     onPointerEnter={(e) => e.pointerType === "mouse" && open && schedule(null, CLOSE_DELAY)}
                     className={clsx(
                       "font-hud flex items-center px-4 text-[11px] transition-colors hover:text-brand-accent",
-                      pathname === link.href ? "text-brand-accent" : "text-brand-bone/80"
+                      pathname === link.href || pathname.startsWith(link.href) ? "text-brand-accent" : "text-brand-bone/80"
                     )}
                   >
                     {link.label}
@@ -284,6 +285,11 @@ function MegaPanel({ id, open, nav, onPointerEnter }: { id: PanelId; open: boole
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/custom-design/" className="hover:text-brand-accent">
+                  Custom designs
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

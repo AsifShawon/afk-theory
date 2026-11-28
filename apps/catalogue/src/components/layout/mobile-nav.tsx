@@ -133,6 +133,11 @@ export function MobileNav({ nav, settings }: { nav: NavData; settings: SiteSetti
                 </Link>
               </li>
             )}
+            <li>
+              <Link href="/custom-design/" onClick={close} className={clsx(row, "display text-2xl")}>
+                Custom designs
+              </Link>
+            </li>
           </ul>
 
           {nav.collections.length > 0 && (
